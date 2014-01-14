@@ -1,0 +1,16 @@
+<!doctype html>
+<title>ABET - Facultad de Ingeniería</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<div class=page>
+  <h1>ABET</h1>
+  <h2>FACULTAD DE INGENIERÍA</h2>
+  {% block body %}
+  <ul class=entries>
+  {% for entry in entries %}
+    <li><a href="{{ entry.title }}.html">{{ entry.title }}</a>{{ entry.text|safe }}
+  {% else %}
+    <li><em>No hay cursos.</em>
+  {% endfor %}
+  </ul>
+  {% endblock %}
+</div>
