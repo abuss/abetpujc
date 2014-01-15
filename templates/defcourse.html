@@ -1,0 +1,33 @@
+<!doctype html>
+<title>ABET - Facultad de Ingeniería</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<div class=page>
+  <h1>ABET</h1>
+  <h2>FACULTAD DE INGENIERÍA</h2>
+  <h3>{{ entries.nombre }}</h3>
+  {% block body %}
+  <br>
+  <h4>Definición de Evaluaciones</h4>
+  <br>
+  <table border="0">
+  <tr>
+  <td>Instrumento</td>
+  <td align="center">%</td>
+  <td width="50">&nbsp;</td>
+  {% for entry in entries.resprog %}
+  <td align="center">{{ entry[0] }}</td>
+  {% endfor %}
+  </tr>
+  {% for k in range(1,11) %}
+  <tr>
+  <td><input type=text name=‘evaluacion{{k}}’></td>
+  <td><input type=text name=‘porcentaje{{k}}’ size="3"></td>
+  <td width="50">&nbsp;</td>
+  {% for entry in entries.resprog %}
+  <td><input type=text name=“{{ entry[0] }}{{k}}” size=“3”></td>
+  {% endfor %}
+  {% endfor %}
+  </tr>
+  </table>
+  {% endblock %}
+</div>
