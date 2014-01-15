@@ -52,9 +52,24 @@ def teardown_request(exception):
 @app.route('/')
 def show_courses():
     add_data(g)
-    cur = g.db.execute('select nomb_asig from asignaturas order by id_asig desc')
-    entries = [dict(title=row[0]) for row in cur.fetchall()]
-    return render_template('layout.html', entries=entries)
+    cur = g.db.execute('select nomb_asig, id_asig, grupo_asig from asignaturas order by nomb_asig desc')
+    entries = [dict(title=row[0], cod=row[1], grupo=row[2]) for row in cur.fetchall()]
+    return render_template('main.html', entries=entries)
+
+@app.route('/<codigo>/<grupo>', methods=['GET', 'POST'])
+def asignatura(codigo,grupo):
+    #print codigo
+    return render_template(codigo)
+
+@app.route('/<codigo>/notas', methods=['GET', 'POST'])
+def notas(codigo):
+    return render_template(codigo+'/notas.html')
+
+@app.route('/<codigo>/evaluaciones', methods=['GET', 'POST'])
+def evaluaciones(codigo):
+    cur = g.db.execute('select nomb_asig, id_asig from asignaturas order by nomb_asig desc')
+    entries = [dict(title=row[0], cod=row[1]) for row in cur.fetchall()]
+    return render_template(codigo+'/evaluaciones.html', )
 
 if __name__ == '__main__':
     init_db()

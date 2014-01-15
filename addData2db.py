@@ -7,6 +7,28 @@ def add_data(g):
     g.db.execute('insert into asignaturas values (?,?,?,?,?)',
                  ['300CIP001','A','Introduccion a la Programacion',40,1])
     g.db.execute('insert into asignaturas values (?,?,?,?,?)',
-                 ['300CIP022','A','Fundamentos y Estructuras de Programacion',40,1])
+                 ['300CIP002','A','Fundamentos y Estructuras de Programacion',40,1])
+    g.db.execute('insert into relevresulprog values (?,?,?,?)',
+                 ['A','300CIP001','A',5])
+    g.db.execute('insert into relevresulprog values (?,?,?,?)',
+                 ['B','300CIP001','A',2])
+    g.db.execute('insert into relevresulprog values (?,?,?,?)',
+                 ['C','300CIP001','A',5])
+    g.db.execute('insert into relevresulprog values (?,?,?,?)',
+                 ['D','300CIP001','A',2])
+##    g.db.execute('insert into relevresulprog values (?,?,?,?)',
+##                 ['E','300CIP001','A',0])
+##    g.db.execute('insert into relevresulprog values (?,?,?,?)',
+##                 ['F','300CIP001','A',0])
+##    g.db.execute('insert into relevresulprog values (?,?,?,?)',
+##                 ['G','300CIP001','A',0])
+##    g.db.execute('insert into relevresulprog values (?,?,?,?)',
+##                 ['H','300CIP001','A',0])
+##    g.db.execute('insert into relevresulprog values (?,?,?,?)',
+##                 ['I','300CIP001','A',0])
+##    g.db.execute('insert into relevresulprog values (?,?,?,?)',
+##                 ['J','300CIP001','A',0])
+##    g.db.execute('insert into relevresulprog values (?,?,?,?)',
+##                 ['K','300CIP001','A',0])
     g.db.commit()
 

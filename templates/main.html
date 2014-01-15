@@ -6,10 +6,11 @@
   <h2>FACULTAD DE INGENIERÍA</h2>
   {% block body %}
   <ul class=entries>
+  <br>
   {% for entry in entries %}
-    <li><a href="{{ entry.title }}.html">{{ entry.title }}</a>{{ entry.text|safe }}
+  <a href="{{ url_for('asignatura', codigo=entry.cod, grupo=entry.grupo) }}.html">{{ entry.title }}</a><br>
   {% else %}
-    <li><em>No hay cursos.</em>
+  <em>No hay cursos.</em>
   {% endfor %}
   </ul>
   {% endblock %}

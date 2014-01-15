@@ -6,5 +6,11 @@
   <h2>FACULTAD DE INGENIERÍA</h2>
   <h3>INTRODUCCIÓN A LA PROGRAMACIÓN</h3>
   {% block body %}
+  <form action="{{ url_for('notas', codigo='300CIP001') }}" method=post>
+    <input type=submit value='Ingresar Notas'><br>
+  </form>
+  <form action="{{ url_for('evaluaciones', codigo='300CIP001') }}" method=post>
+    <input type=submit value='Definir Evaluaciones'>
+  </form>
   {% endblock %}
 </div>
