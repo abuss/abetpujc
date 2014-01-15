@@ -26,8 +26,8 @@ def add_data(g):
 ##                 ['H','300CIP001','A',0])
 ##    g.db.execute('insert into relevresulprog values (?,?,?,?)',
 ##                 ['I','300CIP001','A',0])
-##    g.db.execute('insert into relevresulprog values (?,?,?,?)',
-##                 ['J','300CIP001','A',0])
+    g.db.execute('insert into relevresulprog values (?,?,?,?)',
+                 ['J','300CIP001','A',0])
 ##    g.db.execute('insert into relevresulprog values (?,?,?,?)',
 ##                 ['K','300CIP001','A',0])
     g.db.commit()

@@ -58,18 +58,20 @@ def show_courses():
 
 @app.route('/<codigo>/<grupo>', methods=['GET', 'POST'])
 def asignatura(codigo,grupo):
-    #print codigo
-    return render_template(codigo)
+    cur = g.db.execute("select nomb_asig, id_asig, grupo_asig from asignaturas where id_asig=?",[codigo])
+    entries = [dict(title=row[0], cod=row[1], grupo=row[2]) for row in cur.fetchall()]
+    return render_template('course.html', entries=entries[0])
 
-@app.route('/<codigo>/notas', methods=['GET', 'POST'])
+@app.route('/<codigo>/<grupo>', methods=['GET', 'POST'])
 def notas(codigo):
     return render_template(codigo+'/notas.html')
 
-@app.route('/<codigo>/evaluaciones', methods=['GET', 'POST'])
-def evaluaciones(codigo):
-    cur = g.db.execute('select nomb_asig, id_asig from asignaturas order by nomb_asig desc')
-    entries = [dict(title=row[0], cod=row[1]) for row in cur.fetchall()]
-    return render_template(codigo+'/evaluaciones.html', )
+@app.route('/<codigo>/<grupo>/defcourse', methods=['GET', 'POST'])
+def evaluaciones(codigo,grupo):
+    cur1 = g.db.execute("select nomb_asig from asignaturas where id_asig=?",[codigo])
+    cur2 = g.db.execute('select id_resprog from relevresulprog where id_asig=?',[codigo])
+    entries = {'nombre':cur1.fetchone()[0],'resprog':cur2.fetchall()}
+    return render_template('defcourse.html', entries=entries)
 
 if __name__ == '__main__':
     init_db()
