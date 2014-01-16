@@ -1,33 +1,77 @@
 <!doctype html>
-<title>ABET - Facultad de Ingeniería</title>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<head>
+  <title>ABET - Facultad de Ingeniería</title>
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+  <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+  <script src="http://code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
+  <script>
+  var sumarCol = function(event) {
+    var total = Number(document.tabla.{{ entries.resprog[0][0] }}1.value)
+    {% for k in range(2,11) %}
+        + Number(document.tabla.{{ entries.resprog[0][0] }}{{k}}.value)
+    {% endfor %};
+    document.getElementById('algo').innerText = total;
+  };
+  </script>
+</head>
+
+<body>
 <div class=page>
+  {% block body %}
   <h1>ABET</h1>
   <h2>FACULTAD DE INGENIERÍA</h2>
   <h3>{{ entries.nombre }}</h3>
-  {% block body %}
   <br>
   <h4>Definición de Evaluaciones</h4>
   <br>
+
+  <form name="tabla">
   <table border="0">
-  <tr>
-  <td>Instrumento</td>
-  <td align="center">%</td>
-  <td width="50">&nbsp;</td>
-  {% for entry in entries.resprog %}
-  <td align="center">{{ entry[0] }}</td>
-  {% endfor %}
-  </tr>
-  {% for k in range(1,11) %}
-  <tr>
-  <td><input type=text name=‘evaluacion{{k}}’></td>
-  <td><input type=text name=‘porcentaje{{k}}’ size="3"></td>
-  <td width="50">&nbsp;</td>
-  {% for entry in entries.resprog %}
-  <td><input type=text name=“{{ entry[0] }}{{k}}” size=“3”></td>
-  {% endfor %}
-  {% endfor %}
-  </tr>
+    <tr>
+      <td>Instrumento</td>
+      <td align="center">%</td>
+      <td width="50">&nbsp;</td>
+      {% for entry in entries.resprog %}
+        <td align="center">{{ entry[0] }}</td>
+      {% endfor %}
+      <td align="center">Total</td>
+    </tr>
+    {% for k in range(1,11) %}
+      <tr>
+        <td><input type=text name="evaluacion{{k}}"></td>
+        <td><input type=text name="porcentaje{{k}}" size="3"></td>
+        <td width="150">&nbsp;</td>
+        {% for entry in entries.resprog %}
+          <td><input type=text name="{{ entry[0] }}{{k}}" onchange="sumarCol()" size="3"></td>
+        {% endfor %}
+        <td align="center">0%</td>
+      </tr>
+    {% endfor %}
+    <tr>
+      <td align="right">Total</td>
+      <td align="center">0%</td>
+      <td align="right">Suma:</td>
+      {% for entry in entries.resprog %}
+        <td align="center"><div id="algo">0</div></td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td align="right"></td>
+      <td align="center"></td>
+      <td align="right">Peso Relativo:</td>
+      {% for entry in entries.peso %}
+        <td align="center">{{ entry }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td align="right"></td>
+      <td align="center"></td>
+      <td align="right">Diferencia:</td>
+      {% for entry in entries.resprog %}
+        <td align="center">0</td>
+      {% endfor %}
+    </tr>
   </table>
   {% endblock %}
 </div>
+</body>

@@ -1,4 +1,5 @@
 # all the imports
+from __future__ import division
 import sqlite3
 from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash
@@ -23,6 +24,7 @@ def init_db():
     with closing(connect_db()) as db:
         with app.open_resource('DB_Abet_SQLite.sql', mode='r') as f:
             db.cursor().executescript(f.read())
+            add_data(db)
         db.commit()
 
 def get_db():
@@ -51,7 +53,6 @@ def teardown_request(exception):
 
 @app.route('/')
 def show_courses():
-    add_data(g)
     cur = g.db.execute('select nomb_asig, id_asig, grupo_asig from asignaturas order by nomb_asig desc')
     entries = [dict(title=row[0], cod=row[1], grupo=row[2]) for row in cur.fetchall()]
     return render_template('main.html', entries=entries)
@@ -69,8 +70,15 @@ def notas(codigo):
 @app.route('/<codigo>/<grupo>/defcourse', methods=['GET', 'POST'])
 def evaluaciones(codigo,grupo):
     cur1 = g.db.execute("select nomb_asig from asignaturas where id_asig=?",[codigo])
-    cur2 = g.db.execute('select id_resprog from relevresulprog where id_asig=?',[codigo])
-    entries = {'nombre':cur1.fetchone()[0],'resprog':cur2.fetchall()}
+    cur2 = g.db.execute('select id_resprog, peso from relevresulprog where id_asig=?',[codigo])
+    formula = cur2.fetchall()
+    suma = 0
+    for i in formula:
+        suma = suma + i[1]
+    pesorelativo = []
+    for i in range(len(formula)):
+        pesorelativo = pesorelativo + [round(formula[i][1]*100/suma,1)]
+    entries = {'nombre':cur1.fetchone()[0],'resprog':formula, 'peso':pesorelativo}
     return render_template('defcourse.html', entries=entries)
 
 if __name__ == '__main__':
