@@ -62,12 +62,12 @@
   {% block body %}
   <h1>ABET</h1>
   <h2>FACULTAD DE INGENIERÍA</h2>
-  <h3>{{ entries.nombre }}</h3>
+  <h3>{{ entries.detalles[0] }}</h3>
   <br>
   <h4>Definición de Evaluaciones</h4>
   <br>
 
-  <form name="tabla">
+  <form name="tabla" action="{{ url_for('asignatura', codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
   <table border="0">
     <tr>
       <td>Instrumento</td>
@@ -115,6 +115,9 @@
       {% endfor %}
     </tr>
   </table>
+  <br>
+  <input type=submit value='Volver a {{entries.detalles[0]}}'>
+  </form>
   {% endblock %}
 </div>
 </body>

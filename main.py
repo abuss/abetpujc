@@ -69,7 +69,7 @@ def notas(codigo):
 
 @app.route('/<codigo>/<grupo>/defcourse', methods=['GET', 'POST'])
 def evaluaciones(codigo,grupo):
-    cur1 = g.db.execute("select nomb_asig from asignaturas where id_asig=?",[codigo])
+    cur1 = g.db.execute("select nomb_asig, id_asig, grupo_asig from asignaturas where id_asig=?",[codigo])
     cur2 = g.db.execute('select id_resprog, peso from relevresulprog where id_asig=?',[codigo])
     formula = cur2.fetchall()
     suma = 0
@@ -79,8 +79,7 @@ def evaluaciones(codigo,grupo):
         temp = list(formula[i])
         temp.append(int(formula[i][1]*1000/suma))
         formula[i] = tuple(temp)
-    print formula
-    entries = {'nombre':cur1.fetchone()[0],'resprog':formula, 'suma':suma}
+    entries = {'detalles':cur1.fetchall()[0], 'resprog':formula, 'suma':suma}
     return render_template('defcourse.html', entries=entries)
 
 if __name__ == '__main__':

@@ -12,5 +12,8 @@
   <form action="{{ url_for('evaluaciones', codigo=entries.cod, grupo=entries.grupo) }}" method=post>
     <input type=submit value='Definir Evaluaciones'>
   </form>
+  <form action="{{ url_for('show_courses') }}">
+    <input type=submit value='Volver al listado de cursos'>
+  </form>
   {% endblock %}
 </div>
