@@ -5,12 +5,15 @@
   <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
   <script src="http://code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
   <script>
-  var sumarCol = function(event) {
-    var total = Number(document.tabla.{{ entries.resprog[0][0] }}1.value)
-    {% for k in range(2,11) %}
-        + Number(document.tabla.{{ entries.resprog[0][0] }}{{k}}.value)
-    {% endfor %};
-    document.getElementById('algo').innerText = total;
+  var sumarCols = function(event) {
+    event = event || window.event;
+    {% for entry in entries.resprog %}
+      var total = Number(document.tabla.{{ entry[0] }}1.value)
+      {% for k in range(2,11) %}
+        + Number(document.tabla.{{ entry[0] }}{{k}}.value)
+      {% endfor %};
+      document.getElementById('col{{ entry[0] }}').innerText = total;
+    {% endfor %}
   };
   </script>
 </head>
@@ -42,9 +45,9 @@
         <td><input type=text name="porcentaje{{k}}" size="3"></td>
         <td width="150">&nbsp;</td>
         {% for entry in entries.resprog %}
-          <td><input type=text name="{{ entry[0] }}{{k}}" onchange="sumarCol()" size="3"></td>
+          <td><input type=text name="{{ entry[0] }}{{k}}" onchange="sumarCols()" size="3"></td>
         {% endfor %}
-        <td align="center">0%</td>
+        <td align="center"><div id="fila{{ k }}">0%</div></td>
       </tr>
     {% endfor %}
     <tr>
@@ -52,7 +55,7 @@
       <td align="center">0%</td>
       <td align="right">Suma:</td>
       {% for entry in entries.resprog %}
-        <td align="center"><div id="algo">0</div></td>
+        <td align="center"><div id="col{{ entry[0] }}">0</div></td>
       {% endfor %}
     </tr>
     <tr>
