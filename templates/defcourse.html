@@ -67,7 +67,7 @@
   <h4>Definición de Evaluaciones</h4>
   <br>
 
-  <form name="tabla" action="{{ url_for('asignatura', codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
+  <form name="tabla" action="{{ url_for('guardarPesos', codigo=entries.detalles[1], grupo=entries.detalles[2])}}" method=post>
   <table border="0">
     <tr>
       <td>Instrumento</td>
@@ -116,6 +116,9 @@
     </tr>
   </table>
   <br>
+  <input type=submit value='Guardar'>
+  </form>
+  <form name="tabla" action="{{ url_for('asignatura', codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
   <input type=submit value='Volver a {{entries.detalles[0]}}'>
   </form>
   {% endblock %}

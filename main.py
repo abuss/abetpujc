@@ -68,7 +68,7 @@ def notas(codigo):
     return render_template(codigo+'/notas.html')
 
 @app.route('/<codigo>/<grupo>/defcourse', methods=['GET', 'POST'])
-def evaluaciones(codigo,grupo):
+def pesos(codigo,grupo):
     cur1 = g.db.execute("select nomb_asig, id_asig, grupo_asig from asignaturas where id_asig=?",[codigo])
     cur2 = g.db.execute('select id_resprog, peso from relevresulprog where id_asig=?',[codigo])
     formula = cur2.fetchall()
@@ -81,6 +81,14 @@ def evaluaciones(codigo,grupo):
         formula[i] = tuple(temp)
     entries = {'detalles':cur1.fetchall()[0], 'resprog':formula, 'suma':suma}
     return render_template('defcourse.html', entries=entries)
+
+@app.route('/<codigo>/<grupo>/guardar', methods=['POST'])
+def guardarPesos(codigo,grupo):
+    return redirect(url_for('pesos', codigo=codigo, grupo=grupo))
+
+@app.route('/<codigo>/<grupo>/assessments', methods=['GET', 'POST'])
+def evaluaciones(codigo,grupo):
+    return render_template('assessments.html')
 
 if __name__ == '__main__':
     init_db()
