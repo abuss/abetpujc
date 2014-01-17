@@ -7,19 +7,41 @@
   <script>
   var sumarCeldas = function(event) {
     event = event || window.event;
+    // Suma de cada columna
     {% for entry in entries.resprog %}
       var total = Number(document.tabla.{{ entry[0] }}1.value)
       {% for k in range(2,11) %}
         + Number(document.tabla.{{ entry[0] }}{{k}}.value)
       {% endfor %};
-      document.getElementById('col{{ entry[0] }}').innerText = total;
+      document.getElementById('suma{{ entry[0] }}').innerText = total;
     {% endfor %}
+
+    // Suma de cada fila
     {% for k in range(1,11) %}
       var total = 0
       {% for entry in entries.resprog %}
           + Number(document.tabla.{{ entry[0] }}{{k}}.value)
       {% endfor %};
-      document.getElementById('fila{{k}}').innerText = String(total)+'%';
+      document.getElementById('fila{{k}}').innerText = total;
+    {% endfor %}
+
+    // Suma de los totales
+    var total = 0
+    {% for k in range(1,11) %}
+      + Number(document.getElementById('fila{{k}}').innerText)
+    {% endfor %};
+    document.getElementById('totalsuma').innerText = total;
+
+    // Calculo del objetivo
+    {% for entry in entries.resprog %}
+      var total = Number(document.getElementById('totalsuma').innerText)*{{ entry[1] }}/{{ entries.suma }};
+      document.getElementById('objetivo{{ entry[0] }}').innerText = parseInt(total,10);
+    {% endfor %}
+
+    // Calculo de la diferencia
+    {% for entry in entries.resprog %}
+      var total = Number(document.getElementById('suma{{ entry[0] }}').innerText) - Number(document.getElementById('objetivo{{ entry[0] }}').innerText);
+      document.getElementById('diferencia{{ entry[0] }}').innerText = parseInt(total,10);
     {% endfor %}
   };
   </script>
@@ -54,7 +76,7 @@
       {% for entry in entries.resprog %}
         <td align="center">{{ entry[0] }}</td>
       {% endfor %}
-      <td align="center">Total</td>
+      <td align="center">Total (%)</td>
     </tr>
     {% for k in range(1,11) %}
       <tr>
@@ -64,23 +86,24 @@
         {% for entry in entries.resprog %}
           <td><input type=text name="{{ entry[0] }}{{k}}" onchange="sumarCeldas()" size="3"></td>
         {% endfor %}
-        <td align="center"><div id="fila{{k}}">0%</div></td>
+        <td align="center"><div id="fila{{k}}">0</div></td>
       </tr>
     {% endfor %}
     <tr>
       <td align="right">Total</td>
       <td align="center"><div id="porcentajetotal">0%</div></td>
-      <td align="right">Peso Relativo:</td>
+      <td align="right">Suma:</td>
       {% for entry in entries.resprog %}
-        <td align="center"><div id="col{{ entry[0] }}">0</div></td>
+        <td align="center"><div id="suma{{ entry[0] }}">0</div></td>
       {% endfor %}
+      <td align="center"><div id="totalsuma">0</div></td>
     </tr>
     <tr>
       <td align="right"></td>
       <td align="center"></td>
-      <td align="right">Peso Ideal:</td>
-      {% for entry in entries.peso %}
-        <td align="center">{{ entry }}</td>
+      <td align="right">Objetivo:</td>
+      {% for entry in entries.resprog %}
+        <td align="center"><div id="objetivo{{ entry[0] }}">0</div></td>
       {% endfor %}
     </tr>
     <tr>
@@ -88,7 +111,7 @@
       <td align="center"></td>
       <td align="right">Diferencia:</td>
       {% for entry in entries.resprog %}
-        <td align="center">0</td>
+        <td align="center"><div id="diferencia{{ entry[0] }}">0</div></td>
       {% endfor %}
     </tr>
   </table>

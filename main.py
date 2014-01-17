@@ -75,10 +75,12 @@ def evaluaciones(codigo,grupo):
     suma = 0
     for i in formula:
         suma = suma + i[1]
-    pesorelativo = []
     for i in range(len(formula)):
-        pesorelativo = pesorelativo + [round(formula[i][1]*100/suma,1)]
-    entries = {'nombre':cur1.fetchone()[0],'resprog':formula, 'peso':pesorelativo}
+        temp = list(formula[i])
+        temp.append(int(formula[i][1]*1000/suma))
+        formula[i] = tuple(temp)
+    print formula
+    entries = {'nombre':cur1.fetchone()[0],'resprog':formula, 'suma':suma}
     return render_template('defcourse.html', entries=entries)
 
 if __name__ == '__main__':
