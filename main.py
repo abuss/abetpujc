@@ -53,14 +53,14 @@ def teardown_request(exception):
 
 @app.route('/')
 def show_courses():
-    cur = g.db.execute('select nomb_asig, id_asig, grupo_asig from asignaturas order by nomb_asig desc')
-    entries = [dict(title=row[0], cod=row[1], grupo=row[2]) for row in cur.fetchall()]
+    cur = g.db.execute('select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where periodo=? order by nomb_asig desc',['2014-1'])
+    entries = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3]) for row in cur.fetchall()]
     return render_template('main.html', entries=entries)
 
 @app.route('/<codigo>/<grupo>', methods=['GET', 'POST'])
 def asignatura(codigo,grupo):
-    cur = g.db.execute("select nomb_asig, id_asig, grupo_asig from asignaturas where id_asig=?",[codigo])
-    entries = [dict(title=row[0], cod=row[1], grupo=row[2]) for row in cur.fetchall()]
+    cur = g.db.execute("select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where id_asig=?",[codigo])
+    entries = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3]) for row in cur.fetchall()]
     return render_template('course.html', entries=entries[0])
 
 @app.route('/<codigo>/<grupo>', methods=['GET', 'POST'])
@@ -69,7 +69,7 @@ def notas(codigo):
 
 @app.route('/<codigo>/<grupo>/defcourse', methods=['GET', 'POST'])
 def pesos(codigo,grupo):
-    cur1 = g.db.execute("select nomb_asig, id_asig, grupo_asig from asignaturas where id_asig=?",[codigo])
+    cur1 = g.db.execute("select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where id_asig=?",[codigo])
     cur2 = g.db.execute('select id_resprog, peso from relevresulprog where id_asig=?',[codigo])
     formula = cur2.fetchall()
     suma = 0
