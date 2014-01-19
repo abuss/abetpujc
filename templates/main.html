@@ -2,14 +2,17 @@
 <title>ABET - Facultad de Ingeniería</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <div class=page>
-  <h1>ABET</h1>
-  <h2>FACULTAD DE INGENIERÍA</h2>
+  <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET</h1>
+  <!-- <img src="static/logopujc.png" alt="Logo Javeriana Cali" width="346" height="70"> -->
+  <h2>PONTIFICIA UNIVERSIDAD JAVERIANA - CALI</h2>
+  <h3>FACULTAD DE INGENIERÍA</h3>
+  <br><br>
   {% block body %}
   Listado de cursos del período {{ entries[0].periodo }}:
   <ul class=entries>
   <br>
   {% for entry in entries %}
-  <a href="{{ url_for('asignatura', codigo=entry.cod, grupo=entry.grupo) }}.html">{{ entry.title }}</a><br>
+  <li><a href="{{ url_for('asignatura', codigo=entry.cod, grupo=entry.grupo) }}.html">{{ entry.title }}</a>
   {% else %}
   <em>No hay cursos.</em>
   {% endfor %}

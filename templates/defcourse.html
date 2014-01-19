@@ -60,12 +60,13 @@
 <body>
 <div class=page>
   {% block body %}
-  <h1>ABET</h1>
-  <h2>FACULTAD DE INGENIERÍA</h2>
-  <h3>{{ entries.detalles[0] }} - Grupo {{ entries.detalles[2] }}</h3>
-  <h3>Período {{ entries.detalles[3] }}</h3>
+  <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET</h1>
+  <h2>PONTIFICIA UNIVERSIDAD JAVERIANA - CALI</h2>
+  <h3>FACULTAD DE INGENIERÍA</h3>
+  <h4>{{ entries.detalles[0] }} - Grupo {{ entries.detalles[2] }}</h4>
+  <h4>Período {{ entries.detalles[3] }}</h4>
   <br>
-  <h4>Definición de Evaluaciones</h4>
+  <h5>Definición de Evaluaciones</h5>
   <br>
 
   <form name="tabla" action="{{ url_for('guardarPesos', codigo=entries.detalles[1], grupo=entries.detalles[2])}}" method=post>
