@@ -69,17 +69,43 @@ def notas(codigo):
 
 @app.route('/<codigo>/<grupo>/defcourse', methods=['GET', 'POST'])
 def pesos(codigo,grupo):
+    # Recupera los datos de la base de datos
     cur1 = g.db.execute("select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where id_asig=?",[codigo])
     cur2 = g.db.execute('select id_resprog, peso from relevresulprog where id_asig=?',[codigo])
+    cur3 = g.db.execute('select desc_eval, porceval from defcalificacion where id_asig=?',[codigo])
+    cur4 = g.db.execute('select id_resprog, porc_abet from defnotaabet where id_asig=?',[codigo])
+
+    # Procesa los datos de resultados de programa
     formula = cur2.fetchall()
+    abet = cur4.fetchall()
     suma = 0
     for i in formula:
         suma = suma + i[1]
     for i in range(len(formula)):
-        temp = list(formula[i])
-        temp.append(int(formula[i][1]*1000/suma))
-        formula[i] = tuple(temp)
-    entries = {'detalles':cur1.fetchall()[0], 'resprog':formula, 'suma':suma}
+        temp1 = list(formula[i])
+        temp1.append(int(formula[i][1]*1000/suma))
+        temp2 = []
+        for j in range(len(abet)):
+            if abet[j][0] == formula[i][0]:
+                temp2.append(abet[j][1])
+        temp1.append(temp2)
+        formula[i] = tuple(temp1)
+
+        print formula[i]
+
+    # Procesa los datos de nombre y procentaje de evaluaciones
+    evaluaciones = []
+    for row in cur3.fetchall():
+         evaluaciones.append(row)
+
+    # Variable para saber si hay evaluaciones y no imprimir cosas vacias
+    if evaluaciones==[]:
+        hayeval = False
+    else:
+        hayeval = True
+
+    # Agrupa los datos procesados en una sola lista y la retorna
+    entries = {'detalles':cur1.fetchall()[0], 'resprog':formula, 'suma':suma, 'hayeval':hayeval, 'evaluaciones':evaluaciones, 'abet':abet}
     return render_template('defcourse.html', entries=entries)
 
 @app.route('/<codigo>/<grupo>/guardar', methods=['POST'])

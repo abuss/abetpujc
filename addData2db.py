@@ -54,9 +54,13 @@ def add_data(db):
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','P1','A',80])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
+                 ['300CIP002','A','P1','C',0])
+    db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','P1','F',10])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','P1','H',10])
+    db.execute('insert into defnotaabet values (?,?,?,?,?)',
+                 ['300CIP002','A','P1','I',0])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','P2','A',30])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
@@ -66,6 +70,8 @@ def add_data(db):
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','P2','H',10])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
+                 ['300CIP002','A','P2','I',0])
+    db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','P3','A',30])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','P3','C',50])
@@ -74,7 +80,11 @@ def add_data(db):
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','P3','H',10])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
+                 ['300CIP002','A','P3','I',0])
+    db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','T1','A',50])
+    db.execute('insert into defnotaabet values (?,?,?,?,?)',
+                 ['300CIP002','A','T1','C',0])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','T1','F',5])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
@@ -83,6 +93,8 @@ def add_data(db):
                  ['300CIP002','A','T1','I',30])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','T2','A',30])
+    db.execute('insert into defnotaabet values (?,?,?,?,?)',
+                 ['300CIP002','A','T2','C',0])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','T2','F',5])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
@@ -120,15 +132,23 @@ def add_data(db):
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','T5','I',20])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
+                 ['300CIP002','A','Exp','A',0])
+    db.execute('insert into defnotaabet values (?,?,?,?,?)',
+                 ['300CIP002','A','Exp','C',0])
+    db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','Exp','F',35])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','Exp','H',65])
+    db.execute('insert into defnotaabet values (?,?,?,?,?)',
+                 ['300CIP002','A','Exp','I',0])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','Pry','A',15])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','Pry','C',40])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','Pry','F',20])
+    db.execute('insert into defnotaabet values (?,?,?,?,?)',
+                 ['300CIP002','A','Pry','H',0])
     db.execute('insert into defnotaabet values (?,?,?,?,?)',
                  ['300CIP002','A','Pry','I',25])
 
