@@ -55,9 +55,16 @@
     document.getElementById('porcentajetotal').innerText = String(total)+'%';
   };
   </script>
+  <script>
+  var paraCargar = function(event) {
+    event = event || window.event;
+    sumarCeldas(event);
+    sumarPorcentajes(event);
+  };
+  </script>
 </head>
 
-<body>
+<body {% if entries.hayeval %}onload="paraCargar()"{% endif %}>
 <div class=page>
   {% block body %}
   <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET</h1>
@@ -82,11 +89,11 @@
     </tr>
     {% for k in range(1,11) %}
       <tr>
-        <td><input type=text name="evaluacion{{k}}" {% if entries.hayeval %}value='{{ entries.evaluaciones[k-1][0] }}'{% endif %}></td>
-        <td><input type=text name="porcentaje{{k}}" onchange="sumarPorcentajes()" size="3" {% if entries.hayeval %}value='{{ entries.evaluaciones[k-1][1] }}'{% endif %}></td>
+        <td><input type=text name="evaluacion{{k}}" {% if entries.hayeval %}value='{{ entries.evaluaciones[(k-1)*entries.conteo][0] }}'{% endif %}></td>
+        <td><input type=text name="porcentaje{{k}}" onchange="sumarPorcentajes()" size="3" {% if entries.hayeval %}value='{{ entries.evaluaciones[(k-1)*entries.conteo][1] }}'{% endif %}></td>
         <td width="150">&nbsp;</td>
-        {% for entry in entries.resprog %}
-          <td><input type=text name="{{ entry[0] }}{{k}}" onchange="sumarCeldas()" size="3" {% if entries.hayeval %}value='{{ entry[3][k-1] }}'{% endif %}></td>
+        {% for j in range(0,entries.conteo) %}
+          <td><input type=text name="{{ entries.resprog[j][0] }}{{k}}" onchange="sumarCeldas()" size="3" {% if entries.hayeval %}value='{{ entries.evaluaciones[((k-1)*entries.conteo)+j][3] }}'{% endif %}></td>
         {% endfor %}
         <td align="center"><div id="fila{{k}}">0</div></td>
       </tr>
