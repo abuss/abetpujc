@@ -4,7 +4,6 @@ import sqlite3
 from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash
 from contextlib import closing
-from addData2db import *
 
 # create our little application :)
 app = Flask(__name__)
@@ -19,6 +18,11 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
+
+def add_data(db):
+	with app.open_resource('addData2db.sql', mode='r') as f:
+		db.cursor().executescript(f.read())
+	db.commit()
 
 def init_db():
     with closing(connect_db()) as db:
@@ -87,11 +91,10 @@ def pesos(codigo,grupo):
     # Variable para saber el numero de resultados de programa
     conteo = len(formula)
 
-    # Procesa los datos de nombre y procentaje de evaluaciones
+    # Procesa los datos de nombre y porcentaje de evaluaciones y resultados de programa
     evaluaciones = []
     for row in cur3.fetchall():
          evaluaciones.append(row)
-    print evaluaciones
 
     # Variable para saber si hay evaluaciones y no imprimir cosas vacias
     if evaluaciones==[]:
@@ -105,7 +108,13 @@ def pesos(codigo,grupo):
 
 @app.route('/<codigo>/<grupo>/guardar', methods=['POST'])
 def guardarPesos(codigo,grupo):
-    return redirect(url_for('pesos', codigo=codigo, grupo=grupo))
+	cur = g.db.execute('select * from defcalificacion where id_asig=?',[codigo])
+	datosguardados = cur.fetchall()
+	if datosguardados != []:
+		print datosguardados
+	else:
+		print "No hay datos"
+	return redirect(url_for('pesos', codigo=codigo, grupo=grupo))
 
 @app.route('/<codigo>/<grupo>/assessments', methods=['GET', 'POST'])
 def evaluaciones(codigo,grupo):

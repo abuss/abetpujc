@@ -104,7 +104,7 @@ CREATE TABLE INDICDESEMP
 	-- Ej. (A1) Identificar los fundamentos cientificos y los principios de ingeniería que rigen un proceso o sistema.
 	DESC_INDDESEMP TEXT NOT NULL,
 	-- Ej. A .. K
-	ID_RESPROG TEXT NOT NULL UNIQUE,
+	ID_RESPROG TEXT NOT NULL,
 
 	PRIMARY KEY (ID_INDDESEMP),
 	FOREIGN KEY (ID_RESPROG)
