@@ -120,15 +120,32 @@ def guardarPesos(codigo,grupo):
 def evaluaciones(codigo,grupo):
     # Recupera los datos de la base de datos
     cur1 = g.db.execute("select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where id_asig=?",[codigo])
-    cur2 = g.db.execute('select d.id_resprog, descr_resprog from relevresulprog as d, resulprograma as n where d.id_asig=? and d.id_resprog = n.id_resprog',[codigo])
+    cur2 = g.db.execute("select d.desc_eval, d.id_eval, n.id_resprog, porc_abet, m.descr_resprog from defcalificacion as d, defnotaabet as n, resulprograma as m where porc_abet > 0 and d.id_eval = n.id_eval and n.id_resprog = m.id_resprog order by d.id_eval")
     cur3 = g.db.execute("select * from indicdesemp")
-    cur4 = g.db.execute("select desc_eval, id_eval from defcalificacion")
-    # resprog = cur2.fetchall()
-    # for i in resprog:
-    #     print i[0]
+ 
+    # Procesa los datos de los instrumentos de evaluacion
+    resprog = cur2.fetchall()
+    temp = []
+    i = 0
+    while i<len(resprog):
+        temp2 = []
+        numero = resprog[i][1]
+        temp2.append(resprog[i])
+        if i>=len(resprog)-1:
+            break
+        i = i + 1
+        while numero == resprog[i][1]:
+            temp2.append(resprog[i])
+            if i>=len(resprog)-1:
+                break
+            i = i + 1
+        print temp2
+        print " "
+        temp.append(temp2)
+    #print temp
 
     # Agrupa los datos procesados en una sola lista y la retorna
-    entries = {'detalles':cur1.fetchall()[0], 'resprog':cur2.fetchall(), 'indicdesemp':cur3.fetchall(), 'evaluaciones':cur4.fetchall()}
+    entries = {'detalles':cur1.fetchall()[0], 'resprog':temp, 'indicdesemp':cur3.fetchall()}
     return render_template('assessments.html', entries=entries)
 
 if __name__ == '__main__':
