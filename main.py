@@ -122,7 +122,7 @@ def evaluaciones(codigo,grupo):
     cur1 = g.db.execute("select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where id_asig=?",[codigo])
     cur2 = g.db.execute('select d.id_resprog, descr_resprog from relevresulprog as d, resulprograma as n where d.id_asig=? and d.id_resprog = n.id_resprog',[codigo])
     cur3 = g.db.execute("select * from indicdesemp")
-    cur4 = g.db.execute("select desc_eval from defcalificacion")
+    cur4 = g.db.execute("select desc_eval, id_eval from defcalificacion")
     # resprog = cur2.fetchall()
     # for i in resprog:
     #     print i[0]
