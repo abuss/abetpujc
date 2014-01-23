@@ -67,9 +67,15 @@
 <body {% if entries.hayeval %}onload="paraCargar()"{% endif %}>
 <div class=page>
   {% block body %}
+  <table>
+  <tr>
+    <td><img src="../../static/logo.png"></td>
+    <td width="20">&nbsp;</td>
+    <td><h4>Facultad de Ingeniería<br>Ingeniería de Sistemas y Computación</h4></td>
+  </tr>
+  </table>
   <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET</h1>
-  <h2>PONTIFICIA UNIVERSIDAD JAVERIANA - CALI</h2>
-  <h3>FACULTAD DE INGENIERÍA</h3>
+  <hr>
   <h4>{{ entries.detalles[0] }} - Grupo {{ entries.detalles[2] }}</h4>
   <h4>Período {{ entries.detalles[3] }}</h4>
   <br>
@@ -90,10 +96,10 @@
     {% for k in range(1,11) %}
       <tr>
         <td><input type=text name="evaluacion{{k}}" {% if entries.hayeval %}value='{{ entries.evaluaciones[(k-1)*entries.conteo][0] }}'{% endif %}></td>
-        <td><input type=text name="porcentaje{{k}}" onchange="sumarPorcentajes()" size="3" {% if entries.hayeval %}value='{{ entries.evaluaciones[(k-1)*entries.conteo][1] }}'{% endif %}></td>
+        <td><input type="number" step="1" min="0" max="100" name="porcentaje{{k}}" onchange="sumarPorcentajes()" size="3" {% if entries.hayeval %}value='{{ entries.evaluaciones[(k-1)*entries.conteo][1] }}'{% endif %}></td>
         <td width="150">&nbsp;</td>
         {% for j in range(0,entries.conteo) %}
-          <td><input type=text name="{{ entries.resprog[j][0] }}{{k}}" onchange="sumarCeldas()" size="3" {% if entries.hayeval %}value='{{ entries.evaluaciones[((k-1)*entries.conteo)+j][3] }}'{% endif %}></td>
+          <td><input type="number" step="1" min="0" max="100" name="{{ entries.resprog[j][0] }}{{k}}" onchange="sumarCeldas()" size="3" {% if entries.hayeval %}value='{{ entries.evaluaciones[((k-1)*entries.conteo)+j][3] }}'{% endif %}></td>
         {% endfor %}
         <td align="center"><div id="fila{{k}}">0</div></td>
       </tr>

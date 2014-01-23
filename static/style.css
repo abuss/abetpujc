@@ -2,7 +2,7 @@ body            { font-family: sans-serif; background: #eee; }
 a, h1, h2       { color: #377ba8; }
 h1, h2          { color: black; }
 h1, h2, h3      { font-family: 'Georgia', serif; margin: 1; }
-h1              { border-bottom: 2.5px solid #eee; }
+h1              { font-size: 1.8em; }
 h2              { font-size: 1.6em; }
 h3              { font-size: 1.4em; }
 h4              { font-size: 1.2em; }
