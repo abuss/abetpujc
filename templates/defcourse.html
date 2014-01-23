@@ -127,7 +127,10 @@
   <br>
   <input type=submit value='Guardar'>
   </form>
-  <form name="botonguardar" action="{{ url_for('asignatura', codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
+  <form name="botonseguir" action="{{ url_for('evaluaciones', codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
+  <input type=submit value='Definir los detalles de los Instrumentos'>
+  </form>
+  <form name="botonvolver" action="{{ url_for('asignatura', codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
   <input type=submit value='Volver a {{entries.detalles[0]}}'>
   </form>
   {% endblock %}

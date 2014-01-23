@@ -91,7 +91,7 @@ def pesos(codigo,grupo):
     # Variable para saber el numero de resultados de programa
     conteo = len(formula)
 
-    # Procesa los datos de nombre y porcentaje de evaluaciones y resultados de programa
+    # Procesa los datos de nombre de evaluaciones, y porcentaje de evaluaciones y resultados de programa
     evaluaciones = []
     for row in cur3.fetchall():
          evaluaciones.append(row)
@@ -118,7 +118,18 @@ def guardarPesos(codigo,grupo):
 
 @app.route('/<codigo>/<grupo>/assessments', methods=['GET', 'POST'])
 def evaluaciones(codigo,grupo):
-    return render_template('assessments.html')
+    # Recupera los datos de la base de datos
+    cur1 = g.db.execute("select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where id_asig=?",[codigo])
+    cur2 = g.db.execute('select d.id_resprog, descr_resprog from relevresulprog as d, resulprograma as n where d.id_asig=? and d.id_resprog = n.id_resprog',[codigo])
+    cur3 = g.db.execute("select * from indicdesemp")
+    cur4 = g.db.execute("select desc_eval from defcalificacion")
+    # resprog = cur2.fetchall()
+    # for i in resprog:
+    #     print i[0]
+
+    # Agrupa los datos procesados en una sola lista y la retorna
+    entries = {'detalles':cur1.fetchall()[0], 'resprog':cur2.fetchall(), 'indicdesemp':cur3.fetchall(), 'evaluaciones':cur4.fetchall()}
+    return render_template('assessments.html', entries=entries)
 
 if __name__ == '__main__':
     init_db()
