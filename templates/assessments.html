@@ -41,11 +41,20 @@
     	$(function(){
         	{% for inst in entries.resprog %}
         		{% for entry in inst %}
-        			$("#boton{{inst[0][1]}}{{entry[2]}} ").click(function(){
+        			$("#botonadd{{inst[0][1]}}{{entry[2]}} ").click(function(){
 	        			var numfilas = document.getElementById('tabla{{entry[1]}}{{entry[2]}}').getElementsByTagName('tr').length;
             			var htmlToAppend = "<tr><td><select style='width: 600px'><option name='empty'>---</option>{% for i in entries.indicdesemp %}{% if i[2] == entry[2] %}<option name='indicador{{inst[0][1]}}{{entry[2]}}'>{{i[0]}}: {{i[1]}}</option>{% endif %}{% endfor %}</select></td><td width='20'>&nbsp;</td><td><input type=number step='1' min='0' max='100' name='pesoind{{inst[0][1]}}{{entry[2]}}"+String(numfilas-2)+"' id='pesoind{{inst[0][1]}}{{entry[2]}}"+String(numfilas-2)+"'onchange='sumarPorcentajes()' size='3'></td></tr>";
-		            	$("#tabla{{entry[1]}}{{entry[2]}} > tbody > tr").eq(numfilas-1).before ( htmlToAppend );
+		            	$("#tabla{{entry[1]}}{{entry[2]}} > tbody > tr").eq(numfilas-1).before(htmlToAppend);
     		        	numfilas = numfilas + 1;
+        			});
+        			$("#botondel{{inst[0][1]}}{{entry[2]}} ").click(function(){
+	        			var numfilas = document.getElementById('tabla{{entry[1]}}{{entry[2]}}').getElementsByTagName('tr').length;
+	        			if(numfilas>3)
+	        			{
+			            	$("#tabla{{entry[1]}}{{entry[2]}} tr:nth-last-of-type(2)").remove();
+    			        	numfilas = numfilas - 1;
+    			        }
+    			        sumarPorcentajes();
         			});
         		{% endfor %}
         	{% endfor %}
@@ -102,7 +111,8 @@
             <td align="center" size="3"><div id="totalsuma{{inst[0][1]}}{{entry[2]}}">0%</div></td>
           </tr>
         </table>
-        <input type="button" id="boton{{inst[0][1]}}{{entry[2]}}" value="Adicionar indicadores">
+        <input type="button" id="botonadd{{inst[0][1]}}{{entry[2]}}" value="Adicionar indicadores">
+        <input type="button" id="botondel{{inst[0][1]}}{{entry[2]}}" value="Eliminar el último indicador">
         </form>
         <br>
       {% endfor %}
