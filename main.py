@@ -77,7 +77,8 @@ def pesos(codigo,grupo):
     cur1 = g.db.execute("select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where id_asig=?",[codigo])
     cur2 = g.db.execute('select id_resprog, peso from relevresulprog where id_asig=?',[codigo])
     cur3 = g.db.execute('select desc_eval, porceval, id_resprog, porc_abet from defcalificacion as d, defnotaabet as n where d.id_asig = n.id_asig and d.id_eval = n.id_eval and d.id_asig=?',[codigo])
- 
+    cur4 = g.db.execute("select count(*) from defcalificacion")
+
     # Procesa los datos de resultados de programa
     formula = cur2.fetchall()
     suma = 0
@@ -96,14 +97,12 @@ def pesos(codigo,grupo):
     for row in cur3.fetchall():
          evaluaciones.append(row)
 
-    # Variable para saber si hay evaluaciones y no imprimir cosas vacias
-    if evaluaciones==[]:
-        hayeval = False
-    else:
-        hayeval = True
+    # Variable para saber el numero de evaluaciones
+    numevals = cur4.fetchall()
+    print numevals[0][0]
 
     # Agrupa los datos procesados en una sola lista y la retorna
-    entries = {'detalles':cur1.fetchall()[0], 'resprog':formula, 'suma':suma, 'hayeval':hayeval, 'evaluaciones':evaluaciones, 'conteo':conteo}
+    entries = {'detalles':cur1.fetchall()[0], 'resprog':formula, 'suma':suma, 'numevals':numevals[0][0], 'evaluaciones':evaluaciones, 'conteo':conteo}
     return render_template('defcourse.html', entries=entries)
 
 @app.route('/<codigo>/<grupo>/guardar', methods=['POST'])
@@ -142,7 +141,6 @@ def evaluaciones(codigo,grupo):
         print temp2
         print " "
         temp.append(temp2)
-    #print temp
 
     # Agrupa los datos procesados en una sola lista y la retorna
     entries = {'detalles':cur1.fetchall()[0], 'resprog':temp, 'indicdesemp':cur3.fetchall()}

@@ -36,7 +36,7 @@ insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values ('
 insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values ('300CIP002','A','Parcial 3',20);
 insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values ('300CIP002','A','Tarea 1',2);
 insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values ('300CIP002','A','Tarea 2',2);
-insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values ('300CIP002','A','Tarea 3',2);
+/*insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values ('300CIP002','A','Tarea 3',2);
 insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values ('300CIP002','A','Tarea 4',2);
 insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values ('300CIP002','A','Tarea 5',2);
 insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values ('300CIP002','A','Exposicion',10);
@@ -68,7 +68,7 @@ insert into defnotaabet values ('300CIP002','A',5,'C',0);
 insert into defnotaabet values ('300CIP002','A',5,'F',5);
 insert into defnotaabet values ('300CIP002','A',5,'H',15);
 insert into defnotaabet values ('300CIP002','A',5,'I',50);
-insert into defnotaabet values ('300CIP002','A',6,'A',15);
+/*insert into defnotaabet values ('300CIP002','A',6,'A',15);
 insert into defnotaabet values ('300CIP002','A',6,'C',45);
 insert into defnotaabet values ('300CIP002','A',6,'F',5);
 insert into defnotaabet values ('300CIP002','A',6,'H',15);
