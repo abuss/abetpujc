@@ -12,9 +12,16 @@
     // Suma de cada columna
     {% for entry in entries.resprog %}
       var total = 0;
-      for (k=1; k<numfilas-3; k++)
+      if (numfilas==5)
       {
-        total = total + Number($("#tabla").find("#{{ entry[0] }}"+String(k))[0].value);
+        total = Number($("#tabla").find("#{{ entry[0] }}"+String(1))[0].value);
+      }
+      else
+      {
+        for (k=1; k<numfilas-3; k++)
+        {
+          total = total + Number($("#tabla").find("#{{ entry[0] }}"+String(k))[0].value);
+        }
       }
       document.getElementById('suma{{ entry[0] }}').innerText = total;
     {% endfor %}
@@ -108,7 +115,7 @@
   <h5>Definición de Evaluaciones</h5>
   <br>
 
-  <form name="forma" id="forma" action="{{ url_for('guardarPesos', codigo=entries.detalles[1], grupo=entries.detalles[2])}}" method=post>
+  <form name="forma" id="forma" action="{{ url_for('guardarPesosEvaluaciones', codigo=entries.detalles[1], grupo=entries.detalles[2])}}" method=post>
   <table name="tabla" id="tabla" border="0">
     <tr>
       <td>Instrumento</td>
@@ -133,13 +140,13 @@
       {% endfor %}
     {% else %}
       <tr>
-        <td><input type=text name="evaluacion{{k}}"></td>
-        <td><input type="number" step="1" min="0" max="100" name="porcentaje{{k}}" onchange="sumarPorcentajes()" size="3"></td>
+        <td><input type=text name="evaluacion1" id="evaluacion1"></td>
+        <td><input type="number" step="1" min="0" max="100" name="porcentaje1" id="porcentaje1" onchange="sumarPorcentajes()" size="3"></td>
         <td width="150">&nbsp;</td>
         {% for j in range(0,entries.conteo) %}
-          <td><input type="number" step="1" min="0" max="100" name="{{ entries.resprog[j][0] }}{{k}}" onchange="sumarCeldas()" size="3"></td>
+          <td><input type="number" step="1" min="0" max="100" name="{{ entries.resprog[j][0] }}1" id="{{ entries.resprog[j][0] }}1" onchange="sumarCeldas()" size="3"></td>
         {% endfor %}
-        <td align="center"><div id="fila{{k}}">0</div></td>
+        <td align="center"><div id="fila1">0</div></td>
       </tr>
     {% endif %}
     <tr>

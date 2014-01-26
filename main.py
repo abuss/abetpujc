@@ -99,21 +99,26 @@ def pesos(codigo,grupo):
 
     # Variable para saber el numero de evaluaciones
     numevals = cur4.fetchall()
-    print numevals[0][0]
 
     # Agrupa los datos procesados en una sola lista y la retorna
     entries = {'detalles':cur1.fetchall()[0], 'resprog':formula, 'suma':suma, 'numevals':numevals[0][0], 'evaluaciones':evaluaciones, 'conteo':conteo}
     return render_template('defcourse.html', entries=entries)
 
-@app.route('/<codigo>/<grupo>/guardar', methods=['POST'])
-def guardarPesos(codigo,grupo):
-	cur = g.db.execute('select * from defcalificacion where id_asig=?',[codigo])
-	datosguardados = cur.fetchall()
-	if datosguardados != []:
-		print datosguardados
-	else:
-		print "No hay datos"
-	return redirect(url_for('pesos', codigo=codigo, grupo=grupo))
+@app.route('/<codigo>/<grupo>/guardarPesosEvaluaciones', methods=['GET', 'POST'])
+def guardarPesosEvaluaciones(codigo,grupo):
+    cur = g.db.execute('select * from defcalificacion where id_asig=?',[codigo])
+    datosguardados = cur.fetchall()
+    if datosguardados != []:
+        print datosguardados
+    else:
+        print "No hay datos"
+    print " "
+    g.db.execute('delete from defcalificacion where id_asig=?',[codigo])
+    g.db.commit()
+    if request.method == 'POST':
+        print request.form['evaluacion1']
+    flash('Los datos han sido guardados')
+    return redirect(url_for('pesos', codigo=codigo, grupo=grupo))
 
 @app.route('/<codigo>/<grupo>/assessments', methods=['GET', 'POST'])
 def evaluaciones(codigo,grupo):
@@ -138,8 +143,6 @@ def evaluaciones(codigo,grupo):
             if i>=len(resprog)-1:
                 break
             i = i + 1
-        print temp2
-        print " "
         temp.append(temp2)
 
     # Agrupa los datos procesados en una sola lista y la retorna
