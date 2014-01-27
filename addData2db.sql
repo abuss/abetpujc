@@ -685,7 +685,7 @@ insert into indicdesemp values ('J.2.2','Identifica y combina principios matemá
 insert into indicdesemp values ('J.2.3','Reconoce la importancia de modelar cuando se resuelve un problema','J');
 insert into indicdesemp values ('J.3.1','Toma decisiones bien informadas, basadas en principios matemáticos y computacionales, cuando diseña','J');
 insert into indicdesemp values ('K.1.1','Asigna y estima tiempos y recursos acorde a la complejidad de la situación','K');
-insert into indicdesemp values ('K.1.2','Asegura la calidad el software','K');
+insert into indicdesemp values ('K.1.2','Asegura la calidad del software','K');
 insert into indicdesemp values ('K.1.3','Sigue cronogramas y adapta recursos para conseguir objetivos','K');
 insert into indicdesemp values ('K.2.1','Toma una buena y bien informada decisión sobre el lenguaje y herramientas que deben ser usados en la implementación','K');
 insert into indicdesemp values ('K.2.2','Implementa e integra componentes de software que siguen fielmente criterios de diseño','K');
@@ -693,3 +693,6 @@ insert into indicdesemp values ('K.2.3','Establece invariantes y propiedades de 
 insert into indicdesemp values ('K.3.1','Evalua, verifica y valida con respecto a requerimientos y restricciones de sistemas','K');
 insert into indicdesemp values ('K.3.2','Afina e integra hardware','K');
 insert into indicdesemp values ('K.3.3','Identifica la evolución de un software','K');
+
+insert into estudiantes values ('000001','Pepito Perez');
+insert into estudiantes values ('000002','Pepita Mendieta');
