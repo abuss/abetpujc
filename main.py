@@ -57,7 +57,7 @@ def teardown_request(exception):
 
 @app.route('/')
 def show_courses():
-    cur = g.db.execute('select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where periodo=? order by nomb_asig desc',['2014-1'])
+    cur = g.db.execute('select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where periodo=? order by nomb_asig asc',['2014-1'])
     entries = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3]) for row in cur.fetchall()]
     return render_template('main.html', entries=entries)
 
@@ -72,12 +72,12 @@ def notas(codigo):
     return render_template(codigo+'/notas.html')
 
 @app.route('/<codigo>/<grupo>/defcourse', methods=['GET', 'POST'])
-def pesos(codigo,grupo):
+def instrumentos(codigo,grupo):
     # Recupera los datos de la base de datos
     cur1 = g.db.execute("select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where id_asig=?",[codigo])
     cur2 = g.db.execute('select id_resprog, peso from relevresulprog where id_asig=?',[codigo])
-    cur3 = g.db.execute('select desc_eval, porceval, id_resprog, porc_abet from defcalificacion as d, defnotaabet as n where d.id_asig = n.id_asig and d.id_eval = n.id_eval and d.id_asig=?',[codigo])
-    cur4 = g.db.execute("select count(*) from defcalificacion")
+    cur3 = g.db.execute('select desc_eval, porceval, id_resprog, porc_abet, n.id_eval from defcalificacion as d, defnotaabet as n where d.id_asig = n.id_asig and d.id_eval = n.id_eval and d.id_asig=?',[codigo])
+    cur4 = g.db.execute("select count(*) from defcalificacion where id_asig=?",[codigo])
 
     # Procesa los datos de resultados de programa
     formula = cur2.fetchall()
@@ -99,32 +99,58 @@ def pesos(codigo,grupo):
 
     # Variable para saber el numero de evaluaciones
     numevals = cur4.fetchall()
+    # print formula
+    # for i in range (7):
+    #     for j in range(7):
+    #         print evaluaciones[i*6+j]
+    # print len(evaluaciones)
+    # print conteo
+    # print numevals[0][0]
 
     # Agrupa los datos procesados en una sola lista y la retorna
     entries = {'detalles':cur1.fetchall()[0], 'resprog':formula, 'suma':suma, 'numevals':numevals[0][0], 'evaluaciones':evaluaciones, 'conteo':conteo}
     return render_template('defcourse.html', entries=entries)
 
 @app.route('/<codigo>/<grupo>/guardarPesosEvaluaciones', methods=['GET', 'POST'])
-def guardarPesosEvaluaciones(codigo,grupo):
-    cur = g.db.execute('select * from defcalificacion where id_asig=?',[codigo])
-    datosguardados = cur.fetchall()
-    if datosguardados != []:
-        print datosguardados
-    else:
-        print "No hay datos"
-    print " "
-    g.db.execute('delete from defcalificacion where id_asig=?',[codigo])
-    g.db.commit()
-    if request.method == 'POST':
-        print request.form['evaluacion1']
-    flash('Los datos han sido guardados')
+def guardarPesosInstrumentos(codigo,grupo):
+    cur = g.db.execute('select id_resprog from relevresulprog where id_asig=?',[codigo])
+    resultados = cur.fetchall()
+
+    # numero = int(request.form['numeroFilas'])
+    # #numero = 0
+
+    # datos1 = []
+    # datos2 = []
+    # for i in range(1,int(numero)+1):
+    #     datos1.append([request.form['evaluacion'+str(i)], request.form['porcentaje'+str(i)]])
+    #     tmp = []
+    #     for j in range(len(resultados)):
+    #         tmp.append(request.form[resultados[j][0]+str(i)])
+    #     datos2.append(tmp)
+
+    # print " "
+    # print numero
+    # print datos1
+    # print datos2
+    # print " "
+
+    # g.db.execute('delete from defcalificacion where id_asig=?',[codigo])
+    # g.db.execute('delete from defnotaabet where id_asig=?',[codigo])
+    # g.db.commit()
+
+    # for i in range(1,int(numero)+1):
+    #     g.db.execute('insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values (?,?,?,?)', [codigo, grupo, datos1[i-1][0], datos1[i-1][1]])
+    #     for j in range(len(resultados)):
+    #         g.db.execute('insert into defnotaabet values (?,?,?,?,?)', [codigo, grupo, i, resultados[j][0], datos2[i-1][j]])
+    # g.db.commit()
+
     return redirect(url_for('pesos', codigo=codigo, grupo=grupo))
 
 @app.route('/<codigo>/<grupo>/assessments', methods=['GET', 'POST'])
-def evaluaciones(codigo,grupo):
+def indicadores(codigo,grupo):
     # Recupera los datos de la base de datos
     cur1 = g.db.execute("select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where id_asig=?",[codigo])
-    cur2 = g.db.execute("select d.desc_eval, d.id_eval, n.id_resprog, porc_abet, m.descr_resprog from defcalificacion as d, defnotaabet as n, resulprograma as m where porc_abet > 0 and d.id_eval = n.id_eval and n.id_resprog = m.id_resprog order by d.id_eval")
+    cur2 = g.db.execute("select d.desc_eval, d.id_eval, n.id_resprog, porc_abet, m.descr_resprog from defcalificacion as d, defnotaabet as n, resulprograma as m where porc_abet > 0 and d.id_eval = n.id_eval and n.id_resprog = m.id_resprog and n.id_asig=? order by d.id_eval",[codigo])
     cur3 = g.db.execute("select * from indicdesemp")
  
     # Procesa los datos de los instrumentos de evaluacion
@@ -148,6 +174,41 @@ def evaluaciones(codigo,grupo):
     # Agrupa los datos procesados en una sola lista y la retorna
     entries = {'detalles':cur1.fetchall()[0], 'resprog':temp, 'indicdesemp':cur3.fetchall()}
     return render_template('assessments.html', entries=entries)
+
+@app.route('/<codigo>/<grupo>/guardarPesosEvaluaciones', methods=['GET', 'POST'])
+def guardarPesosIndicadores(codigo,grupo):
+    cur = g.db.execute('select id_resprog from relevresulprog where id_asig=?',[codigo])
+    resultados = cur.fetchall()
+
+    # numero = int(request.form['numeroFilas'])
+    # #numero = 0
+
+    # datos1 = []
+    # datos2 = []
+    # for i in range(1,int(numero)+1):
+    #     datos1.append([request.form['evaluacion'+str(i)], request.form['porcentaje'+str(i)]])
+    #     tmp = []
+    #     for j in range(len(resultados)):
+    #         tmp.append(request.form[resultados[j][0]+str(i)])
+    #     datos2.append(tmp)
+
+    # print " "
+    # print numero
+    # print datos1
+    # print datos2
+    # print " "
+
+    # g.db.execute('delete from defcalificacion where id_asig=?',[codigo])
+    # g.db.execute('delete from defnotaabet where id_asig=?',[codigo])
+    # g.db.commit()
+
+    # for i in range(1,int(numero)+1):
+    #     g.db.execute('insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values (?,?,?,?)', [codigo, grupo, datos1[i-1][0], datos1[i-1][1]])
+    #     for j in range(len(resultados)):
+    #         g.db.execute('insert into defnotaabet values (?,?,?,?,?)', [codigo, grupo, i, resultados[j][0], datos2[i-1][j]])
+    # g.db.commit()
+
+    return redirect(url_for('pesos', codigo=codigo, grupo=grupo))
 
 if __name__ == '__main__':
     init_db()

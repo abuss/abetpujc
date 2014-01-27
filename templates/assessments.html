@@ -83,7 +83,7 @@
     <h5>Dimensiones de {{ inst[0][0] }}</h5>
     <div>
       {% for entry in inst %}
-        <form name="forma{{entry[1]}}{{entry[2]}}" action="{{ url_for('guardarPesos', codigo=entries.detalles[1], grupo=entries.detalles[2])}}" method=post>
+        <form name="forma{{entry[1]}}{{entry[2]}}" action="{{ url_for('guardarPesosIndicadores', codigo=entries.detalles[1], grupo=entries.detalles[2])}}" method=post>
         <table id="tabla{{entry[1]}}{{entry[2]}}" border="0">
           <tr>
             <td width="600">Resultado de Programa {{ entry[2] }}: {{ entry[4] }}</td>
