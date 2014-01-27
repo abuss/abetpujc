@@ -99,13 +99,6 @@ def instrumentos(codigo,grupo):
 
     # Variable para saber el numero de evaluaciones
     numevals = cur4.fetchall()
-    # print formula
-    # for i in range (7):
-    #     for j in range(7):
-    #         print evaluaciones[i*6+j]
-    # print len(evaluaciones)
-    # print conteo
-    # print numevals[0][0]
 
     # Agrupa los datos procesados en una sola lista y la retorna
     entries = {'detalles':cur1.fetchall()[0], 'resprog':formula, 'suma':suma, 'numevals':numevals[0][0], 'evaluaciones':evaluaciones, 'conteo':conteo}
@@ -116,35 +109,39 @@ def guardarPesosInstrumentos(codigo,grupo):
     cur = g.db.execute('select id_resprog from relevresulprog where id_asig=?',[codigo])
     resultados = cur.fetchall()
 
-    # numero = int(request.form['numeroFilas'])
+    numero = int(request.form['numeroDeFilas'])
     # #numero = 0
 
-    # datos1 = []
-    # datos2 = []
-    # for i in range(1,int(numero)+1):
-    #     datos1.append([request.form['evaluacion'+str(i)], request.form['porcentaje'+str(i)]])
-    #     tmp = []
-    #     for j in range(len(resultados)):
-    #         tmp.append(request.form[resultados[j][0]+str(i)])
-    #     datos2.append(tmp)
+    datos1 = []
+    datos2 = []
+    for i in range(1,int(numero)-3):
+        print 'evaluacion'+str(i)
+        datos1.append([request.form['evaluacion'+str(i)], request.form['porcentaje'+str(i)]])
+        tmp = []
+        for j in range(len(resultados)):
+            tmp.append(request.form[resultados[j][0]+str(i)])
+        datos2.append(tmp)
 
-    # print " "
-    # print numero
-    # print datos1
-    # print datos2
-    # print " "
+    print " "
+    print numero
+    print datos1
+    print datos2
+    print " "
 
-    # g.db.execute('delete from defcalificacion where id_asig=?',[codigo])
-    # g.db.execute('delete from defnotaabet where id_asig=?',[codigo])
-    # g.db.commit()
+    g.db.execute('delete from defnotaabet where id_asig=?',[codigo])
+    g.db.execute('delete from defcalificacion where id_asig=?',[codigo])
+    g.db.commit()
 
-    # for i in range(1,int(numero)+1):
-    #     g.db.execute('insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values (?,?,?,?)', [codigo, grupo, datos1[i-1][0], datos1[i-1][1]])
-    #     for j in range(len(resultados)):
-    #         g.db.execute('insert into defnotaabet values (?,?,?,?,?)', [codigo, grupo, i, resultados[j][0], datos2[i-1][j]])
-    # g.db.commit()
+    for i in range(1,int(numero)-3):
+        g.db.execute('insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values (?,?,?,?)', [codigo, grupo, datos1[i-1][0], datos1[i-1][1]])
+        cur = g.db.execute('select id_eval from defcalificacion where desc_eval = ?',[datos1[i-1][0]])
+        numeroEval = cur.fetchall()
+        print numeroEval
+        for j in range(len(resultados)):
+            g.db.execute('insert into defnotaabet values (?,?,?,?,?)', [codigo, grupo, numeroEval[0][0], resultados[j][0], datos2[i-1][j]])
+    g.db.commit()
 
-    return redirect(url_for('pesos', codigo=codigo, grupo=grupo))
+    return redirect(url_for('instrumentos', codigo=codigo, grupo=grupo))
 
 @app.route('/<codigo>/<grupo>/assessments', methods=['GET', 'POST'])
 def indicadores(codigo,grupo):
@@ -208,7 +205,7 @@ def guardarPesosIndicadores(codigo,grupo):
     #         g.db.execute('insert into defnotaabet values (?,?,?,?,?)', [codigo, grupo, i, resultados[j][0], datos2[i-1][j]])
     # g.db.commit()
 
-    return redirect(url_for('pesos', codigo=codigo, grupo=grupo))
+    return redirect(url_for('indicadores', codigo=codigo, grupo=grupo))
 
 if __name__ == '__main__':
     init_db()

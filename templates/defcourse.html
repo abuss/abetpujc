@@ -63,10 +63,17 @@
   };
   </script>
   <script>
-  var paraCargar = function(event) {
+  var operaciones = function(event) {
     event = event || window.event;
     sumarCeldas(event);
     sumarPorcentajes(event);
+  };
+  </script>
+  <script>
+  var inicializacion = function(event) {
+    event = event || window.event;
+    operaciones(event);
+    $("#forma").find("#numeroFilas")[0].value = Number({{entries.numevals}})+4;
   };
   </script>
   <script>
@@ -87,13 +94,13 @@
           numfilas = numfilas - 1;
           $("#forma").find("#numeroFilas")[0].value = numfilas;
         }
-        paraCargar();
+        operaciones();
       });
     });
   </script>
 </head>
 
-<body {% if entries.numevals>0 %}onload="paraCargar()"{% endif %}>
+<body {% if entries.numevals>0 %}onload="inicializacion()"{% endif %}>
 <div class=page>
   {% block body %}
   <table>
