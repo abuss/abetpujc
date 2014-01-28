@@ -98,19 +98,12 @@ def instrumentos(codigo,grupo):
     # Procesa los datos de nombre de evaluaciones, y porcentaje de evaluaciones y resultados de programa
     evaluaciones = []
     for row in cur3.fetchall():
-    	print "Row:",row
         evaluaciones.append(row)
 
     # Variable para saber el numero de evaluaciones
     numevals = cur4.fetchall()
 
-    # print " "
-    # print conteo
-    # print numevals
-    # print evaluaciones
-    # print " "
-
-    # # Agrupa los datos procesados en una sola lista y la retorna
+    # Agrupa los datos procesados en una sola lista y la retorna
     entries = {'detalles':cur1.fetchall()[0], 'resprog':formula, 'suma':suma, 'numevals':numevals[0][0], 'evaluaciones':evaluaciones, 'conteo':conteo}
     return render_template('defcourse.html', entries=entries)
 
@@ -134,11 +127,6 @@ def guardarPesosInstrumentos(codigo,grupo):
             tmp.append(request.form[resultados[j][0]+str(i)])
         datos2.append(tmp)
 
-    print " "
-    print datos1
-    print datos2
-    print " "
-
     # Elimina de la base de datos los registros viejos
     db.execute('delete from defnotaabet where id_asig=?',[codigo])
     db.execute('delete from defcalificacion where id_asig=?',[codigo])
@@ -147,11 +135,12 @@ def guardarPesosInstrumentos(codigo,grupo):
     # Inserta la nueva informacion en la base de datos
     for i in range(1,int(numero)-3):
         db.execute('insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values (?,?,?,?)', [codigo, grupo, datos1[i-1][0], datos1[i-1][1]])
-        cur = db.execute('select id_eval from defcalificacion where desc_eval=?',[datos1[i-1][0]])
+        db.commit()
+        cur = db.execute('select id_eval from defcalificacion where desc_eval=? and id_asig=?',[datos1[i-1][0], codigo])
         numeroEval = cur.fetchall()
         for j in range(len(resultados)):
-            db.execute('insert into defnotaabet values (?,?,?,?,?)', [codigo, grupo, numeroEval[0][0], resultados[j][0], datos2[i-1][j]])
-    db.commit()
+        	db.execute('insert into defnotaabet values (?,?,?,?,?)', [codigo, grupo, numeroEval[0][0], resultados[j][0], datos2[i-1][j]])
+        	db.commit()
 
     flash("Datos guardados")
 
