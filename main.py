@@ -58,14 +58,14 @@ def close_db(error):
 @app.route('/')
 def show_courses():
     db = get_db()
-    cur = db.execute('select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where periodo=? order by nomb_asig asc',['2014-1'])
+    cur = db.execute('select nombre, codigo, grupo, periodo from asignatura where periodo=? order by nombre asc',['2014-1'])
     entries = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3]) for row in cur.fetchall()]
     return render_template('main.html', entries=entries)
 
 @app.route('/<codigo>/<grupo>', methods=['GET', 'POST'])
 def asignatura(codigo,grupo):
     db = get_db()
-    cur = db.execute("select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where id_asig=?",[codigo])
+    cur = db.execute("select nombre, codigo, grupo, periodo from asignatura where codigo=?",[codigo])
     entries = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3]) for row in cur.fetchall()]
     return render_template('course.html', entries=entries[0])
 
@@ -75,14 +75,15 @@ def notas(codigo):
 
 @app.route('/<codigo>/<grupo>/defcourse', methods=['GET', 'POST'])
 def instrumentos(codigo,grupo):
-    # Recupera los datos de la base de datos
+    # Accede a la base de datos
     db = get_db()
-    cur1 = db.execute("select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where id_asig=?",[codigo])
-    cur2 = db.execute('select id_resprog, peso from relevresulprog where id_asig=?',[codigo])
-    cur3 = db.execute('select desc_eval, porceval, id_resprog, porc_abet, n.id_eval from defcalificacion as d, defnotaabet as n where d.id_asig = n.id_asig and d.id_eval = n.id_eval and d.id_asig=?',[codigo])
-    cur4 = db.execute("select count(*) from defcalificacion where id_asig=?",[codigo])
 
-    # Procesa los datos de resultados de programa
+    # Recupera (de la base de datos) los detalles del curso
+    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?",[codigo])
+    detalles = cur1.fetchall()[0]
+
+    # Recupera (de la base de datos) y procesa los datos de resultados de programa
+    cur2 = db.execute('select resultado_de_programa, peso from formula where asignatura=?',[detalles[4]])
     formula = cur2.fetchall()
     suma = 0
     for i in formula:
@@ -95,24 +96,32 @@ def instrumentos(codigo,grupo):
     # Variable para saber el numero de resultados de programa
     conteo = len(formula)
 
-    # Procesa los datos de nombre de evaluaciones, y porcentaje de evaluaciones y resultados de programa
+    # Recupera (de la base de datos) y procesa los datos de nombre de evaluaciones, y porcentaje de evaluaciones y resultados de programa
+    cur3 = db.execute('select d.evaluacion, d.porcentaje, e.competencia, e.porcentaje, d.id_evaluacion from porcentaje_instrumento as d, porcentaje_abet as e where d.asignatura = e.asignatura and d.id_evaluacion = e.evaluacion and d.asignatura=?',[detalles[4]])
     evaluaciones = []
     for row in cur3.fetchall():
         evaluaciones.append(row)
 
-    # Variable para saber el numero de evaluaciones
+    # Recupera (de la base de datos) el numero de evaluaciones
+    cur4 = db.execute("select count(*) from porcentaje_instrumento where asignatura=?",[detalles[4]])
     numevals = cur4.fetchall()
 
-    # Agrupa los datos procesados en una sola lista y la retorna
-    entries = {'detalles':cur1.fetchall()[0], 'resprog':formula, 'suma':suma, 'numevals':numevals[0][0], 'evaluaciones':evaluaciones, 'conteo':conteo}
+    # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
+    entries = {'detalles':detalles, 'resprog':formula, 'suma':suma, 'numevals':numevals[0][0], 'evaluaciones':evaluaciones, 'conteo':conteo}
     return render_template('defcourse.html', entries=entries)
 
 @app.route('/<codigo>/<grupo>/guardarPesosEvaluaciones', methods=['POST'])
 def guardarPesosInstrumentos(codigo,grupo):
-    # Recupera de la base de datos los resultados de programa del curso
+    # Accede la base de datos
     db = get_db()
-    cur = db.execute('select id_resprog from relevresulprog where id_asig=?',[codigo])
-    resultados = cur.fetchall()
+
+	# Recupera (de la base de datos) los detalles del curso
+    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?",[codigo])
+    detalles = cur1.fetchall()[0]
+
+    # Recupera de la base de datos los resultados de programa del curso
+    cur2 = db.execute('select resultado_de_programa from formula where asignatura=?',[detalles[4]])
+    resultados = cur2.fetchall()
 
     # Recupera de la pagina el numero de instrumentos actual
     numero = int(request.form['numeroDeFilas'])
@@ -128,18 +137,18 @@ def guardarPesosInstrumentos(codigo,grupo):
         datos2.append(tmp)
 
     # Elimina de la base de datos los registros viejos
-    db.execute('delete from defnotaabet where id_asig=?',[codigo])
-    db.execute('delete from defcalificacion where id_asig=?',[codigo])
+    db.execute('delete from porcentaje_abet where asignatura=?',[detalles[4]])
+    db.execute('delete from porcentaje_instrumento where asignatura=?',[detalles[4]])
     db.commit()
 
     # Inserta la nueva informacion en la base de datos
     for i in range(1,int(numero)-3):
-        db.execute('insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values (?,?,?,?)', [codigo, grupo, datos1[i-1][0], datos1[i-1][1]])
+        db.execute('insert into porcentaje_instrumento (asignatura, evaluacion, porcentaje) values (?,?,?)', [detalles[4], datos1[i-1][0], datos1[i-1][1]])
         db.commit()
-        cur = db.execute('select id_eval from defcalificacion where desc_eval=? and id_asig=?',[datos1[i-1][0], codigo])
+        cur = db.execute('select id_evaluacion from porcentaje_instrumento where evaluacion=? and asignatura=?',[datos1[i-1][0], detalles[4]])
         numeroEval = cur.fetchall()
         for j in range(len(resultados)):
-        	db.execute('insert into defnotaabet values (?,?,?,?,?)', [codigo, grupo, numeroEval[0][0], resultados[j][0], datos2[i-1][j]])
+        	db.execute('insert into porcentaje_abet values (?,?,?,?,?,?)', [detalles[4], numeroEval[0][0], resultados[j][0], datos2[i-1][j],1,''])
         	db.commit()
 
     flash("Datos guardados")
@@ -149,13 +158,15 @@ def guardarPesosInstrumentos(codigo,grupo):
 
 @app.route('/<codigo>/<grupo>/assessments', methods=['GET', 'POST'])
 def indicadores(codigo,grupo):
-    # Recupera los datos de la base de datos
+    # Accede la base de datos
     db = get_db()
-    cur1 = db.execute("select nomb_asig, id_asig, grupo_asig, periodo from asignaturas where id_asig=?",[codigo])
-    cur2 = db.execute("select d.desc_eval, d.id_eval, n.id_resprog, porc_abet, m.descr_resprog from defcalificacion as d, defnotaabet as n, resulprograma as m where porc_abet > 0 and d.id_eval = n.id_eval and n.id_resprog = m.id_resprog and n.id_asig=? order by d.id_eval",[codigo])
-    cur3 = db.execute("select * from indicdesemp")
- 
-    # Procesa los datos de los instrumentos de evaluacion
+
+    # Recupera (de la base de datos) los detalles del curso
+    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?",[codigo])
+    detalles = cur1.fetchall()[0]
+
+    # Recupera (de la base de datos) y procesa los datos de los instrumentos de evaluacion
+    cur2 = db.execute("select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? order by d.id_evaluacion",[detalles[4]])
     resprog = cur2.fetchall()
     temp = []
     i = 0
@@ -173,15 +184,29 @@ def indicadores(codigo,grupo):
             i = i + 1
         temp.append(temp2)
 
-    # Agrupa los datos procesados en una sola lista y la retorna
-    entries = {'detalles':cur1.fetchall()[0], 'resprog':temp, 'indicdesemp':cur3.fetchall()}
+    # Recupera (de la base de datos) los indicadores de desempeno
+    cur3 = db.execute("select * from indicador_de_desempeno")
+
+    # Recupera (de la base de datos) y procesa la informacion de las evaluaciones ya contenida en la base de datos
+    cur4 = db.execute("select d.id_evaluacion, e.competencia, e.porcentaje from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
+    porcindicadores = cur4.fetchall()
+
+    # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
+    entries = {'detalles':detalles, 'resprog':temp, 'indicdesemp':cur3.fetchall()}
     return render_template('assessments.html', entries=entries)
 
 @app.route('/<codigo>/<grupo>/guardarPesosEvaluaciones', methods=['GET', 'POST'])
 def guardarPesosIndicadores(codigo,grupo):
+	# Accede la base de datos
     db = get_db()
-    cur = db.execute('select id_resprog from relevresulprog where id_asig=?',[codigo])
-    resultados = cur.fetchall()
+
+    # Recupera (de la base de datos) los detalles del curso
+    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?",[codigo])
+    detalles = cur1.fetchall()[0]
+
+    # Recupera de la base de datos los resultados de programa del curso
+    cur2 = db.execute('select resultado_de_programa from formula where asignatura=?',[detalles[4]])
+    resultados = cur2.fetchall()
 
     # numero = int(request.form['numeroFilas'])
     # #numero = 0
