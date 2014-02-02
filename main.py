@@ -165,34 +165,51 @@ def indicadores(codigo,grupo):
     cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?",[codigo])
     detalles = cur1.fetchall()[0]
 
-    # Recupera (de la base de datos) y procesa los datos de los instrumentos de evaluacion
+    # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur2 = db.execute("select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? order by d.id_evaluacion",[detalles[4]])
     resprog = cur2.fetchall()
-    temp = []
+
+    # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
+    cur3 = db.execute("select d.evaluacion, e.competencia, e.porcentaje, e.superior from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
+    porcindicadores = cur3.fetchall()
+
+	# Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
+    inst = []
     i = 0
-    while i<len(resprog):
-        temp2 = []
+    while i < len(resprog):
+        temp1 = []
         numero = resprog[i][1]
-        temp2.append(resprog[i])
-        if i>=len(resprog)-1:
+        temp1.append(resprog[i])
+        if i >= len(resprog)-1:
             break
         i = i + 1
         while numero == resprog[i][1]:
-            temp2.append(resprog[i])
-            if i>=len(resprog)-1:
+            temp1.append(resprog[i])
+            if i >= len(resprog)-1:
                 break
             i = i + 1
-        temp.append(temp2)
+
+        for j in range(len(temp1)):
+	        temp2 = list(temp1[j])
+	    	temp3 = []
+	    	k = 0
+	    	while k < len(porcindicadores):
+	    		if porcindicadores[k][0] == temp1[j][0] and porcindicadores[k][3] == temp1[j][2]:
+	    			temp3.append([porcindicadores[k][1],porcindicadores[k][2]])
+	    			del porcindicadores[k]
+	    		else:
+	    			k = k + 1
+	    	temp3.insert(0,len(temp3))
+	    	temp2.append(temp3)
+	        temp1[j] = tuple(temp2)
+
+        inst.append(temp1)
 
     # Recupera (de la base de datos) los indicadores de desempeno
-    cur3 = db.execute("select * from indicador_de_desempeno")
-
-    # Recupera (de la base de datos) y procesa la informacion de las evaluaciones ya contenida en la base de datos
-    cur4 = db.execute("select d.id_evaluacion, e.competencia, e.porcentaje from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
-    porcindicadores = cur4.fetchall()
+    cur4 = db.execute("select * from indicador_de_desempeno")
 
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
-    entries = {'detalles':detalles, 'resprog':temp, 'indicdesemp':cur3.fetchall()}
+    entries = {'detalles':detalles, 'resprog':inst, 'indicdesemp':cur4.fetchall()}
     return render_template('assessments.html', entries=entries)
 
 @app.route('/<codigo>/<grupo>/guardarPesosEvaluaciones', methods=['GET', 'POST'])

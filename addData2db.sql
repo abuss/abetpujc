@@ -699,12 +699,11 @@ insert into porcentaje_abet values (10,67,'I',30,1,'');
 insert into porcentaje_abet values (10,67,'J',0,1,'');
 insert into porcentaje_abet values (10,67,'K',55,1,'');
 
-
-/*
-insert into defevaluaciones values (1,1,'A.1.1',25);
-insert into defevaluaciones values (1,1,'A.1.3',25);
-insert into defevaluaciones values (1,1,'A.2.2',50);
-insert into defevaluaciones values (1,1,'F.2.1',30);
-insert into defevaluaciones values (1,1,'F.5.2',70);
-insert into defevaluaciones values (1,1,'H.1.5',45);
-insert into defevaluaciones values (1,1,'H.2.4',55); */
+/* Prueba: Definicion de los porcentajes de los instrumentos */
+insert into porcentaje_abet values (1,1,'A.1.1',25,3,'A');
+insert into porcentaje_abet values (1,1,'A.1.3',25,3,'A');
+insert into porcentaje_abet values (1,1,'A.2.2',50,3,'A');
+insert into porcentaje_abet values (1,1,'F.2.1',30,3,'F');
+insert into porcentaje_abet values (1,1,'F.5.2',70,3,'F');
+insert into porcentaje_abet values (1,1,'H.1.5',45,3,'H');
+insert into porcentaje_abet values (1,1,'H.2.4',55,3,'H'); 
