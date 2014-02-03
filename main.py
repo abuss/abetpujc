@@ -212,7 +212,7 @@ def indicadores(codigo,grupo):
     entries = {'detalles':detalles, 'resprog':inst, 'indicdesemp':cur4.fetchall()}
     return render_template('assessments.html', entries=entries)
 
-@app.route('/<codigo>/<grupo>/guardarPesosEvaluaciones', methods=['GET', 'POST'])
+@app.route('/<codigo>/<grupo>/guardarPesosIndicadores', methods=['POST'])
 def guardarPesosIndicadores(codigo,grupo):
 	# Accede la base de datos
     db = get_db()
@@ -222,26 +222,36 @@ def guardarPesosIndicadores(codigo,grupo):
     detalles = cur1.fetchall()[0]
 
     # Recupera de la base de datos los resultados de programa del curso
-    cur2 = db.execute('select resultado_de_programa from formula where asignatura=?',[detalles[4]])
-    resultados = cur2.fetchall()
+    cur2 = db.execute('select d.id_evaluacion, d.evaluacion, e.competencia from porcentaje_instrumento as d, porcentaje_abet as e where d.id_evaluacion = e.evaluacion and e.porcentaje > 0 and e.nivel = 1 and d.asignatura=?',[detalles[4]])
+    instrumentos = cur2.fetchall()
 
-    # numero = int(request.form['numeroFilas'])
-    # #numero = 0
+    # Procesa los datos guardados en la base de datos, necesarios para hacer la insercion
+    temp = []
+    i = 0
+    while i < range(len(instrumentos)):
+    	temp1 = []
+    	resprog = instrumentos[i][0]
+    	temp1.append(instrumentos[i])
+    	if i >= len(instrumentos)-1:
+    		break
+    	i = i + 1
+    	while resprog == instrumentos[i][0]:
+    		temp1.append(instrumentos[i])
+    		if i >= len(instrumentos)-1:
+    			break
+    		i = i + 1
+    	temp.append(temp1)
 
-    # datos1 = []
-    # datos2 = []
-    # for i in range(1,int(numero)+1):
-    #     datos1.append([request.form['evaluacion'+str(i)], request.form['porcentaje'+str(i)]])
-    #     tmp = []
-    #     for j in range(len(resultados)):
-    #         tmp.append(request.form[resultados[j][0]+str(i)])
-    #     datos2.append(tmp)
+    cur3 = db.execute('select count(*) from formula where asignatura=?',[detalles[4]])
+    numero = cur3.fetchall()
 
-    # print " "
-    # print numero
-    # print datos1
-    # print datos2
-    # print " "
+    # Recupera de la pagina los datos de las entradas
+    datos = []
+    for i in range(len(temp)):
+    	for j in range(len(temp[i])):
+    		numero = int(request.form['numeroDeFilas'+str(temp[i][j][0])+str(temp[i][j][2])])
+    		for k in range(numero-2):
+	    		datos.append([request.form["indicador"+str(temp[i][j][0])+str(temp[i][j][2])+str(k)], request.form["pesoind"+str(temp[i][j][0])+str(temp[i][j][2])+str(k)]])
 
     # g.db.execute('delete from defcalificacion where id_asig=?',[codigo])
     # g.db.execute('delete from defnotaabet where id_asig=?',[codigo])
@@ -253,6 +263,7 @@ def guardarPesosIndicadores(codigo,grupo):
     #         g.db.execute('insert into defnotaabet values (?,?,?,?,?)', [codigo, grupo, i, resultados[j][0], datos2[i-1][j]])
     # g.db.commit()
 
+    # Recarga la pagina de los indicadores
     return redirect(url_for('indicadores', codigo=codigo, grupo=grupo))
 
 if __name__ == '__main__':
