@@ -27,8 +27,8 @@ insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) valu
 insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIS005','A','Procesos de Ingeniería de Software',40,2,'2014-1');
 
 /* Estudiantes */
-insert into estudiante values ('000001','Pepito Perez','300CIP002');
-insert into estudiante values ('000002','Pepita Mendieta','300CIP002');
+insert into estudiante values ('000001','Pepito Perez',1);
+insert into estudiante values ('000002','Pepita Mendieta',1);
 
 /* Resultados de Programa */
 insert into resultado_de_programa values ('A','Habilidad para aplicar conocimientos de matemáticas, ciencias e ingeniería','');

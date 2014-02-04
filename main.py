@@ -69,10 +69,6 @@ def asignatura(codigo,grupo):
     entries = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3]) for row in cur.fetchall()]
     return render_template('course.html', entries=entries[0])
 
-@app.route('/<codigo>/<grupo>', methods=['GET', 'POST'])
-def notas(codigo):
-    return render_template(codigo+'/notas.html')
-
 @app.route('/<codigo>/<grupo>/defcourse', methods=['GET', 'POST'])
 def instrumentos(codigo,grupo):
     # Accede a la base de datos
@@ -97,7 +93,7 @@ def instrumentos(codigo,grupo):
     conteo = len(formula)
 
     # Recupera (de la base de datos) y procesa los datos de nombre de evaluaciones, y porcentaje de evaluaciones y resultados de programa
-    cur3 = db.execute('select d.evaluacion, d.porcentaje, e.competencia, e.porcentaje, d.id_evaluacion from porcentaje_instrumento as d, porcentaje_abet as e where d.asignatura = e.asignatura and d.id_evaluacion = e.evaluacion and d.asignatura=?',[detalles[4]])
+    cur3 = db.execute('select d.evaluacion, d.porcentaje, e.competencia, e.porcentaje, d.id_evaluacion from porcentaje_instrumento as d, porcentaje_abet as e where d.asignatura = e.asignatura and d.id_evaluacion = e.evaluacion and e.nivel = 1 and d.asignatura=?',[detalles[4]])
     evaluaciones = []
     for row in cur3.fetchall():
         evaluaciones.append(row)
@@ -136,22 +132,27 @@ def guardarPesosInstrumentos(codigo,grupo):
             tmp.append(request.form[resultados[j][0]+str(i)])
         datos2.append(tmp)
 
-    # Elimina de la base de datos los registros viejos
-    db.execute('delete from porcentaje_abet where asignatura=?',[detalles[4]])
-    db.execute('delete from porcentaje_instrumento where asignatura=?',[detalles[4]])
-    db.commit()
-
-    # Inserta la nueva informacion en la base de datos
-    for i in range(1,int(numero)-3):
-        db.execute('insert into porcentaje_instrumento (asignatura, evaluacion, porcentaje) values (?,?,?)', [detalles[4], datos1[i-1][0], datos1[i-1][1]])
+    # Validacion antes de insertar: si el instrumento ya existe no se puede ingresar
+    # Si no hay datos repetidos que no pueden ser guardados
+    if request.form['hayRepetidos'] == '0':
+        # Elimina de la base de datos los registros viejos
+        db.execute('delete from porcentaje_abet where asignatura=?',[detalles[4]])
+        db.execute('delete from porcentaje_instrumento where asignatura=?',[detalles[4]])
         db.commit()
-        cur = db.execute('select id_evaluacion from porcentaje_instrumento where evaluacion=? and asignatura=?',[datos1[i-1][0], detalles[4]])
-        numeroEval = cur.fetchall()
-        for j in range(len(resultados)):
-        	db.execute('insert into porcentaje_abet values (?,?,?,?,?,?)', [detalles[4], numeroEval[0][0], resultados[j][0], datos2[i-1][j],1,''])
-        	db.commit()
 
-    flash("Datos guardados")
+        print "entro!!!"
+
+        # Inserta la nueva informacion en la base de datos
+        for i in range(1,int(numero)-3):
+            db.execute('insert into porcentaje_instrumento (asignatura, evaluacion, porcentaje) values (?,?,?)', [detalles[4], datos1[i-1][0], datos1[i-1][1]])
+            db.commit()
+            cur = db.execute('select id_evaluacion from porcentaje_instrumento where evaluacion=? and asignatura=?',[datos1[i-1][0], detalles[4]])
+            numeroEval = cur.fetchall()
+            for j in range(len(resultados)):
+            	db.execute('insert into porcentaje_abet values (?,?,?,?,?,?)', [detalles[4], numeroEval[0][0], resultados[j][0], datos2[i-1][j],1,''])
+            	db.commit()
+
+        flash("Datos guardados")
 
     # Recarga la pagina de instrumentos
     return redirect(url_for('instrumentos', codigo=codigo, grupo=grupo))
@@ -242,6 +243,8 @@ def guardarPesosIndicadores(codigo,grupo):
     		i = i + 1
     	temp.append(temp1)
 
+    print temp
+
     cur3 = db.execute('select count(*) from formula where asignatura=?',[detalles[4]])
     numero = cur3.fetchall()
 
@@ -253,18 +256,77 @@ def guardarPesosIndicadores(codigo,grupo):
     		for k in range(numero-2):
 	    		datos.append([request.form["indicador"+str(temp[i][j][0])+str(temp[i][j][2])+str(k)], request.form["pesoind"+str(temp[i][j][0])+str(temp[i][j][2])+str(k)]])
 
-    # g.db.execute('delete from defcalificacion where id_asig=?',[codigo])
-    # g.db.execute('delete from defnotaabet where id_asig=?',[codigo])
-    # g.db.commit()
+	# print datos
 
-    # for i in range(1,int(numero)+1):
-    #     g.db.execute('insert into defcalificacion (id_asig, grupo_asig, desc_eval, porceval) values (?,?,?,?)', [codigo, grupo, datos1[i-1][0], datos1[i-1][1]])
-    #     for j in range(len(resultados)):
-    #         g.db.execute('insert into defnotaabet values (?,?,?,?,?)', [codigo, grupo, i, resultados[j][0], datos2[i-1][j]])
-    # g.db.commit()
+ #    g.db.execute('delete from porcentaje_abet where id_asig=? and nivel=?',[detalles[4],3])
+ #    g.db.commit()
+
+ #    for d in datos:
+ #        g.db.execute('insert into porcentaje_abet values (?,?,?,?,?,?)', [detalles[4], d[0][0], datos1[i-1][1]])
+ #    g.db.commit()
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('indicadores', codigo=codigo, grupo=grupo))
+
+@app.route('/<codigo>/<grupo>/grades', methods=['GET', 'POST'])
+def notas(codigo,grupo):
+	# Accede la base de datos
+    db = get_db()
+
+    # Recupera (de la base de datos) los detalles del curso
+    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?",[codigo])
+    detalles = cur1.fetchall()[0]
+
+    # Recupera (de la base de datos) los estudiantes
+    cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc",[detalles[4]])
+    estudiantes = cur2.fetchall()
+
+    # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
+    cur3 = db.execute("select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? order by d.id_evaluacion",[detalles[4]])
+    resprog = cur3.fetchall()
+
+    # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
+    cur4 = db.execute("select d.evaluacion, e.competencia, e.porcentaje, e.superior from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
+    porcindicadores = cur4.fetchall()
+
+	# Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
+    inst = []
+    i = 0
+    while i < len(resprog):
+        temp1 = []
+        numero = resprog[i][1]
+        temp1.append(resprog[i])
+        if i >= len(resprog)-1:
+            break
+        i = i + 1
+        while numero == resprog[i][1]:
+            temp1.append(resprog[i])
+            if i >= len(resprog)-1:
+                break
+            i = i + 1
+
+        for j in range(len(temp1)):
+	        temp2 = list(temp1[j])
+	    	temp3 = []
+	    	k = 0
+	    	while k < len(porcindicadores):
+	    		if porcindicadores[k][0] == temp1[j][0] and porcindicadores[k][3] == temp1[j][2]:
+	    			temp3.append([porcindicadores[k][1],porcindicadores[k][2]])
+	    			del porcindicadores[k]
+	    		else:
+	    			k = k + 1
+	    	temp3.insert(0,len(temp3))
+	    	temp2.append(temp3)
+	        temp1[j] = tuple(temp2)
+
+        inst.append(temp1)
+
+    print estudiantes
+
+    # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
+    entries = {'detalles':detalles, 'estudiantes':estudiantes, 'resprog':inst, 'numinstrumentos':len(inst), 'numestudiantes':len(estudiantes)}
+    return render_template('grades.html', entries=entries)
+
 
 if __name__ == '__main__':
     init_db()

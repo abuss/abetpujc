@@ -77,6 +77,25 @@
   };
   </script>
   <script>
+  var verificacion = function(event) {
+    event = event || window.event;
+    var numfilas = document.getElementById('tabla').getElementsByTagName('tr').length;
+    $("#forma").find("#repetidos")[0].value = 0;
+    for (k=1;k<numfilas-4;k++)
+    {
+      for (l=k+1;l<numfilas-3;l++)
+      {
+        if ($("#forma").find("#evaluacion"+String(k))[0].value == $("#forma").find("#evaluacion"+String(l))[0].value)
+        {
+          alert("No es posible guardar los datos, revise las nombres de los instrumentos");
+          $("#forma").find("#repetidos")[0].value = 1;
+        }
+      }
+    }
+    
+  };
+  </script>
+  <script>
     $(function(){
       $("#botonadd").click(function(){
         var numfilas = document.getElementById('tabla').getElementsByTagName('tr').length;
@@ -181,7 +200,15 @@
   <br>
   <br>
   <input type=hidden name="numeroDeFilas" id="numeroFilas">
-  <input type=submit value='Guardar'>
+  <input type=hidden name="hayRepetidos" id="repetidos">
+  <input type=submit value='Guardar' onclick="verificacion()">
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        {{ message }}
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
   </form>
   <form name="botonseguir" action="{{ url_for('indicadores', codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
   <input type=submit value='Definir los detalles de los Instrumentos'>

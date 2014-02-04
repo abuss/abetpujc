@@ -146,8 +146,8 @@
   <br>
   <input type=submit value='Guardar'>
   </form>
-  <form name="botonvolver" action="{{ url_for('asignatura', codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
-  <input type=submit value='Volver a {{entries.detalles[0]}}'>
+  <form name="botonvolver" action="{{ url_for('instrumentos', codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
+  <input type=submit value='Volver a definir evaluaciones para {{entries.detalles[0]}}'>
   </form>
   {% endblock %}
 </div>
