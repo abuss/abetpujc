@@ -140,8 +140,6 @@ def guardarPesosInstrumentos(codigo,grupo):
         db.execute('delete from porcentaje_instrumento where asignatura=?',[detalles[4]])
         db.commit()
 
-        print "entro!!!"
-
         # Inserta la nueva informacion en la base de datos
         for i in range(1,int(numero)-3):
             db.execute('insert into porcentaje_instrumento (asignatura, evaluacion, porcentaje) values (?,?,?)', [detalles[4], datos1[i-1][0], datos1[i-1][1]])
@@ -243,27 +241,27 @@ def guardarPesosIndicadores(codigo,grupo):
     		i = i + 1
     	temp.append(temp1)
 
-    print temp
-
+    # Recupera (de la base de datos) el numero de resultados de programa
     cur3 = db.execute('select count(*) from formula where asignatura=?',[detalles[4]])
     numero = cur3.fetchall()
 
-    # Recupera de la pagina los datos de las entradas
+    # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
     for i in range(len(temp)):
     	for j in range(len(temp[i])):
-    		numero = int(request.form['numeroDeFilas'+str(temp[i][j][0])+str(temp[i][j][2])])
-    		for k in range(numero-2):
-	    		datos.append([request.form["indicador"+str(temp[i][j][0])+str(temp[i][j][2])+str(k)], request.form["pesoind"+str(temp[i][j][0])+str(temp[i][j][2])+str(k)]])
+            numero = int(request.form['numeroDeFilas'+str(temp[i][j][0])+str(temp[i][j][2])])
+            for k in range(numero-2):
+                datos.append([temp[i][j][0], temp[i][j][2], request.form["indicador"+str(temp[i][j][0])+str(temp[i][j][2])+str(k)][:5], request.form["pesoind"+str(temp[i][j][0])+str(temp[i][j][2])+str(k)]])
 
-	# print datos
+    # Elimina de la base de datos los registros viejos
+    db.execute('delete from porcentaje_abet where asignatura=? and nivel=?',[detalles[4],3])
+    db.commit()
 
- #    g.db.execute('delete from porcentaje_abet where id_asig=? and nivel=?',[detalles[4],3])
- #    g.db.commit()
-
- #    for d in datos:
- #        g.db.execute('insert into porcentaje_abet values (?,?,?,?,?,?)', [detalles[4], d[0][0], datos1[i-1][1]])
- #    g.db.commit()
+    # Inserta la nueva informacion en la base de datos
+    for d in datos:
+        if d[2] != '---':
+            db.execute('insert into porcentaje_abet values (?,?,?,?,?,?)', [detalles[4], d[0], d[2], int(d[3]), 3, d[1]])
+    db.commit()
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('indicadores', codigo=codigo, grupo=grupo))

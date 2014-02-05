@@ -102,7 +102,6 @@
         var htmlToAppend = "<tr><td><input type=text name='evaluacion"+String(numfilas-3)+"' id='evaluacion"+String(numfilas-3)+"'></td><td><input type='number' step='1' min='0' max='100' name='porcentaje"+String(numfilas-3)+"' id='porcentaje"+String(numfilas-3)+"' onchange='sumarPorcentajes()' size='3'></td><td width='150'>&nbsp;</td>{% for j in range(0,entries.conteo) %}<td><input type='number' step='1' min='0' max='100' name='{{ entries.resprog[j][0] }}"+String(numfilas-3)+"' id ='{{ entries.resprog[j][0] }}"+String(numfilas-3)+"'onchange='sumarCeldas()' size='3'></td>{% endfor %}<td align='center'><div id='fila"+String(numfilas-3)+"'>0</div></td></tr>";
         $("#tabla > tbody > tr").eq(numfilas-3).before(htmlToAppend);
         numfilas = numfilas + 1;
-        //document.getElementById('tabla').getElementsByName('numeroFilas')[0].value = numfilas;
         $("#forma").find("#numeroFilas")[0].value = numfilas;
       });
       $("#botondel").click(function(){
