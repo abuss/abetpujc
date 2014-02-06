@@ -26,10 +26,6 @@ insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) valu
 insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300MAG031','A','Matemáticas Discretas para la Computación',40,3,'2014-1');
 insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIS005','A','Procesos de Ingeniería de Software',40,2,'2014-1');
 
-/* Estudiantes */
-insert into estudiante values ('000001','Pepito Perez',1);
-insert into estudiante values ('000002','Pepita Mendieta',1);
-
 /* Resultados de Programa */
 insert into resultado_de_programa values ('A','Habilidad para aplicar conocimientos de matemáticas, ciencias e ingeniería','');
 insert into resultado_de_programa values ('B','Habilidad para analizar un problema e identificar los requerimientos necesarios para su definición y solución','');
@@ -699,6 +695,10 @@ insert into porcentaje_abet values (10,67,'I',30,1,'');
 insert into porcentaje_abet values (10,67,'J',0,1,'');
 insert into porcentaje_abet values (10,67,'K',55,1,'');
 
+/* Prueba: Estudiantes */
+insert into estudiante values ('000001','Pepito Perez',1);
+insert into estudiante values ('000002','Pepita Mendieta',1);
+
 /* Prueba: Definicion de los porcentajes de los instrumentos */
 insert into porcentaje_abet values (1,1,'A.1.1',25,3,'A');
 insert into porcentaje_abet values (1,1,'A.1.3',25,3,'A');
@@ -707,3 +707,12 @@ insert into porcentaje_abet values (1,1,'F.2.1',30,3,'F');
 insert into porcentaje_abet values (1,1,'F.5.2',70,3,'F');
 insert into porcentaje_abet values (1,1,'H.1.5',45,3,'H');
 insert into porcentaje_abet values (1,1,'H.2.4',55,3,'H'); 
+
+insert into porcentaje_abet values (1,2,'A.1.1',25,3,'A');
+insert into porcentaje_abet values (1,2,'A.1.3',25,3,'A');
+insert into porcentaje_abet values (1,2,'A.2.2',50,3,'A');
+insert into porcentaje_abet values (1,2,'C.1.1',100,3,'C');
+insert into porcentaje_abet values (1,2,'F.2.1',30,3,'F');
+insert into porcentaje_abet values (1,2,'F.5.1',70,3,'F');
+insert into porcentaje_abet values (1,2,'H.1.3',45,3,'H');
+insert into porcentaje_abet values (1,2,'H.2.2',55,3,'H'); 
