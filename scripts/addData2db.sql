@@ -1,5 +1,3 @@
-/* Disable synchronization to improve performance during insertion */
-PRAGMA synchronous = OFF;
 
 BEGIN TRANSACTION;
 
