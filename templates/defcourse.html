@@ -16,7 +16,7 @@
       {
         total = total + Number($("#tabla").find("#{{ entry[0] }}"+String(k))[0].value);
       }
-      document.getElementById('suma{{ entry[0] }}').innerText = total;
+      document.getElementById('suma{{ entry[0] }}').innerHTML = total;
     {% endfor %}
 
     // Suma de cada fila
@@ -26,27 +26,27 @@
       {% for entry in entries.resprog %}
           + Number($("#tabla").find("#{{ entry[0] }}"+String(k))[0].value)
       {% endfor %};
-      document.getElementById('fila'+String(k)).innerText = total;
+      document.getElementById('fila'+String(k)).innerHTML = total;
     }
 
     // Suma de los totales
     var total = 0
     for (k=1; k<numfilas-3; k++)
     {
-      total = total + Number(document.getElementById('fila'+String(k)).innerText);
+      total = total + Number(document.getElementById('fila'+String(k)).innerHTML);
     }
-    document.getElementById('totalsuma').innerText = total;
+    document.getElementById('totalsuma').innerHTML = total;
 
     // Calculo del objetivo
     {% for entry in entries.resprog %}
-      var total = Number(document.getElementById('totalsuma').innerText)*{{ entry[1] }}/{{ entries.suma }};
-      document.getElementById('objetivo{{ entry[0] }}').innerText = parseInt(total,10);
+      var total = Number(document.getElementById('totalsuma').innerHTML)*{{ entry[1] }}/{{ entries.suma }};
+      document.getElementById('objetivo{{ entry[0] }}').innerHTML = parseInt(total,10);
     {% endfor %}
 
     // Calculo de la diferencia
     {% for entry in entries.resprog %}
-      var total = Number(document.getElementById('suma{{ entry[0] }}').innerText) - Number(document.getElementById('objetivo{{ entry[0] }}').innerText);
-      document.getElementById('diferencia{{ entry[0] }}').innerText = parseInt(total,10);
+      var total = Number(document.getElementById('suma{{ entry[0] }}').innerHTML) - Number(document.getElementById('objetivo{{ entry[0] }}').innerHTML);
+      document.getElementById('diferencia{{ entry[0] }}').innerHTML = parseInt(total,10);
     {% endfor %}
   };
   </script>
@@ -59,7 +59,7 @@
     {
       total = total + Number($("#tabla").find("#porcentaje"+String(k))[0].value);
     }
-    document.getElementById('porcentajetotal').innerText = String(total)+'%';
+    document.getElementById('porcentajetotal').innerHTML = String(total)+'%';
   };
   </script>
   <script>
