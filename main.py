@@ -360,16 +360,12 @@ def notas(codigo, grupo):
             temp8.append(temp7)
             for l in range(len(temp3)):
                 temp9.append(temp3[l][1]*temp2[3]/10000)
-            temp3.insert(0, len(temp3))
-            temp2.append(temp3)
+            #temp3.insert(0, len(temp3))
+            #temp2.append(temp3)
             temp1[j] = tuple(temp2)
 
-        #print [temp5,reduce(lambda x,y: x+y,temp6),reduce(lambda x,y: x+y,temp8)]
         indicadores.append([temp5, reduce(lambda x, y: x + y, temp6), reduce(lambda x, y: x + y, temp8), temp9])
         inst.append(temp1)
-
-    for row in indicadores:
-        print row
 
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
