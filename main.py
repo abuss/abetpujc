@@ -20,9 +20,9 @@ def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
 
 def add_data(db):
-	with app.open_resource('addData2db.sql', mode='r') as f:
-		db.cursor().executescript(f.read())
-	db.commit()
+    with app.open_resource('addData2db.sql', mode='r') as f:
+        db.cursor().executescript(f.read())
+    db.commit()
 
 def init_db():
     with closing(connect_db()) as db:
@@ -111,7 +111,7 @@ def guardarPesosInstrumentos(codigo,grupo):
     # Accede la base de datos
     db = get_db()
 
-	# Recupera (de la base de datos) los detalles del curso
+    # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?",[codigo])
     detalles = cur1.fetchall()[0]
 
@@ -147,8 +147,8 @@ def guardarPesosInstrumentos(codigo,grupo):
             cur = db.execute('select id_evaluacion from porcentaje_instrumento where evaluacion=? and asignatura=?',[datos1[i-1][0], detalles[4]])
             numeroEval = cur.fetchall()
             for j in range(len(resultados)):
-            	db.execute('insert into porcentaje_abet values (?,?,?,?,?,?)', [detalles[4], numeroEval[0][0], resultados[j][0], datos2[i-1][j],1,''])
-            	db.commit()
+                db.execute('insert into porcentaje_abet values (?,?,?,?,?,?)', [detalles[4], numeroEval[0][0], resultados[j][0], datos2[i-1][j],1,''])
+                db.commit()
 
         flash("Datos guardados")
 
@@ -172,7 +172,7 @@ def indicadores(codigo,grupo):
     cur3 = db.execute("select d.evaluacion, e.competencia, e.porcentaje, e.superior from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcindicadores = cur3.fetchall()
 
-	# Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
+    # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
     inst = []
     i = 0
     while i < len(resprog):
@@ -189,18 +189,18 @@ def indicadores(codigo,grupo):
             i = i + 1
 
         for j in range(len(temp1)):
-	        temp2 = list(temp1[j])
-	    	temp3 = []
-	    	k = 0
-	    	while k < len(porcindicadores):
-	    		if porcindicadores[k][0] == temp1[j][0] and porcindicadores[k][3] == temp1[j][2]:
-	    			temp3.append([porcindicadores[k][1],porcindicadores[k][2]])
-	    			del porcindicadores[k]
-	    		else:
-	    			k = k + 1
-	    	temp3.insert(0,len(temp3))
-	    	temp2.append(temp3)
-	        temp1[j] = tuple(temp2)
+            temp2 = list(temp1[j])
+            temp3 = []
+            k = 0
+            while k < len(porcindicadores):
+                if porcindicadores[k][0] == temp1[j][0] and porcindicadores[k][3] == temp1[j][2]:
+                    temp3.append([porcindicadores[k][1],porcindicadores[k][2]])
+                    del porcindicadores[k]
+                else:
+                    k = k + 1
+            temp3.insert(0,len(temp3))
+            temp2.append(temp3)
+            temp1[j] = tuple(temp2)
 
         inst.append(temp1)
 
@@ -213,7 +213,7 @@ def indicadores(codigo,grupo):
 
 @app.route('/<codigo>/<grupo>/guardarPesosIndicadores', methods=['POST'])
 def guardarPesosIndicadores(codigo,grupo):
-	# Accede la base de datos
+    # Accede la base de datos
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
@@ -228,18 +228,18 @@ def guardarPesosIndicadores(codigo,grupo):
     temp = []
     i = 0
     while i < range(len(instrumentos)):
-    	temp1 = []
-    	resprog = instrumentos[i][0]
-    	temp1.append(instrumentos[i])
-    	if i >= len(instrumentos)-1:
-    		break
-    	i = i + 1
-    	while resprog == instrumentos[i][0]:
-    		temp1.append(instrumentos[i])
-    		if i >= len(instrumentos)-1:
-    			break
-    		i = i + 1
-    	temp.append(temp1)
+        temp1 = []
+        resprog = instrumentos[i][0]
+        temp1.append(instrumentos[i])
+        if i >= len(instrumentos)-1:
+            break
+        i = i + 1
+        while resprog == instrumentos[i][0]:
+            temp1.append(instrumentos[i])
+            if i >= len(instrumentos)-1:
+                break
+            i = i + 1
+        temp.append(temp1)
 
     # Recupera (de la base de datos) el numero de resultados de programa
     cur3 = db.execute('select count(*) from formula where asignatura=?',[detalles[4]])
@@ -248,7 +248,7 @@ def guardarPesosIndicadores(codigo,grupo):
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
     for i in range(len(temp)):
-    	for j in range(len(temp[i])):
+        for j in range(len(temp[i])):
             numero = int(request.form['numeroDeFilas'+str(temp[i][j][0])+str(temp[i][j][2])])
             for k in range(numero-2):
                 datos.append([temp[i][j][0], temp[i][j][2], request.form["indicador"+str(temp[i][j][0])+str(temp[i][j][2])+str(k)][:5], request.form["pesoind"+str(temp[i][j][0])+str(temp[i][j][2])+str(k)]])
@@ -268,7 +268,7 @@ def guardarPesosIndicadores(codigo,grupo):
 
 @app.route('/<codigo>/<grupo>/grades', methods=['GET', 'POST'])
 def notas(codigo,grupo):
-	# Accede la base de datos
+    # Accede la base de datos
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
@@ -287,7 +287,7 @@ def notas(codigo,grupo):
     cur4 = db.execute("select d.evaluacion, e.competencia, e.porcentaje, e.superior, f.descripcion from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcindicadores = cur4.fetchall()
 
-	# Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
+    # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
     inst = []
     indicadores = []
     i = 0
