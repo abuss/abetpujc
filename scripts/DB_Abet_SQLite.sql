@@ -1,5 +1,6 @@
-
 /* Drop Tables */
+
+BEGIN TRANSACTION;
 
 DROP TABLE IF EXISTS NOTA_DEFINITIVA;
 DROP TABLE IF EXISTS NOTA_INSTRUMENTO;
@@ -15,16 +16,19 @@ DROP TABLE IF EXISTS PROFESOR;
 DROP TABLE IF EXISTS RESULTADO_DE_PROGRAMA;
 DROP TABLE IF EXISTS USUARIO;
 
+COMMIT;
 
 
 
 /* Create Tables */
 
+BEGIN TRANSACTION;
+
 CREATE TABLE ACREDITACION_ABET 
 (
         -- Ej. 40
 	ID_CARRERA INT NOT NULL,
-        -- Ej. Ingeniería de Sistemas y Computación
+        -- Ej. Ingenierï¿½a de Sistemas y Computaciï¿½n
 	NOMBRE_CARRERA TEXT NOT NULL,
         -- Ej. 2014-1
 	PERIODO TEXT NOT NULL,
@@ -47,7 +51,7 @@ CREATE TABLE PROFESOR
 CREATE TABLE ASIGNATURA
 (
 	ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        -- Código de la Asignatura. Ej. 300CIP001
+        -- Cï¿½digo de la Asignatura. Ej. 300CIP001
 	CODIGO TEXT NOT NULL,
         -- Ej. A
 	GRUPO TEXT NOT NULL,
@@ -74,7 +78,7 @@ CREATE TABLE ESTUDIANTE
 	CODIGO INT NOT NULL,
 		-- Jose Luis Perez Gomez
 	NOMBRE TEXT NOT NULL,
-		-- Ej. Introducción a la Programación
+		-- Ej. Introducciï¿½n a la Programaciï¿½n
 	ASIGNATURA INTEGER,
 
 	PRIMARY KEY (CODIGO),
@@ -99,7 +103,7 @@ CREATE TABLE INDICADOR_DE_DESEMPENO
 (
 		-- Ej. A1
 	ID TEXT NOT NULL,
-		-- Ej. (A1) Identificar los fundamentos cientificos y los principios de ingeniería que rigen un proceso o sistema.
+		-- Ej. (A1) Identificar los fundamentos cientificos y los principios de ingenierï¿½a que rigen un proceso o sistema.
 	DESCRIPCION TEXT NOT NULL,
 		-- Ej. A .. K
 	RESULTADO_DE_PROGRAMA TEXT NOT NULL,
@@ -129,7 +133,7 @@ CREATE TABLE FORMULA
 
 CREATE TABLE PORCENTAJE_INSTRUMENTO
 (
-		-- Identificación para la Evaluacion.
+		-- Identificaciï¿½n para la Evaluacion.
 	ID_EVALUACION INTEGER PRIMARY KEY AUTOINCREMENT,
 		-- Id de la Asignatura.
 	ASIGNATURA INT NOT NULL,
@@ -172,7 +176,7 @@ CREATE TABLE NOTA_INDICADOR
 (
 		-- Id de la Asignatura
 	ASIGNATURA TEXT NOT NULL,
-		-- Identificación para la Evaluacion. Ej. Expos, Parcial1
+		-- Identificaciï¿½n para la Evaluacion. Ej. Expos, Parcial1
 	EVALUACION INT NOT NULL,
 		-- Ej. A.1.1
 	COMPETENCIA TEXT NOT NULL,
@@ -193,7 +197,7 @@ CREATE TABLE NOTA_INSTRUMENTO
 (
 		-- Id de la Asignatura.
 	ASIGNATURA TEXT NOT NULL,
-		-- Identificación para la Evaluacion. Ej. Expos, Parcial1
+		-- Identificaciï¿½n para la Evaluacion. Ej. Expos, Parcial1
 	EVALUACION INT NOT NULL,
 		-- Ej. 0201001
 	CODIGO_ESTUDIANTE INT NOT NULL,
@@ -238,3 +242,4 @@ CREATE TABLE USUARIO
 	NIVEL_ACCESO INT DEFAULT 4
 );
 
+COMMIT;
