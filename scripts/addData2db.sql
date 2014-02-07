@@ -1,3 +1,7 @@
+/* Disable synchronization to improve performance during insertion */
+PRAGMA synchronous = OFF;
+
+BEGIN TRANSACTION;
 
 /* Carreras */
 insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2014-1');
@@ -716,3 +720,6 @@ insert into porcentaje_abet values (1,2,'F.2.1',30,3,'F');
 insert into porcentaje_abet values (1,2,'F.5.1',70,3,'F');
 insert into porcentaje_abet values (1,2,'H.1.3',45,3,'H');
 insert into porcentaje_abet values (1,2,'H.2.2',55,3,'H'); 
+
+
+COMMIT;
