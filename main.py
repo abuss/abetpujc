@@ -20,13 +20,13 @@ def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
 
 def add_data(db):
-    with app.open_resource('addData2db.sql', mode='r') as f:
+    with app.open_resource('scripts/addData2db.sql', mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
 
 def init_db():
     with closing(connect_db()) as db:
-        with app.open_resource('DB_Abet_SQLite.sql', mode='r') as f:
+        with app.open_resource('scripts/DB_Abet_SQLite.sql', mode='r') as f:
             db.cursor().executescript(f.read())
             add_data(db)
         db.commit()
@@ -306,26 +306,30 @@ def notas(codigo,grupo):
 
         temp5 = 0
         temp6 = []
+        temp8 = []
         for j in range(len(temp1)):
             temp2 = list(temp1[j])
             temp3 = []
             temp4 = []
+            temp7 = []
             k = 0
             while k < len(porcindicadores):
                 if porcindicadores[k][0] == temp1[j][0] and porcindicadores[k][3] == temp1[j][2]:
-                    temp3.append([porcindicadores[k][1],porcindicadores[k][2],porcindicadores[k][4]])
+                    temp3.append([porcindicadores[k][1],porcindicadores[k][2]])
                     temp4.append(porcindicadores[k][1])
+                    temp7.append(porcindicadores[k][4])
                     del porcindicadores[k]
                 else:
                     k = k + 1
             temp5 = temp5 + len(temp3)
             temp6.append(temp4)
+            temp8.append(temp7)
             temp3.insert(0,len(temp3))
             temp2.append(temp3)
             temp1[j] = tuple(temp2)
 
-        print [temp5,reduce(lambda x,y: x+y,temp6)]
-        indicadores.append([temp5,reduce(lambda x,y: x+y,temp6)])
+        #print [temp5,reduce(lambda x,y: x+y,temp6),reduce(lambda x,y: x+y,temp8)]
+        indicadores.append([temp5,reduce(lambda x,y: x+y,temp6),reduce(lambda x,y: x+y,temp8)])
         inst.append(temp1)
 
     #print inst

@@ -18,6 +18,11 @@
       $(".ui-tabs-nav").css("background", "transparent");
     });
   </script>
+  <script>
+    $(function() {
+      $( document ).tooltip();
+    });
+  </script>
 </head>
 
 <body>
@@ -50,7 +55,7 @@
           <td>Estudiante</td>
           <td width="10">&nbsp;</td>
         {% for j in range(0,entries.indicadores[i-1][0]) %}
-            <td align="center">{{ entries.indicadores[i-1][1][j] }}</td>
+            <td align="center" title="{{ entries.indicadores[i-1][2][j] }}">{{ entries.indicadores[i-1][1][j] }}</td>
           {% endfor %}
           <td width="10">&nbsp;</td>
           <td>Nota</td>
