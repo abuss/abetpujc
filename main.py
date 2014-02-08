@@ -235,7 +235,7 @@ def indicadores(periodo, codigo, grupo):
 
 
 @app.route('/<periodo>/<codigo>/<grupo>/guardarPesosIndicadores', methods=['POST'])
-def guardarPesosIndicadores(periodo,codigo, grupo):
+def guardarPesosIndicadores(periodo, codigo, grupo):
     # Accede la base de datos
     db = get_db()
 
