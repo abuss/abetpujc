@@ -14,10 +14,10 @@
   <h4>{{ entries.title }} - Grupo {{ entries.grupo }}</h4>
   <h4>Período {{ entries.periodo }}</h4>
   {% block body %}
-  <form action="{{ url_for('notas', codigo=entries.cod, grupo=entries.grupo) }}" method=post>
+  <form action="{{ url_for('notas', periodo=entries.periodo, codigo=entries.cod, grupo=entries.grupo) }}" method=post>
     <input type=submit value='Ingresar Notas'><br>
   </form>
-  <form action="{{ url_for('instrumentos', codigo=entries.cod, grupo=entries.grupo) }}" method=post>
+  <form action="{{ url_for('instrumentos', periodo=entries.periodo, codigo=entries.cod, grupo=entries.grupo) }}" method=post>
     <input type=submit value='Definir Evaluaciones'>
   </form>
   <form action="{{ url_for('show_courses') }}">

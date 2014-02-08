@@ -136,7 +136,7 @@
   <h5>Definición de Evaluaciones</h5>
   <br>
 
-  <form name="forma" id="forma" action="{{ url_for('guardarPesosInstrumentos', codigo=entries.detalles[1], grupo=entries.detalles[2]) }}" method=post>
+  <form name="forma" id="forma" action="{{ url_for('guardarPesosInstrumentos', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2]) }}" method=post>
   <table name="tabla" id="tabla" border="0">
     <tr>
       <td>Instrumento</td>
@@ -209,10 +209,10 @@
     {% endif %}
   {% endwith %}
   </form>
-  <form name="botonseguir" action="{{ url_for('indicadores', codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
+  <form name="botonseguir" action="{{ url_for('indicadores', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
   <input type=submit value='Definir los detalles de los Instrumentos'>
   </form>
-  <form name="botonvolver" action="{{ url_for('asignatura', codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
+  <form name="botonvolver" action="{{ url_for('asignatura', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
   <input type=submit value='Volver a {{entries.detalles[0]}}'>
   </form>
   {% endblock %}

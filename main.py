@@ -72,21 +72,21 @@ def show_courses():
     return render_template('main.html', entries=entries)
 
 
-@app.route('/<codigo>/<grupo>', methods=['GET', 'POST'])
-def asignatura(codigo, grupo):
+@app.route('/<periodo>/<codigo>/<grupo>', methods=['GET', 'POST'])
+def asignatura(periodo, codigo, grupo):
     db = get_db()
-    cur = db.execute("select nombre, codigo, grupo, periodo from asignatura where codigo=?", [codigo])
+    cur = db.execute("select nombre, codigo, grupo, periodo from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
     entries = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3]) for row in cur.fetchall()]
     return render_template('course.html', entries=entries[0])
 
 
-@app.route('/<codigo>/<grupo>/defcourse', methods=['GET', 'POST'])
-def instrumentos(codigo, grupo):
+@app.route('/<periodo>/<codigo>/<grupo>/defcourse', methods=['GET', 'POST'])
+def instrumentos(periodo, codigo, grupo):
     # Accede a la base de datos
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
-    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?", [codigo])
+    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
@@ -121,13 +121,13 @@ def instrumentos(codigo, grupo):
     return render_template('defcourse.html', entries=entries)
 
 
-@app.route('/<codigo>/<grupo>/guardarPesosEvaluaciones', methods=['POST'])
-def guardarPesosInstrumentos(codigo, grupo):
+@app.route('/<periodo>/<codigo>/<grupo>/guardarPesosEvaluaciones', methods=['POST'])
+def guardarPesosInstrumentos(periodo, codigo, grupo):
     # Accede la base de datos
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
-    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?", [codigo])
+    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera de la base de datos los resultados de programa del curso
@@ -171,16 +171,16 @@ def guardarPesosInstrumentos(codigo, grupo):
         flash("Datos guardados")
 
     # Recarga la pagina de instrumentos
-    return redirect(url_for('instrumentos', codigo=codigo, grupo=grupo))
+    return redirect(url_for('instrumentos', periodo=periodo, codigo=codigo, grupo=grupo))
 
 
-@app.route('/<codigo>/<grupo>/assessments', methods=['GET', 'POST'])
-def indicadores(codigo, grupo):
+@app.route('/<periodo>/<codigo>/<grupo>/assessments', methods=['GET', 'POST'])
+def indicadores(periodo, codigo, grupo):
     # Accede la base de datos
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
-    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?", [codigo])
+    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
@@ -234,13 +234,13 @@ def indicadores(codigo, grupo):
     return render_template('assessments.html', entries=entries)
 
 
-@app.route('/<codigo>/<grupo>/guardarPesosIndicadores', methods=['POST'])
-def guardarPesosIndicadores(codigo, grupo):
+@app.route('/<periodo>/<codigo>/<grupo>/guardarPesosIndicadores', methods=['POST'])
+def guardarPesosIndicadores(periodo,codigo, grupo):
     # Accede la base de datos
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
-    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?", [codigo])
+    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera de la base de datos los resultados de programa del curso
@@ -292,16 +292,16 @@ def guardarPesosIndicadores(codigo, grupo):
     db.commit()
 
     # Recarga la pagina de los indicadores
-    return redirect(url_for('indicadores', codigo=codigo, grupo=grupo))
+    return redirect(url_for('indicadores', periodo=periodo, codigo=codigo, grupo=grupo))
 
 
-@app.route('/<codigo>/<grupo>/grades', methods=['GET', 'POST'])
-def notas(codigo, grupo):
+@app.route('/<periodo>/<codigo>/<grupo>/grades', methods=['GET', 'POST'])
+def notas(periodo, codigo, grupo):
     # Accede la base de datos
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
-    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?", [codigo])
+    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los estudiantes
@@ -373,13 +373,13 @@ def notas(codigo, grupo):
     return render_template('grades.html', entries=entries)
 
 
-@app.route('/<codigo>/<grupo>/guardarNotas', methods=['POST'])
-def guardarNotas(codigo, grupo):
+@app.route('/<periodo>/<codigo>/<grupo>/guardarNotas', methods=['POST'])
+def guardarNotas(periodo, codigo, grupo):
     # Accede la base de datos
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
-    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=?", [codigo])
+    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera de la base de datos los resultados de programa del curso
@@ -428,7 +428,7 @@ def guardarNotas(codigo, grupo):
     # db.commit()
 
     # Recarga la pagina de los indicadores
-    return redirect(url_for('notas', codigo=codigo, grupo=grupo))
+    return redirect(url_for('notas', periodo=periodo, codigo=codigo, grupo=grupo))
 
 
 if __name__ == '__main__':

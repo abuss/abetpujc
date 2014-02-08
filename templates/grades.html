@@ -55,7 +55,7 @@
   <h4>{{ entries.detalles[0] }} - Grupo {{ entries.detalles[2] }}</h4>
   <h4>Período {{ entries.detalles[3] }}</h4>
   <br>
-  <form name="forma" id="forma" action="{{ url_for('guardarNotas', codigo=entries.detalles[1], grupo=entries.detalles[2])}}" method=post>
+  <form name="forma" id="forma" action="{{ url_for('guardarNotas', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}" method=post>
 
   <div id="tabs">
     <ul>
@@ -97,7 +97,7 @@
   <br>
   <input type=submit value='Guardar'>
   </form>
-  <form name="botonvolver" action="{{ url_for('asignatura', codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
+  <form name="botonvolver" action="{{ url_for('asignatura', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
   <input type=submit value='Volver a {{entries.detalles[0]}}'>
   </form>
   {% endblock %}
