@@ -429,8 +429,10 @@ def guardarNotas(periodo, codigo, grupo):
         where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcindicadores = cur4.fetchall()
 
-    # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
+    # Procesa los datos de los indicadores de evaluacion, incluyendo la informacion previamente guardada
     indicadores = []
+    pesos = []
+    ubicacion = []
     i = 0
     while i < len(resprog):
         temp1 = []
@@ -445,7 +447,7 @@ def guardarNotas(periodo, codigo, grupo):
                 break
             i = i + 1
 
-        temp4 = 0
+        temp4 = []
         temp5 = []
         for j in range(len(temp1)):
             temp2 = []
@@ -459,37 +461,53 @@ def guardarNotas(periodo, codigo, grupo):
                     del porcindicadores[k]
                 else:
                     k = k + 1
-            temp4 = temp4 + len(temp2)
-            temp5.append(temp3)
+            for l in range(len(temp2)):
+                temp5.append(temp2[l][1]*temp1[j][3]/10000)
+            temp4.append(temp3)
 
-        indicadores.append([temp4, reduce(lambda x, y: x + y, temp5), numero])
+        indicadores.append(reduce(lambda x, y: x + y, temp4))
+        pesos.append(temp5)
+        ubicacion.append(numero)
 
     #print indicadores
 
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
-    for i in range(1,len(estudiantes)+1):
+    for i in range(1,len(indicadores)+1):
         temp1 = []
-        for j in range(1,len(indicadores)+1):
+        for j in range(1,len(estudiantes)+1):
             temp2 = []
             if indicadores[j-1][0] != 0:
-                for k in range(indicadores[i-1][0]):
-                    print "ind" + str(i) + str(j) + str(k)
+                for k in range(len(indicadores[i-1])):
                     temp2.append(request.form["ind" + str(i) + str(j) + str(k)])
             temp1.append(temp2)
         datos.append(temp1)
 
-    print datos
+    #print datos
 
-    # # Elimina de la base de datos los registros viejos
-    # db.execute('delete from porcentaje_abet where asignatura=? and nivel=?',[detalles[4],3])
-    # db.commit()
+    # Elimina de la base de datos los registros viejos
+    db.execute('delete from nota_indicador where asignatura=?',[detalles[4]])
+    db.commit()
 
-    # # Inserta la nueva informacion en la base de datos
-    # for d in datos:
-    #     if d[2] != '---':
-    #         db.execute('insert into porcentaje_abet values (?,?,?,?,?,?)', [detalles[4], d[0], d[2], int(d[3]), 3, d[1]])
-    # db.commit()
+    # Inserta la nueva informacion en la base de datos
+    for d in range(len(datos)): # Instrumentos
+        for e in range(len(datos[d])): # Estudiantes
+            if datos[d][e] == []:
+                continue
+            else:
+                for i in range(len(datos[d][e])): # Indicadores
+                    #print [detalles[4], ubicacion[d], indicadores[d][i], estudiantes[e][1], int(datos[d][e][i])]
+                    if datos[d][e][i] != u'':
+                        db.execute('insert into nota_indicador values (?,?,?,?,?)',
+                                   [detalles[4], ubicacion[d], indicadores[d][i], estudiantes[e][1], int(datos[d][e][i])])
+                    else:
+                        db.execute('insert into nota_indicador (asignatura, evaluacion, competencia, codigo_estudiante) '
+                                   'values (?,?,?,?)',
+                                   [detalles[4], ubicacion[d], indicadores[d][i], estudiantes[e][1]])
+        db.commit()
+
+    curtemp = db.execute("select * from nota_indicador")
+    print curtemp.fetchall()
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('notas', periodo=periodo, codigo=codigo, grupo=grupo))
