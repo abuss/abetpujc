@@ -75,7 +75,9 @@ def show_courses():
 @app.route('/<periodo>/<codigo>/<grupo>', methods=['GET', 'POST'])
 def asignatura(periodo, codigo, grupo):
     db = get_db()
-    cur = db.execute("select nombre, codigo, grupo, periodo from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
+    cur = db.execute(
+        "select nombre, codigo, grupo, periodo from asignatura where codigo=? and grupo=? and periodo=?",
+        [codigo,grupo,periodo])
     entries = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3]) for row in cur.fetchall()]
     return render_template('course.html', entries=entries[0])
 
@@ -86,7 +88,9 @@ def instrumentos(periodo, codigo, grupo):
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
-    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
+    cur1 = db.execute(
+        "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
+        [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
@@ -103,9 +107,12 @@ def instrumentos(periodo, codigo, grupo):
     # Variable para saber el numero de resultados de programa
     conteo = len(formula)
 
-    # Recupera (de la base de datos) y procesa los datos de nombre de evaluaciones, y porcentaje de evaluaciones y resultados de programa
+    # Recupera (de la base de datos) y procesa los datos de nombre de evaluaciones,
+    # y porcentaje de evaluaciones y resultados de programa
     cur3 = db.execute(
-        'select d.evaluacion, d.porcentaje, e.competencia, e.porcentaje, d.id_evaluacion from porcentaje_instrumento as d, porcentaje_abet as e where d.asignatura = e.asignatura and d.id_evaluacion = e.evaluacion and e.nivel = 1 and d.asignatura=?',
+        'select d.evaluacion, d.porcentaje, e.competencia, e.porcentaje, d.id_evaluacion \
+        from porcentaje_instrumento as d, porcentaje_abet as e \
+        where d.asignatura = e.asignatura and d.id_evaluacion = e.evaluacion and e.nivel = 1 and d.asignatura=?',
         [detalles[4]])
     evaluaciones = []
     for row in cur3.fetchall():
@@ -127,7 +134,9 @@ def guardarPesosInstrumentos(periodo, codigo, grupo):
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
-    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
+    cur1 = db.execute(
+        "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
+        [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera de la base de datos los resultados de programa del curso
@@ -180,18 +189,25 @@ def indicadores(periodo, codigo, grupo):
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
-    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
+    cur1 = db.execute(
+        "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
+        [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur2 = db.execute(
-        "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? order by d.id_evaluacion",
+        "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
+        from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
+        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
+        order by d.id_evaluacion",
         [detalles[4]])
     resprog = cur2.fetchall()
 
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
     cur3 = db.execute(
-        "select d.evaluacion, e.competencia, e.porcentaje, e.superior from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
+        "select d.evaluacion, e.competencia, e.porcentaje, e.superior \
+        from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f \
+        where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcindicadores = cur3.fetchall()
 
     # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
@@ -240,12 +256,16 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
-    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
+    cur1 = db.execute(
+        "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
+        [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera de la base de datos los resultados de programa del curso
     cur2 = db.execute(
-        'select d.id_evaluacion, d.evaluacion, e.competencia from porcentaje_instrumento as d, porcentaje_abet as e where d.id_evaluacion = e.evaluacion and e.porcentaje > 0 and e.nivel = 1 and d.asignatura=?',
+        'select d.id_evaluacion, d.evaluacion, e.competencia \
+        from porcentaje_instrumento as d, porcentaje_abet as e \
+        where d.id_evaluacion = e.evaluacion and e.porcentaje > 0 and e.nivel = 1 and d.asignatura=?',
         [detalles[4]])
     instrumentos = cur2.fetchall()
 
@@ -301,7 +321,9 @@ def notas(periodo, codigo, grupo):
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
-    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
+    cur1 = db.execute(
+        "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
+        [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los estudiantes
@@ -310,13 +332,18 @@ def notas(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
-        "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? order by d.id_evaluacion",
+        "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje \
+        from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
+        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
+        order by d.id_evaluacion",
         [detalles[4]])
     resprog = cur3.fetchall()
 
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
     cur4 = db.execute(
-        "select d.evaluacion, e.competencia, e.porcentaje, e.superior, f.descripcion from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
+        "select d.evaluacion, e.competencia, e.porcentaje, e.superior, f.descripcion \
+        from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f \
+        where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcindicadores = cur4.fetchall()
 
     # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
@@ -360,8 +387,6 @@ def notas(periodo, codigo, grupo):
             temp8.append(temp7)
             for l in range(len(temp3)):
                 temp9.append(temp3[l][1]*temp2[3]/10000)
-            #temp3.insert(0, len(temp3))
-            #temp2.append(temp3)
             temp1[j] = tuple(temp2)
 
         indicadores.append([temp5, reduce(lambda x, y: x + y, temp6), reduce(lambda x, y: x + y, temp8), temp9])
@@ -379,43 +404,82 @@ def guardarNotas(periodo, codigo, grupo):
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
-    cur1 = db.execute("select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?", [codigo,grupo,periodo])
+    cur1 = db.execute(
+        "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
+        [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
-    # Recupera de la base de datos los resultados de programa del curso
-    cur2 = db.execute(
-        'select d.id_evaluacion, d.evaluacion, e.competencia from porcentaje_instrumento as d, porcentaje_abet as e where d.id_evaluacion = e.evaluacion and e.porcentaje > 0 and e.nivel = 1 and d.asignatura=?',
-        [detalles[4]])
-    instrumentos = cur2.fetchall()
+    # Recupera (de la base de datos) los estudiantes
+    cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
+    estudiantes = cur2.fetchall()
 
-    # Procesa los datos guardados en la base de datos, necesarios para hacer la insercion
-    temp = []
+    # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
+    cur3 = db.execute(
+        "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje \
+        from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
+        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id \
+            and e.asignatura=? order by d.id_evaluacion",
+        [detalles[4]])
+    resprog = cur3.fetchall()
+
+    # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
+    cur4 = db.execute(
+        "select d.evaluacion, e.competencia, e.porcentaje, e.superior, f.descripcion, d.id_evaluacion \
+        from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f \
+        where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
+    porcindicadores = cur4.fetchall()
+
+    # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
+    indicadores = []
     i = 0
-    while i < range(len(instrumentos)):
+    while i < len(resprog):
         temp1 = []
-        resprog = instrumentos[i][0]
-        temp1.append(instrumentos[i])
-        if i >= len(instrumentos) - 1:
+        numero = resprog[i][1]
+        temp1.append(resprog[i])
+        if i >= len(resprog) - 1:
             break
         i = i + 1
-        while resprog == instrumentos[i][0]:
-            temp1.append(instrumentos[i])
-            if i >= len(instrumentos) - 1:
+        while numero == resprog[i][1]:
+            temp1.append(resprog[i])
+            if i >= len(resprog) - 1:
                 break
             i = i + 1
-        temp.append(temp1)
 
-    # Recupera (de la base de datos) el numero de resultados de programa
-    cur3 = db.execute('select count(*) from formula where asignatura=?', [detalles[4]])
-    numero = cur3.fetchall()
+        temp4 = 0
+        temp5 = []
+        for j in range(len(temp1)):
+            temp2 = []
+            temp3 = []
 
-    # # Recupera de la pagina los datos de las entradas y los procesa
-    # datos = []
-    # for i in range(len(temp)):
-    #     for j in range(len(temp[i])):
-    #         numero = int(request.form['numeroDeFilas'+str(temp[i][j][0])+str(temp[i][j][2])])
-    #         for k in range(numero-2):
-    #             datos.append([temp[i][j][0], temp[i][j][2], request.form["indicador"+str(temp[i][j][0])+str(temp[i][j][2])+str(k)][:5], request.form["pesoind"+str(temp[i][j][0])+str(temp[i][j][2])+str(k)]])
+            k = 0
+            while k < len(porcindicadores):
+                if porcindicadores[k][0] == temp1[j][0] and porcindicadores[k][3] == temp1[j][2]:
+                    temp2.append([porcindicadores[k][1], porcindicadores[k][2]])
+                    temp3.append(porcindicadores[k][1])
+                    del porcindicadores[k]
+                else:
+                    k = k + 1
+            temp4 = temp4 + len(temp2)
+            temp5.append(temp3)
+
+        indicadores.append([temp4, reduce(lambda x, y: x + y, temp5), numero])
+
+    #print indicadores
+
+    # Recupera de la pagina los datos de las entradas y los procesa
+    datos = []
+    for i in range(1,len(estudiantes)+1):
+        temp1 = []
+        for j in range(1,len(indicadores)+1):
+            temp2 = []
+            if indicadores[j-1][0] != 0:
+                for k in range(indicadores[i-1][0]):
+                    print "ind" + str(i) + str(j) + str(k)
+                    temp2.append(request.form["ind" + str(i) + str(j) + str(k)])
+            temp1.append(temp2)
+        datos.append(temp1)
+
+    print datos
 
     # # Elimina de la base de datos los registros viejos
     # db.execute('delete from porcentaje_abet where asignatura=? and nivel=?',[detalles[4],3])
