@@ -346,6 +346,12 @@ def notas(periodo, codigo, grupo):
         where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcindicadores = cur4.fetchall()
 
+    # Recupera (de la base de datos) la informacion de las notas de los indicadores ya contenida en la base de datos
+    cur5 = db.execute(
+        "select evaluacion, competencia, codigo_estudiante, nota from nota_indicador where asignatura=?",
+        [detalles[4]])
+    notasInd = cur5.fetchall()
+
     # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
     inst = []
     indicadores = []
@@ -392,9 +398,21 @@ def notas(periodo, codigo, grupo):
         indicadores.append([temp5, reduce(lambda x, y: x + y, temp6), reduce(lambda x, y: x + y, temp8), temp9])
         inst.append(temp1)
 
+    #print indicadores
+
+    # Procesa los datos de las notas guardadas previamente
+    notas = {}
+    for i in range(1,len(inst)+1):
+        notas[i]=dict([(e[1],{}) for e in estudiantes])
+    print notasInd
+    for (x,y,z,w) in notasInd:
+        print w
+
+    print notas
+
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
-               'numestudiantes': len(estudiantes), 'indicadores': indicadores}
+               'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas}
     return render_template('grades.html', entries=entries)
 
 
@@ -496,18 +514,19 @@ def guardarNotas(periodo, codigo, grupo):
                 continue
             else:
                 for i in range(len(datos[d][e])): # Indicadores
-                    #print [detalles[4], ubicacion[d], indicadores[d][i], estudiantes[e][1], int(datos[d][e][i])]
                     if datos[d][e][i] != u'':
-                        db.execute('insert into nota_indicador values (?,?,?,?,?)',
-                                   [detalles[4], ubicacion[d], indicadores[d][i], estudiantes[e][1], int(datos[d][e][i])])
+                        db.execute(
+                            "insert into nota_indicador values (?,?,?,?,?)",
+                            [detalles[4], ubicacion[d], indicadores[d][i], estudiantes[e][1], int(datos[d][e][i])])
                     else:
-                        db.execute('insert into nota_indicador (asignatura, evaluacion, competencia, codigo_estudiante) '
-                                   'values (?,?,?,?)',
-                                   [detalles[4], ubicacion[d], indicadores[d][i], estudiantes[e][1]])
+                        db.execute(
+                            "insert into nota_indicador (asignatura, evaluacion, competencia, codigo_estudiante) \
+                            values (?,?,?,?)",
+                            [detalles[4], ubicacion[d], indicadores[d][i], estudiantes[e][1]])
         db.commit()
 
-    curtemp = db.execute("select * from nota_indicador")
-    print curtemp.fetchall()
+    # curtemp = db.execute("select * from nota_indicador")
+    # print curtemp.fetchall()
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('notas', periodo=periodo, codigo=codigo, grupo=grupo))

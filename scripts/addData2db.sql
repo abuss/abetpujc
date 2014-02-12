@@ -698,8 +698,8 @@ insert into porcentaje_abet values (10,67,'J',0,1,'');
 insert into porcentaje_abet values (10,67,'K',55,1,'');
 
 /* Prueba: Estudiantes */
-insert into estudiante values ('000001','Pepito Perez',1);
-insert into estudiante values ('000002','Pepita Mendieta',1);
+insert into estudiante values ('100001','Pepito Perez',1);
+insert into estudiante values ('200002','Pepita Mendieta',1);
 
 /* Prueba: Definicion de los porcentajes de los instrumentos */
 insert into porcentaje_abet values (1,1,'A.1.1',25,3,'A');

@@ -1,220 +1,229 @@
 <!doctype html>
 <head>
-  <title>ABET - Facultad de Ingeniería</title>
-  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-  <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
-  <script src="http://code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
-  <script>
-  var sumarCeldas = function(event) {
-    event = event || window.event;
-    var numfilas = document.getElementById('tabla').getElementsByTagName('tr').length;
+    <title>ABET - Facultad de Ingeniería</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
+    <script>
+        var sumarCeldas = function(event) {
+            event = event || window.event;
+            var numfilas = document.getElementById('tabla').getElementsByTagName('tr').length;
 
-    // Suma de cada columna
-    {% for entry in entries.resprog %}
-      var total = 0;     
-      for (k=1; k<numfilas-3; k++)
-      {
-        total = total + Number($("#tabla").find("#{{ entry[0] }}"+String(k))[0].value);
-      }
-      document.getElementById('suma{{ entry[0] }}').innerHTML = total;
-    {% endfor %}
+            // Suma de cada columna
+            {% for entry in entries.resprog %}
+                var total = 0;
+                for (k=1; k<numfilas-3; k++)
+                {
+                    total = total + Number($("#tabla").find("#{{ entry[0] }}"+String(k))[0].value);
+                }
+                document.getElementById('suma{{ entry[0] }}').innerHTML = total;
+            {% endfor %}
 
-    // Suma de cada fila
-    for (k=1; k<numfilas-3; k++)
-    {
-      var total = 0
-      {% for entry in entries.resprog %}
-          + Number($("#tabla").find("#{{ entry[0] }}"+String(k))[0].value)
-      {% endfor %};
-      document.getElementById('fila'+String(k)).innerHTML = total;
-    }
+            // Suma de cada fila
+            for (k=1; k<numfilas-3; k++)
+            {
+                var total = 0
+                {% for entry in entries.resprog %}
+                    + Number($("#tabla").find("#{{ entry[0] }}"+String(k))[0].value)
+                {% endfor %};
+                document.getElementById('fila'+String(k)).innerHTML = total;
+            }
 
-    // Suma de los totales
-    var total = 0
-    for (k=1; k<numfilas-3; k++)
-    {
-      total = total + Number(document.getElementById('fila'+String(k)).innerHTML);
-    }
-    document.getElementById('totalsuma').innerHTML = total;
+            // Suma de los totales
+            var total = 0
+            for (k=1; k<numfilas-3; k++)
+            {
+                total = total + Number(document.getElementById('fila'+String(k)).innerHTML);
+            }
+            document.getElementById('totalsuma').innerHTML = total;
 
-    // Calculo del objetivo
-    {% for entry in entries.resprog %}
-      var total = Number(document.getElementById('totalsuma').innerHTML)*{{ entry[1] }}/{{ entries.suma }};
-      document.getElementById('objetivo{{ entry[0] }}').innerHTML = parseInt(total,10);
-    {% endfor %}
+            // Calculo del objetivo
+            {% for entry in entries.resprog %}
+                var total = Number(document.getElementById('totalsuma').innerHTML)*{{ entry[1] }}/{{ entries.suma }};
+                document.getElementById('objetivo{{ entry[0] }}').innerHTML = parseInt(total,10);
+            {% endfor %}
 
-    // Calculo de la diferencia
-    {% for entry in entries.resprog %}
-      var total = Number(document.getElementById('suma{{ entry[0] }}').innerHTML) - Number(document.getElementById('objetivo{{ entry[0] }}').innerHTML);
-      document.getElementById('diferencia{{ entry[0] }}').innerHTML = parseInt(total,10);
-    {% endfor %}
-  };
-  </script>
-  <script>
-  var sumarPorcentajes = function(event) {
-    event = event || window.event;
-    var numfilas = document.getElementById('tabla').getElementsByTagName('tr').length;
-    var total = 0
-    for (k=1; k<numfilas-3; k++)
-    {
-      total = total + Number($("#tabla").find("#porcentaje"+String(k))[0].value);
-    }
-    document.getElementById('porcentajetotal').innerHTML = String(total)+'%';
-  };
-  </script>
-  <script>
-  var operaciones = function(event) {
-    event = event || window.event;
-    sumarCeldas(event);
-    sumarPorcentajes(event);
-  };
-  </script>
-  <script>
-  var inicializacion = function(event) {
-    event = event || window.event;
-    operaciones(event);
-    $("#forma").find("#numeroFilas")[0].value = Number({{entries.numevals}})+4;
-  };
-  </script>
-  <script>
-  var verificacion = function(event) {
-    event = event || window.event;
-    var numfilas = document.getElementById('tabla').getElementsByTagName('tr').length;
-    $("#forma").find("#repetidos")[0].value = 0;
-    for (k=1;k<numfilas-4;k++)
-    {
-      for (l=k+1;l<numfilas-3;l++)
-      {
-        if ($("#forma").find("#evaluacion"+String(k))[0].value == $("#forma").find("#evaluacion"+String(l))[0].value)
-        {
-          alert("No es posible guardar los datos, revise las nombres de los instrumentos");
-          $("#forma").find("#repetidos")[0].value = 1;
-        }
-      }
-    }
-    
-  };
-  </script>
-  <script>
-    $(function(){
-      $("#botonadd").click(function(){
+            // Calculo de la diferencia
+            {% for entry in entries.resprog %}
+                var total = Number(document.getElementById('suma{{ entry[0] }}').innerHTML) - Number(document.getElementById('objetivo{{ entry[0] }}').innerHTML);
+                document.getElementById('diferencia{{ entry[0] }}').innerHTML = parseInt(total,10);
+            {% endfor %}
+        };
+    </script>
+    <script>
+        var sumarPorcentajes = function(event) {
+            event = event || window.event;
+            var numfilas = document.getElementById('tabla').getElementsByTagName('tr').length;
+            var total = 0
+            for (k=1; k<numfilas-3; k++)
+            {
+                total = total + Number($("#tabla").find("#porcentaje"+String(k))[0].value);
+            }
+            document.getElementById('porcentajetotal').innerHTML = String(total)+'%';
+        };
+    </script>
+    <script>
+        var operaciones = function(event) {
+            event = event || window.event;
+            sumarCeldas(event);
+            sumarPorcentajes(event);
+        };
+    </script>
+    <script>
+        var inicializacion = function(event) {
+            event = event || window.event;
+            operaciones(event);
+            $("#forma").find("#numeroFilas")[0].value = Number({{entries.numevals}})+4;
+        };
+    </script>
+    <script>
+    var verificacion = function(event) {
+        event = event || window.event;
         var numfilas = document.getElementById('tabla').getElementsByTagName('tr').length;
-        var htmlToAppend = "<tr><td><input type=text name='evaluacion"+String(numfilas-3)+"' id='evaluacion"+String(numfilas-3)+"'></td><td><input type='number' step='1' min='0' max='100' name='porcentaje"+String(numfilas-3)+"' id='porcentaje"+String(numfilas-3)+"' onchange='sumarPorcentajes()' size='3'></td><td width='150'>&nbsp;</td>{% for j in range(0,entries.conteo) %}<td><input type='number' step='1' min='0' max='100' name='{{ entries.resprog[j][0] }}"+String(numfilas-3)+"' id ='{{ entries.resprog[j][0] }}"+String(numfilas-3)+"'onchange='sumarCeldas()' size='3'></td>{% endfor %}<td align='center'><div id='fila"+String(numfilas-3)+"'>0</div></td></tr>";
-        $("#tabla > tbody > tr").eq(numfilas-3).before(htmlToAppend);
-        numfilas = numfilas + 1;
-        $("#forma").find("#numeroFilas")[0].value = numfilas;
-      });
-      $("#botondel").click(function(){
-        var numfilas = document.getElementById('tabla').getElementsByTagName('tr').length;
-        if(numfilas>5)
+        $("#forma").find("#repetidos")[0].value = 0;
+        for (k=1;k<numfilas-4;k++)
         {
-          $("#tabla tr:nth-last-of-type(4)").remove();
-          numfilas = numfilas - 1;
-          $("#forma").find("#numeroFilas")[0].value = numfilas;
+            for (l=k+1;l<numfilas-3;l++)
+            {
+                if ($("#forma").find("#evaluacion"+String(k))[0].value == $("#forma").find("#evaluacion"+String(l))[0].value)
+                {
+                    alert("No es posible guardar los datos, revise las nombres de los instrumentos");
+                    $("#forma").find("#repetidos")[0].value = 1;
+                }
+            }
         }
-        operaciones();
-      });
-    });
-  </script>
+    };
+    </script>
+    <script>
+        $(function(){
+            $("#botonadd").click(function(){
+            var numfilas = document.getElementById('tabla').getElementsByTagName('tr').length;
+            var htmlToAppend = "<tr><td><input type=text name='evaluacion"+String(numfilas-3)+"' id='evaluacion"+String(numfilas-3)+"'></td><td><input type='number' step='1' min='0' max='100' name='porcentaje"+String(numfilas-3)+"' id='porcentaje"+String(numfilas-3)+"' onchange='sumarPorcentajes()' size='3'></td><td width='150'>&nbsp;</td>{% for j in range(0,entries.conteo) %}<td><input type='number' step='1' min='0' max='100' name='{{ entries.resprog[j][0] }}"+String(numfilas-3)+"' id ='{{ entries.resprog[j][0] }}"+String(numfilas-3)+"'onchange='sumarCeldas()' size='3'></td>{% endfor %}<td align='center'><div id='fila"+String(numfilas-3)+"'>0</div></td></tr>";
+            $("#tabla > tbody > tr").eq(numfilas-3).before(htmlToAppend);
+            numfilas = numfilas + 1;
+            $("#forma").find("#numeroFilas")[0].value = numfilas;
+            });
+            $("#botondel").click(function(){
+                var numfilas = document.getElementById('tabla').getElementsByTagName('tr').length;
+                if(numfilas>5)
+                {
+                    $("#tabla tr:nth-last-of-type(4)").remove();
+                    numfilas = numfilas - 1;
+                    $("#forma").find("#numeroFilas")[0].value = numfilas;
+                }
+                operaciones();
+            });
+        });
+    </script>
+    <script>
+        function testForEnter()
+        {
+	        if (event.keyCode == 13)
+	        {
+	            event.cancelBubble = true;
+	            event.returnValue = false;
+            }
+        };
+    </script>
 </head>
 
 <body {% if entries.numevals>0 %}onload="inicializacion()"{% endif %}>
 <div class=page>
-  {% block body %}
-  <table>
-  <tr>
-    <td><img src="../../../static/logo.png"></td>
-    <td width="20">&nbsp;</td>
-    <td><h4>Facultad de Ingeniería<br>Ingeniería de Sistemas y Computación</h4></td>
-  </tr>
-  </table>
-  <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET</h1>
-  <hr>
-  <h4>{{ entries.detalles[0] }} - Grupo {{ entries.detalles[2] }}</h4>
-  <h4>Período {{ entries.detalles[3] }}</h4>
-  <br>
-  <h5>Definición de Evaluaciones</h5>
-  <br>
-
-  <form name="forma" id="forma" action="{{ url_for('guardarPesosInstrumentos', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2]) }}" method=post>
-  <table name="tabla" id="tabla" border="0">
-    <tr>
-      <td>Instrumento</td>
-      <td align="center">%</td>
-      <td width="50">&nbsp;</td>
-      {% for entry in entries.resprog %}
-        <td align="center">{{ entry[0] }}</td>
-      {% endfor %}
-      <td align="center">Total (%)</td>
-    </tr>
-    {% if entries.numevals>0 %}
-      {% for k in range(1,entries.numevals+1) %}
+    {% block body %}
+    <table>
         <tr>
-          <td><input type=text name="evaluacion{{k}}" id="evaluacion{{k}}" value='{{ entries.evaluaciones[(k-1)*entries.conteo][0] }}'></td>
-          <td><input type="number" step="1" min="0" max="100" name="porcentaje{{k}}" id="porcentaje{{k}}" onchange="sumarPorcentajes()" size="3" value='{{ entries.evaluaciones[(k-1)*entries.conteo][1] }}'></td>
-          <td width="150">&nbsp;</td>
-          {% for j in range(0,entries.conteo) %}
-            <td><input type="number" step="1" min="0" max="100" name="{{ entries.resprog[j][0] }}{{k}}" id="{{ entries.resprog[j][0] }}{{k}}" onchange="sumarCeldas()" size="3" value='{{ entries.evaluaciones[((k-1)*entries.conteo)+j][3] }}'></td>
-          {% endfor %}
-          <td align="center"><div id="fila{{k}}">0</div></td>
+            <td><img src="../../../static/logo.png"></td>
+            <td width="20">&nbsp;</td>
+            <td><h4>Facultad de Ingeniería<br>Ingeniería de Sistemas y Computación</h4></td>
         </tr>
-      {% endfor %}
-    {% else %}
-      <tr>
-        <td><input type=text name="evaluacion1" id="evaluacion1"></td>
-        <td><input type="number" step="1" min="0" max="100" name="porcentaje1" id="porcentaje1" onchange="sumarPorcentajes()" size="3"></td>
-        <td width="150">&nbsp;</td>
-        {% for j in range(0,entries.conteo) %}
-          <td><input type="number" step="1" min="0" max="100" name="{{ entries.resprog[j][0] }}1" id="{{ entries.resprog[j][0] }}1" onchange="sumarCeldas()" size="3"></td>
-        {% endfor %}
-        <td align="center"><div id="fila1">0</div></td>
-      </tr>
-    {% endif %}
-    <tr>
-      <td align="right">Total</td>
-      <td align="center"><div id="porcentajetotal">0%</div></td>
-      <td align="right">Suma:</td>
-      {% for entry in entries.resprog %}
-        <td align="center"><div id="suma{{ entry[0] }}">0</div></td>
-      {% endfor %}
-      <td align="center"><div id="totalsuma">0</div></td>
-    </tr>
-    <tr>
-      <td align="right"></td>
-      <td align="center"></td>
-      <td align="right">Objetivo:</td>
-      {% for entry in entries.resprog %}
-        <td align="center"><div id="objetivo{{ entry[0] }}">0</div></td>
-      {% endfor %}
-    </tr>
-    <tr>
-      <td align="left">  <input type="button" id="botonadd" value="+"><input type="button" id="botondel" value="-"></td>
-      <td align="center"></td>
-      <td align="right">Diferencia:</td>
-      {% for entry in entries.resprog %}
-        <td align="center"><div id="diferencia{{ entry[0] }}">0</div></td>
-      {% endfor %}
-    </tr>
-  </table>
-  <br>
-  <br>
-  <input type=hidden name="numeroDeFilas" id="numeroFilas">
-  <input type=hidden name="hayRepetidos" id="repetidos">
-  <input type=submit value='Guardar' onclick="verificacion()">
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      {% for message in messages %}
-        {{ message }}
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-  </form>
-  <form name="botonseguir" action="{{ url_for('indicadores', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
-  <input type=submit value='Definir los detalles de los Instrumentos'>
-  </form>
-  <form name="botonvolver" action="{{ url_for('asignatura', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
-  <input type=submit value='Volver a {{entries.detalles[0]}}'>
-  </form>
-  {% endblock %}
+    </table>
+    <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET</h1>
+    <hr>
+    <h4>{{ entries.detalles[0] }} - Grupo {{ entries.detalles[2] }}</h4>
+    <h4>Período {{ entries.detalles[3] }}</h4>
+    <br>
+    <h5>Definición de Evaluaciones</h5>
+    <br>
+
+    <form name="forma" id="forma" action="{{ url_for('guardarPesosInstrumentos', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2]) }}" method=post onkeydown="testForEnter();">
+        <table name="tabla" id="tabla" border="0">
+            <tr>
+                <td>Instrumento</td>
+                <td align="center">%</td>
+                <td width="50">&nbsp;</td>
+                {% for entry in entries.resprog %}
+                    <td align="center">{{ entry[0] }}</td>
+                {% endfor %}
+                <td align="center">Total (%)</td>
+            </tr>
+            {% if entries.numevals>0 %}
+                {% for k in range(1,entries.numevals+1) %}
+                    <tr>
+                        <td><input type=text name="evaluacion{{k}}" id="evaluacion{{k}}" value='{{ entries.evaluaciones[(k-1)*entries.conteo][0] }}'></td>
+                        <td><input type="number" step="1" min="0" max="100" name="porcentaje{{k}}" id="porcentaje{{k}}" onchange="sumarPorcentajes()" size="3" value='{{ entries.evaluaciones[(k-1)*entries.conteo][1] }}'></td>
+                        <td width="150">&nbsp;</td>
+                        {% for j in range(0,entries.conteo) %}
+                            <td><input type="number" step="1" min="0" max="100" name="{{ entries.resprog[j][0] }}{{k}}" id="{{ entries.resprog[j][0] }}{{k}}" onchange="sumarCeldas()" size="3" value='{{ entries.evaluaciones[((k-1)*entries.conteo)+j][3] }}'></td>
+                        {% endfor %}
+                        <td align="center"><div id="fila{{k}}">0</div></td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td><input type=text name="evaluacion1" id="evaluacion1"></td>
+                    <td><input type="number" step="1" min="0" max="100" name="porcentaje1" id="porcentaje1" onchange="sumarPorcentajes()" size="3"></td>
+                    <td width="150">&nbsp;</td>
+                    {% for j in range(0,entries.conteo) %}
+                        <td><input type="number" step="1" min="0" max="100" name="{{ entries.resprog[j][0] }}1" id="{{ entries.resprog[j][0] }}1" onchange="sumarCeldas()" size="3"></td>
+                    {% endfor %}
+                    <td align="center"><div id="fila1">0</div></td>
+                </tr>
+            {% endif %}
+            <tr>
+                <td align="right">Total</td>
+                <td align="center"><div id="porcentajetotal">0%</div></td>
+                <td align="right">Suma:</td>
+                {% for entry in entries.resprog %}
+                    <td align="center"><div id="suma{{ entry[0] }}">0</div></td>
+                {% endfor %}
+                <td align="center"><div id="totalsuma">0</div></td>
+            </tr>
+            <tr>
+                <td align="right"></td>
+                <td align="center"></td>
+                <td align="right">Objetivo:</td>
+                {% for entry in entries.resprog %}
+                    <td align="center"><div id="objetivo{{ entry[0] }}">0</div></td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td align="left">  <input type="button" id="botonadd" value="+"><input type="button" id="botondel" value="-"></td>
+                <td align="center"></td>
+                <td align="right">Diferencia:</td>
+                {% for entry in entries.resprog %}
+                    <td align="center"><div id="diferencia{{ entry[0] }}">0</div></td>
+                {% endfor %}
+            </tr>
+        </table>
+        <br>
+        <br>
+        <input type=hidden name="numeroDeFilas" id="numeroFilas">
+        <input type=hidden name="hayRepetidos" id="repetidos">
+        <input type=submit value='Guardar' onclick="verificacion()">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </form>
+    <form name="botonseguir" action="{{ url_for('indicadores', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
+        <input type=submit value='Definir los detalles de los Instrumentos'>
+    </form>
+    <form name="botonvolver" action="{{ url_for('asignatura', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
+        <input type=submit value='Volver a {{entries.detalles[0]}}'>
+    </form>
+    {% endblock %}
 </div>
 </body>
