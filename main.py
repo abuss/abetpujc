@@ -74,12 +74,98 @@ def show_courses():
 
 @app.route('/<periodo>/<codigo>/<grupo>', methods=['GET', 'POST'])
 def asignatura(periodo, codigo, grupo):
+    # Accede a la base de datos
     db = get_db()
-    cur = db.execute(
-        "select nombre, codigo, grupo, periodo from asignatura where codigo=? and grupo=? and periodo=?",
+
+    # Recupera (de la base de datos) los detalles del curso
+    cur1 = db.execute(
+        "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
         [codigo,grupo,periodo])
-    entries = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3]) for row in cur.fetchall()]
-    return render_template('course.html', entries=entries[0])
+    detalles = cur1.fetchall()[0]
+
+    # Recupera (de la base de datos) los estudiantes
+    cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
+    estudiantes = cur2.fetchall()
+
+    # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
+    cur3 = db.execute(
+        "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje \
+        from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
+        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
+        order by d.id_evaluacion",
+        [detalles[4]])
+    resprog = cur3.fetchall()
+
+    # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
+    cur4 = db.execute(
+        "select d.evaluacion, e.competencia, e.porcentaje, e.superior, f.descripcion \
+        from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f \
+        where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
+    porcindicadores = cur4.fetchall()
+
+    # Recupera (de la base de datos) la informacion de las notas de los indicadores ya contenida en la base de datos
+    cur5 = db.execute(
+        "select evaluacion, competencia, codigo_estudiante, nota from nota_indicador where asignatura=?",
+        [detalles[4]])
+    notasInd = cur5.fetchall()
+
+    # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
+    inst = []
+    indicadores = []
+    i = 0
+    while i < len(resprog):
+        temp1 = []
+        numero = resprog[i][1]
+        temp1.append(resprog[i])
+        if i >= len(resprog) - 1:
+            break
+        i = i + 1
+        while numero == resprog[i][1]:
+            temp1.append(resprog[i])
+            if i >= len(resprog) - 1:
+                break
+            i = i + 1
+
+        temp5 = 0
+        temp6 = []
+        temp8 = []
+        temp9 = []
+        for j in range(len(temp1)):
+            temp2 = list(temp1[j])
+            temp3 = []
+            temp4 = []
+            temp7 = []
+
+            k = 0
+            while k < len(porcindicadores):
+                if porcindicadores[k][0] == temp1[j][0] and porcindicadores[k][3] == temp1[j][2]:
+                    temp3.append([porcindicadores[k][1], porcindicadores[k][2]])
+                    temp4.append(porcindicadores[k][1])
+                    temp7.append(porcindicadores[k][4])
+                    del porcindicadores[k]
+                else:
+                    k = k + 1
+            temp5 = temp5 + len(temp3)
+            temp6.append(temp4)
+            temp8.append(temp7)
+            for l in range(len(temp3)):
+                temp9.append(temp3[l][1]*temp2[3]/10000)
+            temp1[j] = tuple(temp2)
+
+        indicadores.append([temp5, reduce(lambda x, y: x + y, temp6), reduce(lambda x, y: x + y, temp8), temp9])
+        inst.append(temp1)
+
+    # Procesa los datos de las notas guardadas previamente
+    notas = {}
+    for i in range(1,len(inst)+1):
+        notas[i]=dict([(e[1],{}) for e in estudiantes])
+    for (x,y,z,w) in notasInd:
+        notas[x][z][y] = w
+
+    # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
+    entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
+               'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas}
+    return render_template('course.html', entries=entries)
 
 
 @app.route('/<periodo>/<codigo>/<grupo>/defcourse', methods=['GET', 'POST'])
@@ -445,7 +531,7 @@ def guardarNotas(periodo, codigo, grupo):
     # Procesa los datos de los indicadores de evaluacion, incluyendo la informacion previamente guardada
     indicadores = []
     pesos = []
-    ubicacion = []
+    evaluacion = []
     i = 0
     while i < len(resprog):
         temp1 = []
@@ -480,7 +566,11 @@ def guardarNotas(periodo, codigo, grupo):
 
         indicadores.append(reduce(lambda x, y: x + y, temp4))
         pesos.append(temp5)
-        ubicacion.append(numero)
+        evaluacion.append(numero)
+
+    print indicadores
+    print pesos
+    print evaluacion
 
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
@@ -494,6 +584,8 @@ def guardarNotas(periodo, codigo, grupo):
             temp1.append(temp2)
         datos.append(temp1)
 
+    print datos
+
     # Elimina de la base de datos los registros viejos
     db.execute('delete from nota_indicador where asignatura=?',[detalles[4]])
     db.commit()
@@ -504,17 +596,29 @@ def guardarNotas(periodo, codigo, grupo):
             if datos[d][e] == []:
                 continue
             else:
+                definstrumento = 0
                 for i in range(len(datos[d][e])): # Indicadores
                     if datos[d][e][i] != u'':
                         db.execute(
                             "insert into nota_indicador values (?,?,?,?,?)",
-                            [detalles[4], ubicacion[d], indicadores[d][i], estudiantes[e][1], int(datos[d][e][i])])
+                            [detalles[4], evaluacion[d], indicadores[d][i], estudiantes[e][1], int(datos[d][e][i])])
+
+                        definstrumento = definstrumento + (5.0*int(datos[d][e][i])*pesos[d][i]/100)
                     else:
                         db.execute(
                             "insert into nota_indicador (asignatura, evaluacion, competencia, codigo_estudiante) \
                             values (?,?,?,?)",
-                            [detalles[4], ubicacion[d], indicadores[d][i], estudiantes[e][1]])
+                            [detalles[4], evaluacion[d], indicadores[d][i], estudiantes[e][1]])
+
+                db.execute(
+                    "insert into nota_instrumento values (?,?,?,?)",
+                    [detalles[4], evaluacion[d], estudiantes[e][1], definstrumento])
+
+                print definstrumento
         db.commit()
+
+    print db.execute("select * from nota_instrumento").fetchall()
+    print db.execute("select * from estudiante").fetchall()
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('notas', periodo=periodo, codigo=codigo, grupo=grupo))
