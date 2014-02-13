@@ -109,6 +109,20 @@ def asignatura(periodo, codigo, grupo):
         [detalles[4]])
     notasInd = cur5.fetchall()
 
+    # Recupera (de la base de datos) y procesa los datos de resultados de programa
+    cur6 = db.execute('select resultado_de_programa, peso from formula where asignatura=?', [detalles[4]])
+    formula = cur6.fetchall()
+    suma = 0
+    for i in formula:
+        suma = suma + i[1]
+    for i in range(len(formula)):
+        temp1 = list(formula[i])
+        temp1.append(int(formula[i][1] * 1000 / suma))
+        formula[i] = tuple(temp1)
+
+    # Variable para saber el numero de resultados de programa
+    conteo = len(formula)
+
     # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
     inst = []
     indicadores = []
@@ -155,6 +169,8 @@ def asignatura(periodo, codigo, grupo):
         indicadores.append([temp5, reduce(lambda x, y: x + y, temp6), reduce(lambda x, y: x + y, temp8), temp9])
         inst.append(temp1)
 
+    print inst
+
     # Procesa los datos de las notas guardadas previamente
     notas = {}
     for i in range(1,len(inst)+1):
@@ -164,7 +180,8 @@ def asignatura(periodo, codigo, grupo):
 
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
-               'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas}
+               'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas, 'conteo': conteo,
+               'formula': formula}
     return render_template('course.html', entries=entries)
 
 

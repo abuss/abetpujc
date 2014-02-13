@@ -46,11 +46,11 @@
                     <tr>
                         <td>Estudiante</td>
                         <td width="10">&nbsp;</td>
-                            {% for j in range(0,entries.indicadores[0][0]) %}
-                                <td align="center" title="{{ entries.indicadores[0][2][j] }}">{{ entries.indicadores[0][1][j] }}</td>
+                            {% for j in range(0,entries.conteo) %}
+                                <td align="center">{{ entries.formula[j][0] }}</td>
                             {% endfor %}
                         <td width="10">&nbsp;</td>
-                        <td>Nota</td>
+                        <td>Definitiva</td>
                     </tr>
                     {% if entries.numestudiantes > 0 %}
                         {% for j in entries.notas[1].keys() %}
@@ -61,6 +61,9 @@
                                     {% endif %}
                                 {% endfor %}
                                 <td width="10">&nbsp;</td>
+                                {% for k in range(0,entries.conteo) %}
+                                    <td align="center">0.0</td>
+                                {% endfor %}
                                 <td width="10">&nbsp;</td>
                                 <td align="center">0.0</td>
                             </tr>
@@ -74,8 +77,8 @@
                         <tr>
                             <td>Estudiante</td>
                             <td width="10">&nbsp;</td>
-                                {% for j in range(0,entries.indicadores[i-1][0]) %}
-                                    <td align="center" title="{{ entries.indicadores[i-1][2][j] }}">{{ entries.indicadores[i-1][1][j] }}</td>
+                                {% for j in entries.resprog[i-1] %}
+                                    <td align="center">{{ j[2] }}</td>
                                 {% endfor %}
                             <td width="10">&nbsp;</td>
                             <td>Nota</td>
@@ -89,19 +92,9 @@
                                         {% endif %}
                                     {% endfor %}
                                     <td width="10">&nbsp;</td>
-                                        {% for k in range(0,entries.indicadores[i-1][0]) %}
-                                            {% if entries.notas[i][j] != {} %}
-                                                {% for l in entries.notas[i].keys() %}
-                                                    {% for m in entries.notas[i][l].keys() %}
-                                                        {% if j == l and m == entries.indicadores[i-1][1][k] %}
-                                                            <td align="center">{{entries.notas[i][l][m]}}</td>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                {% endfor %}
-                                            {% else %}
-                                                <td align="center">0</td>
-                                            {% endif %}
-                                        {% endfor %}
+                                    {% for k in entries.resprog[i-1] %}
+                                        <td align="center">0.0</td>
+                                    {% endfor %}
                                     <td width="10">&nbsp;</td>
                                     <td id="nota{{i}}{{j}}" align="center">0.0</td>
                                 </tr>
@@ -114,10 +107,10 @@
         <br>
     </form>
 
-    <form action="{{ url_for('notas', periodo=entries.periodo, codigo=entries.cod, grupo=entries.grupo) }}" method=post>
+    <form action="{{ url_for('notas', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2]) }}" method=post>
         <input type=submit value='Ingresar Notas'><br>
     </form>
-    <form action="{{ url_for('instrumentos', periodo=entries.periodo, codigo=entries.cod, grupo=entries.grupo) }}" method=post>
+    <form action="{{ url_for('instrumentos', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2]) }}" method=post>
         <input type=submit value='Definir Evaluaciones'>
     </form>
     <form action="{{ url_for('show_courses') }}">
