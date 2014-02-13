@@ -26,7 +26,7 @@
     <script>
         var calcularNota = function(event) {
             {% for i in range(1,entries.numinstrumentos+1) %}
-                {% for j in range(1,entries.numestudiantes+1) %}
+                {% for j in entries.notas[i].keys() %}
                     {% if entries.indicadores[i-1][0] > 0 %}
                         var total = 0
                         {% for k in range(0,entries.indicadores[i-1][0]) %}
@@ -40,7 +40,7 @@
     </script>
 </head>
 
-<body>
+<body onload="calcularNota()">
 <div class=page>
     {% block body %}
     <table>
@@ -75,17 +75,19 @@
                             <td>Nota</td>
                         </tr>
                         {% if entries.numestudiantes > 0 %}
-                            {% for j in range(1,entries.numestudiantes+1) %}
+                            {% for j in entries.notas[i].keys() %}
                                 <tr>
-                                    <td>{{entries.estudiantes[j-1][0]}}</td>
+                                    {% for k in entries.estudiantes %}
+                                        {% if j == k[1] %}
+                                            <td>{{k[0]}}</td>
+                                        {% endif %}
+                                    {% endfor %}
                                     <td width="10">&nbsp;</td>
                                         {% for k in range(0,entries.indicadores[i-1][0]) %}
-                                            <!--<td>{{entries.notas[i][entries.notas[i].keys()[j-1]]}}</td>-->
-                                            {% if entries.notas[i][entries.notas[i].keys()[j-1]] != {} %}
+                                            {% if entries.notas[i][j] != {} %}
                                                 {% for l in entries.notas[i].keys() %}
                                                     {% for m in entries.notas[i][l].keys() %}
-                                                        <!--<td>{{l}} - {{entries.estudiantes[j-1][1]}}</td>-->
-                                                        {% if m == entries.indicadores[i-1][1][j-1] and entries.estudiantes[j-1][1] == l %}
+                                                        {% if j == l and m == entries.indicadores[i-1][1][k] %}
                                                             <td align="center"><input type="number" size="3" step="1" min="0" max="100" id="ind{{i}}{{j}}{{k}}" name="ind{{i}}{{j}}{{k}}" onchange="calcularNota()" value="{{entries.notas[i][l][m]}}"></td>
                                                         {% endif %}
                                                     {% endfor %}

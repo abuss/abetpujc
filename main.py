@@ -398,17 +398,12 @@ def notas(periodo, codigo, grupo):
         indicadores.append([temp5, reduce(lambda x, y: x + y, temp6), reduce(lambda x, y: x + y, temp8), temp9])
         inst.append(temp1)
 
-    #print indicadores
-
     # Procesa los datos de las notas guardadas previamente
     notas = {}
     for i in range(1,len(inst)+1):
         notas[i]=dict([(e[1],{}) for e in estudiantes])
-    print notasInd
     for (x,y,z,w) in notasInd:
-        print w
-
-    print notas
+        notas[x][z][y] = w
 
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
@@ -487,8 +482,6 @@ def guardarNotas(periodo, codigo, grupo):
         pesos.append(temp5)
         ubicacion.append(numero)
 
-    #print indicadores
-
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
     for i in range(1,len(indicadores)+1):
@@ -497,11 +490,9 @@ def guardarNotas(periodo, codigo, grupo):
             temp2 = []
             if indicadores[j-1][0] != 0:
                 for k in range(len(indicadores[i-1])):
-                    temp2.append(request.form["ind" + str(i) + str(j) + str(k)])
+                    temp2.append(request.form["ind" + str(i) + str(estudiantes[j-1][1]) + str(k)])
             temp1.append(temp2)
         datos.append(temp1)
-
-    #print datos
 
     # Elimina de la base de datos los registros viejos
     db.execute('delete from nota_indicador where asignatura=?',[detalles[4]])
@@ -524,9 +515,6 @@ def guardarNotas(periodo, codigo, grupo):
                             values (?,?,?,?)",
                             [detalles[4], ubicacion[d], indicadores[d][i], estudiantes[e][1]])
         db.commit()
-
-    # curtemp = db.execute("select * from nota_indicador")
-    # print curtemp.fetchall()
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('notas', periodo=periodo, codigo=codigo, grupo=grupo))
