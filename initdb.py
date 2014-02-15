@@ -2,10 +2,12 @@
 import sqlite3
 from contextlib import closing
 
-DATABASE='/tmp/abet.db'
+DATABASE = '/tmp/abet.db'
+
 
 def connect_db():
     return sqlite3.connect(DATABASE)
+
 
 def add_data(db):
     with open('scripts/addData2db.sql', mode='r') as f:
@@ -21,6 +23,7 @@ def init_db():
             db.executescript(f.read())
             add_data(db)
         db.commit()
+
 
 if __name__ == "__main__":
     init_db()

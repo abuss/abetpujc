@@ -6,6 +6,7 @@ from contextlib import closing
 from flask import Flask, request, g, redirect, url_for, \
     render_template, flash
 
+from operator import itemgetter
 
 # create our little application :)
 app = Flask(__name__)
@@ -80,7 +81,7 @@ def asignatura(periodo, codigo, grupo):
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
         "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
-        [codigo,grupo,periodo])
+        [codigo, grupo, periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los estudiantes
@@ -105,7 +106,7 @@ def asignatura(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) la informacion de las notas de los indicadores ya contenida en la base de datos
     cur5 = db.execute(
-        "select evaluacion, competencia, codigo_estudiante, nota from nota_indicador where asignatura=?",
+        "select evaluacion, competencia, codigo_estudiante, nota from nota_abet where asignatura=?",
         [detalles[4]])
     notasInd = cur5.fetchall()
 
@@ -169,7 +170,7 @@ def asignatura(periodo, codigo, grupo):
         indicadores.append([temp5, reduce(lambda x, y: x + y, temp6), reduce(lambda x, y: x + y, temp8), temp9])
         inst.append(temp1)
 
-    print inst
+    #print inst
 
     # Procesa los datos de las notas guardadas previamente
     notas = {}
@@ -451,7 +452,7 @@ def notas(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) la informacion de las notas de los indicadores ya contenida en la base de datos
     cur5 = db.execute(
-        "select evaluacion, competencia, codigo_estudiante, nota from nota_indicador where asignatura=?",
+        "select evaluacion, competencia, codigo_estudiante, nota from nota_abet where asignatura=?",
         [detalles[4]])
     notasInd = cur5.fetchall()
 
@@ -517,6 +518,7 @@ def notas(periodo, codigo, grupo):
 @app.route('/<periodo>/<codigo>/<grupo>/guardarNotas', methods=['POST'])
 def guardarNotas(periodo, codigo, grupo):
     # Accede la base de datos
+    global porcentajes_instrumentos
     db = get_db()
 
     # Recupera (de la base de datos) los detalles del curso
@@ -526,7 +528,7 @@ def guardarNotas(periodo, codigo, grupo):
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los estudiantes
-    cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
+    cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre desc", [detalles[4]])
     estudiantes = cur2.fetchall()
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
@@ -543,7 +545,23 @@ def guardarNotas(periodo, codigo, grupo):
         "select d.evaluacion, e.competencia, e.porcentaje, e.superior, f.descripcion, d.id_evaluacion \
         from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f \
         where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
-    porcindicadores = cur4.fetchall()
+    porcentaje_indicadores = cur4.fetchall()
+    copia_porcentaje_indicadores = porcentaje_indicadores[:]
+
+    # Recupera (de la base de datos) y procesa los datos de nombre de evaluaciones,
+    # y porcentaje de evaluaciones y resultados de programa
+    cur5 = db.execute(
+        'select d.evaluacion, d.porcentaje, e.competencia, e.porcentaje, d.id_evaluacion \
+        from porcentaje_instrumento as d, porcentaje_abet as e \
+        where d.asignatura = e.asignatura and d.id_evaluacion = e.evaluacion and e.nivel = 1 and d.asignatura=?',
+        [detalles[4]])
+    instrumentos = []
+    for row in cur5.fetchall():
+        instrumentos.append(row)
+
+    # Recupera (de la base de datos) el numero de evaluaciones
+    cur6 = db.execute("select count(*) from porcentaje_instrumento where asignatura=?", [detalles[4]])
+    numevals = cur6.fetchall()
 
     # Procesa los datos de los indicadores de evaluacion, incluyendo la informacion previamente guardada
     indicadores = []
@@ -570,11 +588,11 @@ def guardarNotas(periodo, codigo, grupo):
             temp3 = []
 
             k = 0
-            while k < len(porcindicadores):
-                if porcindicadores[k][0] == temp1[j][0] and porcindicadores[k][3] == temp1[j][2]:
-                    temp2.append([porcindicadores[k][1], porcindicadores[k][2]])
-                    temp3.append(porcindicadores[k][1])
-                    del porcindicadores[k]
+            while k < len(copia_porcentaje_indicadores):
+                if copia_porcentaje_indicadores[k][0] == temp1[j][0] and copia_porcentaje_indicadores[k][3] == temp1[j][2]:
+                    temp2.append([copia_porcentaje_indicadores[k][1], copia_porcentaje_indicadores[k][2]])
+                    temp3.append(copia_porcentaje_indicadores[k][1])
+                    del copia_porcentaje_indicadores[k]
                 else:
                     k = k + 1
             for l in range(len(temp2)):
@@ -585,9 +603,11 @@ def guardarNotas(periodo, codigo, grupo):
         pesos.append(temp5)
         evaluacion.append(numero)
 
-    print indicadores
-    print pesos
-    print evaluacion
+    #print indicadores
+    #print pesos
+    #print evaluacion
+    #print instrumentos
+    #print numevals
 
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
@@ -601,41 +621,100 @@ def guardarNotas(periodo, codigo, grupo):
             temp1.append(temp2)
         datos.append(temp1)
 
-    print datos
+    #print datos
+    #print porcentaje_indicadores
 
     # Elimina de la base de datos los registros viejos
-    db.execute('delete from nota_indicador where asignatura=?',[detalles[4]])
+    db.execute('delete from nota_abet where asignatura=?',[detalles[4]])
+    db.execute('delete from nota_instrumento where asignatura=?',[detalles[4]])
+    db.execute('delete from nota_definitiva where asignatura=?',[detalles[4]])
     db.commit()
 
-    # Inserta la nueva informacion en la base de datos
-    for d in range(len(datos)): # Instrumentos
-        for e in range(len(datos[d])): # Estudiantes
+    # Inserta la nueva informacion de indicadores, resultados de programa e instrumentos en la base de datos
+    definitiva_asignatura = []
+    m = n = 0
+    # Ciclo para los instrumentos (tabs)
+    for d in range(len(datos)):
+        n = m
+        if m < len(porcentaje_indicadores):
+            temp1 = porcentaje_indicadores[m][0]
+        # Ciclo para los estudiantes (filas)
+        for e in range(len(datos[d])):
             if datos[d][e] == []:
                 continue
             else:
-                definstrumento = 0
-                for i in range(len(datos[d][e])): # Indicadores
+                definitiva_instrumento = 0
+
+                # Procesa e inserta los valores de los indicadores
+                for i in range(len(datos[d][e])):
                     if datos[d][e][i] != u'':
                         db.execute(
-                            "insert into nota_indicador values (?,?,?,?,?)",
-                            [detalles[4], evaluacion[d], indicadores[d][i], estudiantes[e][1], int(datos[d][e][i])])
+                            "insert into nota_abet values (?,?,?,?,?,?)",
+                            [detalles[4], evaluacion[d], indicadores[d][i], 3, estudiantes[e][1], int(datos[d][e][i])])
 
-                        definstrumento = definstrumento + (5.0*int(datos[d][e][i])*pesos[d][i]/100)
+                        definitiva_instrumento += (5.0*int(datos[d][e][i])*pesos[d][i]/100)
                     else:
                         db.execute(
-                            "insert into nota_indicador (asignatura, evaluacion, competencia, codigo_estudiante) \
-                            values (?,?,?,?)",
-                            [detalles[4], evaluacion[d], indicadores[d][i], estudiantes[e][1]])
+                            "insert into nota_abet (asignatura, evaluacion, competencia, nivel, codigo_estudiante) \
+                            values (?,?,?,?,?)",
+                            [detalles[4], evaluacion[d], indicadores[d][i], 3, estudiantes[e][1]])
 
+                # Procesa e inserta los valores de los resultados de programa
+                m = n
+                resultado = 0
+                o = 0
+                if m < len(porcentaje_indicadores):
+                    temp2 = porcentaje_indicadores[m][3]
+                    while temp1 == porcentaje_indicadores[m][0]:
+                        if temp2 == porcentaje_indicadores[m][3]:
+                            resultado += 5*int(datos[d][e][o])*porcentaje_indicadores[m][2]/10000
+                            m += 1
+                            o += 1
+                        else:
+                            #print "resultado", temp2, ": ", resultado
+                            db.execute(
+                                "insert into nota_abet values (?,?,?,?,?,?)",
+                                [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], resultado])
+                            resultado = 0
+                            temp2 = porcentaje_indicadores[m][3]
+                        if m >= len(porcentaje_indicadores):
+                            break
+
+                    #print "resultado", temp2, ": ", resultado
+                    db.execute(
+                        "insert into nota_abet values (?,?,?,?,?,?)",
+                        [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], resultado])
+
+                # Inserta el valor de la nota definitiva de las evaluaciones
                 db.execute(
                     "insert into nota_instrumento values (?,?,?,?)",
-                    [detalles[4], evaluacion[d], estudiantes[e][1], definstrumento])
+                    [detalles[4], evaluacion[d], estudiantes[e][1], definitiva_instrumento])
 
-                print definstrumento
+                definitiva_asignatura.append([definitiva_instrumento, evaluacion[d], estudiantes[e][1]])
         db.commit()
 
-    print db.execute("select * from nota_instrumento").fetchall()
-    print db.execute("select * from estudiante").fetchall()
+    # Procesa e inserta la nueva informacion de nota definitiva de una asignatura en la base de datos
+    porcentajes_instrumentos = []
+    for i in range(0, len(instrumentos), int(len(instrumentos)/numevals[0][0])):
+        porcentajes_instrumentos.append(instrumentos[i])
+    definitiva_asignatura = sorted(definitiva_asignatura, key=itemgetter(2))
+    j = 0
+    for i in range(len(estudiantes)):
+        nota_def = 0.0
+        est = estudiantes[i][1]
+        if j >= len(definitiva_asignatura) - 1:
+                break
+        while est == definitiva_asignatura[j][2]:
+            for k in porcentajes_instrumentos:
+                if k[4] == definitiva_asignatura[j][1]:
+                    nota_def += definitiva_asignatura[j][0] * k[1] / 100
+            j += 1
+            if j >= len(definitiva_asignatura) - 1:
+                break
+        db.execute("insert into nota_definitiva values (?,?,?)", [detalles[4], estudiantes[i][1], nota_def])
+
+    print db.execute("select * from nota_abet").fetchall()
+    #print db.execute("select * from estudiante").fetchall()
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('notas', periodo=periodo, codigo=codigo, grupo=grupo))
