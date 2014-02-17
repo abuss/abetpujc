@@ -1,4 +1,4 @@
-# all the imports
+# Librerias
 from __future__ import division
 import sqlite3
 from contextlib import closing
@@ -8,7 +8,7 @@ from flask import Flask, request, g, redirect, url_for, \
 
 from operator import itemgetter
 
-# create our little application :)
+# Inicializacion de variables
 app = Flask(__name__)
 app.config.update(dict(
     DATABASE='/tmp/abet.db',
@@ -175,20 +175,14 @@ def asignatura(periodo, codigo, grupo):
         notasInstrumentos[x][y] = z
 
     # Procesa los datos de las notas definitivas guardadas previamente
-    notasDefinitivas = {}
-    for i in range(1,len(inst)+1):
-        notasDefinitivas[i]=dict([(e[1],0) for e in estudiantes])
+    notasDefinitivas = dict([(e[1],0) for e in estudiantes])
     for (x,y) in notasDef:
         notasDefinitivas[x] = y
-
-    print notasDef
-    print " "
-    print notasDefinitivas
 
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
                'numestudiantes': len(estudiantes), 'notasIndicadores': notasIndicadores, 'conteo': conteo,
-               'formula': formula, 'notasInstrumentos': notasInstrumentos}
+               'formula': formula, 'notasInstrumentos': notasInstrumentos, 'notasDefinitivas': notasDefinitivas}
     return render_template('course.html', entries=entries)
 
 
@@ -580,12 +574,12 @@ def guardarNotas(periodo, codigo, grupo):
         temp1.append(resprog[i])
         if i >= len(resprog) - 1:
             break
-        i = i + 1
+        i += 1
         while numero == resprog[i][1]:
             temp1.append(resprog[i])
             if i >= len(resprog) - 1:
                 break
-            i = i + 1
+            i += 1
 
         temp4 = []
         temp5 = []
