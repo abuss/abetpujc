@@ -1,5 +1,6 @@
 <!doctype html>
-<title>ABET - Facultad de Ingeniería</title>
+<head>
+    <title>ABET - Facultad de Ingeniería</title>
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
     <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
     <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
@@ -17,6 +18,12 @@
             $(".ui-tabs-nav").css("background", "transparent");
         });
     </script>
+        <script>
+        $(function() {
+            $( document ).tooltip();
+        });
+    </script>
+</head>
 
 <body>
 <div class=page>
@@ -47,7 +54,7 @@
                         <td>Estudiante</td>
                             {% for j in range(0,entries.conteo) %}
                                <td width="10">&nbsp;</td>
-                               <td align="center">{{ entries.formula[j][0] }}</td>
+                               <td align="center" title="{{ entries.formula[j][2] }}">{{ entries.formula[j][0] }}</td>
                             {% endfor %}
                         <td width="10">&nbsp;</td>
                         <td>Definitiva</td>
@@ -78,7 +85,7 @@
                             <td>Estudiante</td>
                                 {% for j in entries.resprog[i-1] %}
                                     <td width="10">&nbsp;</td>
-                                    <td align="center">{{ j[2] }}</td>
+                                    <td align="center" title="{{ j[4] }}">{{ j[2] }}</td>
                                 {% endfor %}
                             <td width="10">&nbsp;</td>
                             <td>Nota</td>
@@ -91,9 +98,17 @@
                                             <td>{{k[0]}}</td>
                                         {% endif %}
                                     {% endfor %}
-                                    {% for k in entries.resprog[i-1] %}
-                                        <td width="10">&nbsp;</td>
-                                        <td align="center">0.0</td>
+                                    {% for k in range(0,entries.conteo) %}
+                                        {% if entries.notas[i][j] != {} %}
+                                            {% for l in entries.notas[i].keys() %}
+                                                {% for m in entries.notas[i][l].keys() %}
+                                                        <td width="10">&nbsp;</td>
+                                                        <td align="center">{{entries.notas[i][l][m]}}</td>
+                                                {% endfor %}
+                                            {% endfor %}
+                                        {% else %}
+                                            <td align="center">0.0</td>
+                                        {% endif %}
                                     {% endfor %}
                                     <td width="10">&nbsp;</td>
                                     <td id="nota{{i}}{{j}}" align="center">0.0</td>

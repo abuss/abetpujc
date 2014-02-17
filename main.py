@@ -64,6 +64,7 @@ def close_db(error):
 #     if db is not None:
 #         db.close()
 
+
 @app.route('/')
 def show_courses():
     db = get_db()
@@ -90,7 +91,7 @@ def asignatura(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
-        "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje \
+        "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
         from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
         where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
         order by d.id_evaluacion",
@@ -99,19 +100,22 @@ def asignatura(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
     cur4 = db.execute(
-        "select d.evaluacion, e.competencia, e.porcentaje, e.superior, f.descripcion \
-        from porcentaje_instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f \
-        where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
-    porcindicadores = cur4.fetchall()
+        "select d.evaluacion, e.competencia, e.porcentaje, f.descripcion \
+        from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
+        where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 1")
+    porcresultados = cur4.fetchall()
 
     # Recupera (de la base de datos) la informacion de las notas de los indicadores ya contenida en la base de datos
     cur5 = db.execute(
-        "select evaluacion, competencia, codigo_estudiante, nota from nota_abet where asignatura=?",
+        "select evaluacion, competencia, codigo_estudiante, nota from nota_abet where asignatura=? and nivel=1",
         [detalles[4]])
     notasInd = cur5.fetchall()
 
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
-    cur6 = db.execute('select resultado_de_programa, peso from formula where asignatura=?', [detalles[4]])
+    cur6 = db.execute(
+        "select d.resultado_de_programa, d.peso, e.descripcion from formula as d, resultado_de_programa as e "
+        "where asignatura=? and e.id = d.resultado_de_programa",
+        [detalles[4]])
     formula = cur6.fetchall()
     suma = 0
     for i in formula:
@@ -124,9 +128,8 @@ def asignatura(periodo, codigo, grupo):
     # Variable para saber el numero de resultados de programa
     conteo = len(formula)
 
-    # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
+    # Procesa los datos de los resultados de programa de las evaluaciones
     inst = []
-    indicadores = []
     i = 0
     while i < len(resprog):
         temp1 = []
@@ -141,36 +144,10 @@ def asignatura(periodo, codigo, grupo):
                 break
             i = i + 1
 
-        temp5 = 0
-        temp6 = []
-        temp8 = []
-        temp9 = []
-        for j in range(len(temp1)):
-            temp2 = list(temp1[j])
-            temp3 = []
-            temp4 = []
-            temp7 = []
-
-            k = 0
-            while k < len(porcindicadores):
-                if porcindicadores[k][0] == temp1[j][0] and porcindicadores[k][3] == temp1[j][2]:
-                    temp3.append([porcindicadores[k][1], porcindicadores[k][2]])
-                    temp4.append(porcindicadores[k][1])
-                    temp7.append(porcindicadores[k][4])
-                    del porcindicadores[k]
-                else:
-                    k = k + 1
-            temp5 = temp5 + len(temp3)
-            temp6.append(temp4)
-            temp8.append(temp7)
-            for l in range(len(temp3)):
-                temp9.append(temp3[l][1]*temp2[3]/10000)
-            temp1[j] = tuple(temp2)
-
-        indicadores.append([temp5, reduce(lambda x, y: x + y, temp6), reduce(lambda x, y: x + y, temp8), temp9])
         inst.append(temp1)
 
-    #print inst
+    print " "
+    print inst
 
     # Procesa los datos de las notas guardadas previamente
     notas = {}
@@ -181,7 +158,7 @@ def asignatura(periodo, codigo, grupo):
 
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
-               'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas, 'conteo': conteo,
+               'numestudiantes': len(estudiantes), 'notas': notas, 'conteo': conteo,
                'formula': formula}
     return render_template('course.html', entries=entries)
 
@@ -452,7 +429,7 @@ def notas(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) la informacion de las notas de los indicadores ya contenida en la base de datos
     cur5 = db.execute(
-        "select evaluacion, competencia, codigo_estudiante, nota from nota_abet where asignatura=?",
+        "select evaluacion, competencia, codigo_estudiante, nota from nota_abet where asignatura=? and nivel=3",
         [detalles[4]])
     notasInd = cur5.fetchall()
 
@@ -603,12 +580,6 @@ def guardarNotas(periodo, codigo, grupo):
         pesos.append(temp5)
         evaluacion.append(numero)
 
-    #print indicadores
-    #print pesos
-    #print evaluacion
-    #print instrumentos
-    #print numevals
-
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
     for i in range(1,len(indicadores)+1):
@@ -621,16 +592,13 @@ def guardarNotas(periodo, codigo, grupo):
             temp1.append(temp2)
         datos.append(temp1)
 
-    #print datos
-    #print porcentaje_indicadores
-
     # Elimina de la base de datos los registros viejos
     db.execute('delete from nota_abet where asignatura=?',[detalles[4]])
     db.execute('delete from nota_instrumento where asignatura=?',[detalles[4]])
     db.execute('delete from nota_definitiva where asignatura=?',[detalles[4]])
     db.commit()
 
-    # Inserta la nueva informacion de indicadores, resultados de programa e instrumentos en la base de datos
+    # Procesa e inserta la nueva informacion de indicadores, resultados de programa e instrumentos en la base de datos
     definitiva_asignatura = []
     m = n = 0
     # Ciclo para los instrumentos (tabs)
@@ -667,7 +635,8 @@ def guardarNotas(periodo, codigo, grupo):
                     temp2 = porcentaje_indicadores[m][3]
                     while temp1 == porcentaje_indicadores[m][0]:
                         if temp2 == porcentaje_indicadores[m][3]:
-                            resultado += 5*int(datos[d][e][o])*porcentaje_indicadores[m][2]/10000
+                            if datos[d][e][o] != '':
+                                resultado += 5*int(datos[d][e][o])*porcentaje_indicadores[m][2]/10000
                             m += 1
                             o += 1
                         else:
@@ -712,9 +681,6 @@ def guardarNotas(periodo, codigo, grupo):
             if j >= len(definitiva_asignatura) - 1:
                 break
         db.execute("insert into nota_definitiva values (?,?,?)", [detalles[4], estudiantes[i][1], nota_def])
-
-    print db.execute("select * from nota_abet").fetchall()
-    #print db.execute("select * from estudiante").fetchall()
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('notas', periodo=periodo, codigo=codigo, grupo=grupo))
