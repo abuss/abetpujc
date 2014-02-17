@@ -128,6 +128,18 @@ def asignatura(periodo, codigo, grupo):
     # Variable para saber el numero de resultados de programa
     conteo = len(formula)
 
+    # Recupera (de la base de datos) la informacion de las notas de los instrumentos ya contenida en la base de datos
+    cur7 = db.execute(
+        "select evaluacion, codigo_estudiante, nota from nota_instrumento where asignatura=?",
+        [detalles[4]])
+    notasIns = cur7.fetchall()
+
+    # Recupera (de la base de datos) la informacion de las notas de los instrumentos ya contenida en la base de datos
+    cur8 = db.execute(
+        "select codigo_estudiante, nota from nota_definitiva where asignatura=?",
+        [detalles[4]])
+    notasDef = cur8.fetchall()
+
     # Procesa los datos de los resultados de programa de las evaluaciones
     inst = []
     i = 0
@@ -145,21 +157,38 @@ def asignatura(periodo, codigo, grupo):
             i = i + 1
 
         inst.append(temp1)
+    for i in range(len(inst)):
+        inst[i].insert(0,len(inst[i]))
 
-    print " "
-    print inst
-
-    # Procesa los datos de las notas guardadas previamente
-    notas = {}
+    # Procesa los datos de las notas de los resultados de programa guardadas previamente
+    notasIndicadores = {}
     for i in range(1,len(inst)+1):
-        notas[i]=dict([(e[1],{}) for e in estudiantes])
+        notasIndicadores[i]=dict([(e[1],{}) for e in estudiantes])
     for (x,y,z,w) in notasInd:
-        notas[x][z][y] = w
+        notasIndicadores[x][z][y] = w
+
+    # Procesa los datos de las notas de los instrumentos guardadas previamente
+    notasInstrumentos = {}
+    for i in range(1,len(inst)+1):
+        notasInstrumentos[i]=dict([(e[1],{}) for e in estudiantes])
+    for (x,y,z) in notasIns:
+        notasInstrumentos[x][y] = z
+
+    # Procesa los datos de las notas definitivas guardadas previamente
+    notasDefinitivas = {}
+    for i in range(1,len(inst)+1):
+        notasDefinitivas[i]=dict([(e[1],0) for e in estudiantes])
+    for (x,y) in notasDef:
+        notasDefinitivas[x] = y
+
+    print notasDef
+    print " "
+    print notasDefinitivas
 
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
-               'numestudiantes': len(estudiantes), 'notas': notas, 'conteo': conteo,
-               'formula': formula}
+               'numestudiantes': len(estudiantes), 'notasIndicadores': notasIndicadores, 'conteo': conteo,
+               'formula': formula, 'notasInstrumentos': notasInstrumentos}
     return render_template('course.html', entries=entries)
 
 
@@ -629,7 +658,7 @@ def guardarNotas(periodo, codigo, grupo):
 
                 # Procesa e inserta los valores de los resultados de programa
                 m = n
-                resultado = 0
+                resultado = 0.0
                 o = 0
                 if m < len(porcentaje_indicadores):
                     temp2 = porcentaje_indicadores[m][3]
@@ -640,11 +669,10 @@ def guardarNotas(periodo, codigo, grupo):
                             m += 1
                             o += 1
                         else:
-                            #print "resultado", temp2, ": ", resultado
                             db.execute(
                                 "insert into nota_abet values (?,?,?,?,?,?)",
-                                [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], resultado])
-                            resultado = 0
+                                [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], round(resultado,1)])
+                            resultado = 0.0
                             temp2 = porcentaje_indicadores[m][3]
                         if m >= len(porcentaje_indicadores):
                             break
@@ -652,12 +680,12 @@ def guardarNotas(periodo, codigo, grupo):
                     #print "resultado", temp2, ": ", resultado
                     db.execute(
                         "insert into nota_abet values (?,?,?,?,?,?)",
-                        [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], resultado])
+                        [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], round(resultado,1)])
 
                 # Inserta el valor de la nota definitiva de las evaluaciones
                 db.execute(
                     "insert into nota_instrumento values (?,?,?,?)",
-                    [detalles[4], evaluacion[d], estudiantes[e][1], definitiva_instrumento])
+                    [detalles[4], evaluacion[d], estudiantes[e][1], round(definitiva_instrumento,1)])
 
                 definitiva_asignatura.append([definitiva_instrumento, evaluacion[d], estudiantes[e][1]])
         db.commit()
@@ -680,7 +708,8 @@ def guardarNotas(periodo, codigo, grupo):
             j += 1
             if j >= len(definitiva_asignatura) - 1:
                 break
-        db.execute("insert into nota_definitiva values (?,?,?)", [detalles[4], estudiantes[i][1], nota_def])
+        db.execute("insert into nota_definitiva values (?,?,?)", [detalles[4], estudiantes[i][1], round(nota_def,1)])
+        db.commit()
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('notas', periodo=periodo, codigo=codigo, grupo=grupo))
