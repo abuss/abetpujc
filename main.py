@@ -113,10 +113,14 @@ def asignatura(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
     cur6 = db.execute(
-        "select d.resultado_de_programa, d.peso, e.descripcion from formula as d, resultado_de_programa as e "
-        "where asignatura=? and e.id = d.resultado_de_programa",
+        "select d.resultado_de_programa, d.peso, e.descripcion from formula as d, resultado_de_programa as e \
+        where asignatura=? and e.id = d.resultado_de_programa",
         [detalles[4]])
     formula = cur6.fetchall()
+    numResultados = len(formula)
+    resultados = []
+    for a,b,c in formula:
+        resultados.append(a)
     suma = 0
     for i in formula:
         suma = suma + i[1]
@@ -160,29 +164,57 @@ def asignatura(periodo, codigo, grupo):
     for i in range(len(inst)):
         inst[i].insert(0,len(inst[i]))
 
-    # Procesa los datos de las notas de los resultados de programa guardadas previamente
+    # Procesa los datos de las notas de los resultados de programa de cada instrumento guardadas previamente
     notasIndicadores = {}
     for i in range(1,len(inst)+1):
         notasIndicadores[i]=dict([(e[1],{}) for e in estudiantes])
     for (x,y,z,w) in notasInd:
-        notasIndicadores[x][z][y] = w
+        notasIndicadores[x][z][y] = round(w,1)
 
     # Procesa los datos de las notas de los instrumentos guardadas previamente
     notasInstrumentos = {}
     for i in range(1,len(inst)+1):
         notasInstrumentos[i]=dict([(e[1],{}) for e in estudiantes])
     for (x,y,z) in notasIns:
-        notasInstrumentos[x][y] = z
+        notasInstrumentos[x][y] = round(z,1)
+
+    # Procesa los datos de las notas de los resultados de programa totales
+    cur9 = db.execute(
+        "select d.evaluacion, d.competencia, d.codigo_estudiante, d.nota, e.porcentaje \
+        from nota_abet as d, porcentaje_abet as e \
+        where d.asignatura=? and d.nivel=1 and d.evaluacion = e.evaluacion and d.competencia = e.competencia \
+        order by d.competencia",
+        [detalles[4]])
+    temp1 = cur9.fetchall()
+    sumaResultados = dict(zip(resultados,[0]*len(resultados)))
+    for i in resultados:
+        cur10 = db.execute(
+            "select evaluacion, competencia, porcentaje \
+            from porcentaje_abet \
+            where asignatura=? and competencia=? \
+            order by competencia",
+            [detalles[4],i])
+        temp2 = cur10.fetchall()
+        suma = 0
+        for j,k,l in temp2:
+            suma += l
+        sumaResultados[i] = suma
+    resultadosTotales = {}
+    for e in estudiantes:
+        resultadosTotales[e[1]] = dict(zip(resultados,[0]*len(resultados)))
+    for (a,b,c,d,e) in temp1:
+        resultadosTotales[c][b] = round(resultadosTotales[c][b]+((d*e)/sumaResultados[b]),1)
 
     # Procesa los datos de las notas definitivas guardadas previamente
     notasDefinitivas = dict([(e[1],0) for e in estudiantes])
     for (x,y) in notasDef:
-        notasDefinitivas[x] = y
+        notasDefinitivas[x] = round(y,1)
 
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
                'numestudiantes': len(estudiantes), 'notasIndicadores': notasIndicadores, 'conteo': conteo,
-               'formula': formula, 'notasInstrumentos': notasInstrumentos, 'notasDefinitivas': notasDefinitivas}
+               'formula': formula, 'notasInstrumentos': notasInstrumentos, 'notasDefinitivas': notasDefinitivas,
+               'resultadosTotales': resultadosTotales}
     return render_template('course.html', entries=entries)
 
 
