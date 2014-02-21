@@ -81,7 +81,8 @@ def asignatura(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
-        "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
+        "select nombre, codigo, grupo, periodo, id, id_carrera \
+        from asignatura where codigo=? and grupo=? and periodo=?",
         [codigo, grupo, periodo])
     detalles = cur1.fetchall()[0]
 
@@ -94,8 +95,9 @@ def asignatura(periodo, codigo, grupo):
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
         from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
         where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
+            and f.carrera=? \
         order by d.id_evaluacion",
-        [detalles[4]])
+        [detalles[4], detalles[5]])
     resprog = cur3.fetchall()
 
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
@@ -225,12 +227,17 @@ def instrumentos(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
-        "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
+        "select nombre, codigo, grupo, periodo, id, id_carrera \
+        from asignatura where codigo=? and grupo=? and periodo=?",
         [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
-    cur2 = db.execute('select resultado_de_programa, peso from formula where asignatura=?', [detalles[4]])
+    cur2 = db.execute(
+        "select d.resultado_de_programa, d.peso, e.descripcion \
+        from formula as d, resultado_de_programa as e \
+        where asignatura=? and d.resultado_de_programa = e.id and e.carrera=?",
+        [detalles[4], detalles[5]])
     formula = cur2.fetchall()
     suma = 0
     for i in formula:
@@ -326,7 +333,8 @@ def indicadores(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
-        "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
+        "select nombre, codigo, grupo, periodo, id, id_carrera \
+        from asignatura where codigo=? and grupo=? and periodo=?",
         [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
@@ -335,8 +343,9 @@ def indicadores(periodo, codigo, grupo):
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
         from porcentaje_instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
         where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
+            and f.carrera=? \
         order by d.id_evaluacion",
-        [detalles[4]])
+        [detalles[4], detalles[5]])
     resprog = cur2.fetchall()
 
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
@@ -379,7 +388,9 @@ def indicadores(periodo, codigo, grupo):
         inst.append(temp1)
 
     # Recupera (de la base de datos) los indicadores de desempeno
-    cur4 = db.execute("select * from indicador_de_desempeno")
+    cur4 = db.execute(
+        "select id, descripcion, resultado_de_programa from indicador_de_desempeno where carrera=?",
+        [detalles[5]])
 
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'resprog': inst, 'indicdesemp': cur4.fetchall()}
@@ -703,7 +714,6 @@ def guardarNotas(periodo, codigo, grupo):
                         if m >= len(porcentaje_indicadores):
                             break
 
-                    #print "resultado", temp2, ": ", resultado
                     db.execute(
                         "insert into nota_abet values (?,?,?,?,?,?)",
                         [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], round(resultado,1)])

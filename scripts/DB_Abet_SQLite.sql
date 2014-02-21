@@ -89,18 +89,26 @@ CREATE TABLE ESTUDIANTE
 
 CREATE TABLE RESULTADO_DE_PROGRAMA
 (
+    -- Ej. 40
+	CARRERA INT NOT NULL,
 		-- Ej. A .. K
-	ID TEXT PRIMARY KEY NOT NULL,
+	ID TEXT NOT NULL,
 		-- Ej. La habilidad para aplicar conocimientos de matematicas, ciencias e ingenieria.
 	DESCRIPCION TEXT NOT NULL,
 		-- Ej. Students must show an ability to efectively apply knowledge, techniques, principles and theories from continuous and discrete mathematics, logic, statistics, probability, physics as well as core computing and engineering knowledge to: (1)analyze, model and design
 		-- systems and processes; and (2) propose and evaluate solutions to problems.
-	DEFINICION TEXT
+	DEFINICION TEXT,
+
+	PRIMARY KEY (ID,CARRERA),
+	FOREIGN KEY (CARRERA)
+	REFERENCES ACREDITACION_ABET (ID_CARRERA)
 );
 
 
 CREATE TABLE INDICADOR_DE_DESEMPENO
 (
+    -- Ej. 40
+	CARRERA INT NOT NULL,
 		-- Ej. A1
 	ID TEXT NOT NULL,
 		-- Ej. (A1) Identificar los fundamentos cientificos y los principios de ingenier�a que rigen un proceso o sistema.
@@ -108,9 +116,11 @@ CREATE TABLE INDICADOR_DE_DESEMPENO
 		-- Ej. A .. K
 	RESULTADO_DE_PROGRAMA TEXT NOT NULL,
 
-	PRIMARY KEY (ID),
+	PRIMARY KEY (ID,CARRERA),
 	FOREIGN KEY (RESULTADO_DE_PROGRAMA)
-	REFERENCES RESULTADO_DE_PROGRAMA (ID)
+	REFERENCES RESULTADO_DE_PROGRAMA (ID),
+	FOREIGN KEY (CARRERA)
+	REFERENCES ACREDITACION_ABET (ID_CARRERA)
 );
 
 
