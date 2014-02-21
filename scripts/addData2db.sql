@@ -2,8 +2,8 @@
 BEGIN TRANSACTION;
 
 /* Carreras */
-insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2014-1');
-insert into acreditacion_abet values (10,'Ingeniería Industrial','2014-1');
+insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2014-1',5);
+insert into acreditacion_abet values (10,'Ingeniería Industrial','2014-1',3);
 
 /* Profesores */
 insert into profesor values (1,'Gerardo M. Sarria M.','TC');
