@@ -29,6 +29,7 @@ insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) valu
 insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG002','A','Lógica en Ciencias de la Computación',40,10,'2014-1');
 insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300MAG031','A','Matemáticas Discretas para la Computación',40,3,'2014-1');
 insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIS005','A','Procesos de Ingeniería de Software',40,2,'2014-1');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300IGQ001','A','Termodinámica',10,11,'2014-1');
 
 /* Resultados de Programa */
 insert into resultado_de_programa values (40,'A','Habilidad para aplicar conocimientos de matemáticas, ciencias e ingeniería','');
@@ -42,6 +43,17 @@ insert into resultado_de_programa values (40,'H','Reconocimiento de la necesidad
 insert into resultado_de_programa values (40,'I','Habilidad para usar las técnicas, destrezas y herramientas modernas para la práctica de la computación','');
 insert into resultado_de_programa values (40,'J','Habilidad para aplicar los fundamentos y principios de las matemáticas y de la computación en el modelamiento y diseño de sistemas computacionales','');
 insert into resultado_de_programa values (40,'K','Habilidad para aplicar los principios de diseño y desarrollo de software en la construcción de sistemas de diferente complejidad','');
+insert into resultado_de_programa values (10,'A','Habilidad para aplicar conocimientos de matemáticas, ciencias e ingeniería','');
+insert into resultado_de_programa values (10,'B','Habilidad para analizar un problema e identificar los requerimientos necesarios para su definición y solución','');
+insert into resultado_de_programa values (10,'C','Habilidad para diseñar, implementar y evaluar procesos y sistemas computacionales','');
+insert into resultado_de_programa values (10,'D','Habilidad para funcionar en equipos de trabajo','');
+insert into resultado_de_programa values (10,'E','Entendimiento de la responsabilidad profesional y ética','');
+insert into resultado_de_programa values (10,'F','Habilidad para comunicarse efectivamente','');
+insert into resultado_de_programa values (10,'G','Habilidad para analizar los impactos de la computación y la ingeniería en las personas, organizaciones y la sociedad','');
+insert into resultado_de_programa values (10,'H','Reconocimiento de la necesidad de, y la habilidad para, continuar con el desarrollo profesional','');
+insert into resultado_de_programa values (10,'I','Habilidad para usar las técnicas, destrezas y herramientas modernas para la práctica de la computación','');
+insert into resultado_de_programa values (10,'J','Habilidad para aplicar los fundamentos y principios de las matemáticas y de la computación en el modelamiento y diseño de sistemas computacionales','');
+insert into resultado_de_programa values (10,'K','Habilidad para aplicar los principios de diseño y desarrollo de software en la construcción de sistemas de diferente complejidad','');
 
 /* Definicion de los indicadores de desempeño */
 /*
@@ -238,6 +250,15 @@ insert into formula values ('F',10,2);
 insert into formula values ('I',10,2);
 insert into formula values ('J',10,1);
 insert into formula values ('K',10,2);
+
+insert into formula values ('A',11,3);
+insert into formula values ('B',11,2);
+insert into formula values ('E',11,3);
+insert into formula values ('F',11,2);
+insert into formula values ('G',11,2);
+insert into formula values ('H',11,3);
+insert into formula values ('J',11,3);
+insert into formula values ('K',11,2);
 
 /* Definicion de la Calificacion General */
 insert into porcentaje_instrumento (asignatura, evaluacion, porcentaje) values (1,'Parcial 1',20);

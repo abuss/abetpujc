@@ -67,10 +67,24 @@ def close_db(error):
 
 @app.route('/')
 def show_courses():
+    # Accede a la base de datos
     db = get_db()
-    cur = db.execute('select nombre, codigo, grupo, periodo from asignatura where periodo=? order by nombre asc',
-                     ['2014-1'])
-    entries = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3]) for row in cur.fetchall()]
+
+    # Recupera (de la base de datos) los cursos
+    cur1 = db.execute(
+        "select nombre_carrera, id_carrera from acreditacion_abet where periodo=? order by nombre_carrera asc",
+        ['2014-1'])
+    carreras = cur1.fetchall()
+
+    # Recupera (de la base de datos) los cursos
+    cur2 = db.execute(
+        "select nombre, codigo, grupo, periodo, id_carrera from asignatura where periodo=? order by nombre asc",
+        ['2014-1'])
+    cursos = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3], carrera=row[4]) for row in cur2.fetchall()]
+
+    # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web
+    entries = {'carreras': carreras, 'cursos': cursos}
+
     return render_template('main.html', entries=entries)
 
 
@@ -81,8 +95,9 @@ def asignatura(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
-        "select nombre, codigo, grupo, periodo, id, id_carrera \
-        from asignatura where codigo=? and grupo=? and periodo=?",
+        "select d.nombre, d.codigo, d.grupo, d.periodo, d.id, d.id_carrera, e.nombre_carrera \
+        from asignatura as d, acreditacion_abet as e \
+        where d.codigo=? and d.grupo=? and d.periodo=? and d.id_carrera = e.id_carrera",
         [codigo, grupo, periodo])
     detalles = cur1.fetchall()[0]
 
@@ -116,8 +131,8 @@ def asignatura(periodo, codigo, grupo):
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
     cur6 = db.execute(
         "select d.resultado_de_programa, d.peso, e.descripcion from formula as d, resultado_de_programa as e \
-        where asignatura=? and e.id = d.resultado_de_programa",
-        [detalles[4]])
+        where asignatura=? and e.id = d.resultado_de_programa and e.carrera=?",
+        [detalles[4], detalles[5]])
     formula = cur6.fetchall()
     numResultados = len(formula)
     resultados = []
@@ -227,9 +242,10 @@ def instrumentos(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
-        "select nombre, codigo, grupo, periodo, id, id_carrera \
-        from asignatura where codigo=? and grupo=? and periodo=?",
-        [codigo,grupo,periodo])
+        "select d.nombre, d.codigo, d.grupo, d.periodo, d.id, d.id_carrera, e.nombre_carrera \
+        from asignatura as d, acreditacion_abet as e \
+        where d.codigo=? and d.grupo=? and d.periodo=? and d.id_carrera = e.id_carrera",
+        [codigo, grupo, periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
@@ -333,9 +349,10 @@ def indicadores(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
-        "select nombre, codigo, grupo, periodo, id, id_carrera \
-        from asignatura where codigo=? and grupo=? and periodo=?",
-        [codigo,grupo,periodo])
+        "select d.nombre, d.codigo, d.grupo, d.periodo, d.id, d.id_carrera, e.nombre_carrera \
+        from asignatura as d, acreditacion_abet as e \
+        where d.codigo=? and d.grupo=? and d.periodo=? and d.id_carrera = e.id_carrera",
+        [codigo, grupo, periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
@@ -469,8 +486,10 @@ def notas(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
-        "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
-        [codigo,grupo,periodo])
+        "select d.nombre, d.codigo, d.grupo, d.periodo, d.id, d.id_carrera, e.nombre_carrera \
+        from asignatura as d, acreditacion_abet as e \
+        where d.codigo=? and d.grupo=? and d.periodo=? and d.id_carrera = e.id_carrera",
+        [codigo, grupo, periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los estudiantes

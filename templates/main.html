@@ -1,26 +1,39 @@
 <!doctype html>
-<title>ABET - Facultad de Ingeniería</title>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-<div class=page>
-  <table>
-  <tr>
-    <td><img src="../../static/logo.png"></td>
-    <td width="20">&nbsp;</td>
-    <td><h4>Facultad de Ingeniería<br>Ingeniería de Sistemas y Computación</h4></td>
-  </tr>
-  </table>
-  <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET</h1>
-  <hr>
-  <br><br>
-  {% block body %}
-  Listado de cursos del período {{ entries[0].periodo }}:
-  <ul class=entries>
-  <br>
-  {% for entry in entries %}
-  <li><a href="{{ url_for('asignatura', periodo=entry.periodo, codigo=entry.cod, grupo=entry.grupo) }}">{{ entry.title }}</a>
-  {% else %}
-  <em>No hay cursos.</em>
-  {% endfor %}
-  </ul>
-  {% endblock %}
-</div>
+<head>
+    <title>ABET - Facultad de Ingeniería</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class=page>
+        <table>
+            <tr>
+                <td><img src="../../static/logo.png"></td>
+                <td width="20">&nbsp;</td>
+                <td><h4>Facultad de Ingeniería<br></h4></td>
+            </tr>
+        </table>
+        <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET</h1>
+        <hr>
+        <br>
+        <br>
+        {% block body %}
+            Listado de cursos del período {{ entries.cursos[0].periodo }}:
+            <ul>
+            {% for carreras in entries.carreras %}
+                <br><br>
+                <label>{{carreras[0]}}:</label>
+                <br><br>
+                {% for entry in entries.cursos %}
+                    {% if entry.carrera == carreras[1] %}
+                        <li><a href="{{ url_for('asignatura', periodo=entry.periodo, codigo=entry.cod, grupo=entry.grupo) }}">{{ entry.title }}</a>
+                        <br><br>
+                    {% endif %}
+                {% else %}
+                    <em>No hay cursos.</em>
+                {% endfor %}
+            {% endfor %}
+            </ul>
+        {% endblock %}
+    </div>
+</body>
