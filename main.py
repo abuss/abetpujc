@@ -1,3 +1,4 @@
+# Sistema de evaluacion ABET
 # Librerias
 from __future__ import division
 import sqlite3
@@ -7,6 +8,7 @@ from flask import Flask, request, g, redirect, url_for, \
     render_template, flash
 
 from operator import itemgetter
+import sys
 
 # Inicializacion de variables
 app = Flask(__name__)
@@ -771,5 +773,6 @@ def guardarNotas(periodo, codigo, grupo):
 
 
 if __name__ == '__main__':
-    init_db()
+    if len(sys.argv)>2 and sys.argv[1]=='initdb':
+        init_db()
     app.run()
