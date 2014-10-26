@@ -249,7 +249,7 @@ def asignatura(periodo, codigo, grupo):
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
                'numestudiantes': len(estudiantes), 'notasIndicadores': notasIndicadores, 'conteo': conteo,
                'formula': formula, 'notasInstrumentos': notasInstrumentos, 'notasDefinitivas': notasDefinitivas,
-               'resultadosTotales': resultadosTotales}
+               'resultadosTotales': resultadosTotales, 'periodo': periodo}
     return render_template('course.html', entries=entries)
 
 
