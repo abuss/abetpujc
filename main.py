@@ -66,22 +66,38 @@ def close_db(error):
 #     if db is not None:
 #         db.close()
 
-
 @app.route('/')
-def show_courses():
+def show_periods():
+    # Accede a la base de datos
+    db = get_db()
+
+    # Recupera (de la base de datos) los cursos
+    cur1 = db.execute(
+        "select distinct periodo from acreditacion_abet order by periodo asc"
+        )
+    periodos = cur1.fetchall()
+
+    # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web
+    entries = {'periodos': periodos}
+    print(periodos)
+
+    return render_template('periods.html', entries=entries)
+
+@app.route('/<periodo>',methods=['GET', 'POST'])
+def show_courses(periodo):
     # Accede a la base de datos
     db = get_db()
 
     # Recupera (de la base de datos) los cursos
     cur1 = db.execute(
         "select nombre_carrera, id_carrera from acreditacion_abet where periodo=? order by nombre_carrera asc",
-        ['2014-1'])
+        [periodo])
     carreras = cur1.fetchall()
 
     # Recupera (de la base de datos) los cursos
     cur2 = db.execute(
         "select nombre, codigo, grupo, periodo, id_carrera from asignatura where periodo=? order by nombre asc",
-        ['2014-1'])
+        [periodo])
     cursos = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3], carrera=row[4]) for row in cur2.fetchall()]
 
     # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web
