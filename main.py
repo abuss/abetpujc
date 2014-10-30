@@ -111,6 +111,7 @@ def show_courses(periodo):
     return render_template('main.html', entries=entries)
 
 
+
 @app.route('/<periodo>/<codigo>/<grupo>', methods=['GET', 'POST'])
 def asignatura(periodo, codigo, grupo):
     # Accede a la base de datos
@@ -136,10 +137,11 @@ def asignatura(periodo, codigo, grupo):
     proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
     r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
     proofjson =r.json()
+    #proofjson.sort()
     for x in proofjson:
-        estudiante = [x.values()[1],x.values()[2]]
+        estudiante = [x.values()[1].capitalize(),x.values()[2]]
         estudiantes.append(estudiante)
-
+    estudiantes.sort()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
@@ -266,10 +268,6 @@ def asignatura(periodo, codigo, grupo):
     #print "URL: ", r.url
     #print "ContenteCurso: ",r.content
     #print  proofjson.__sizeof__()
-
-    
-    #for x in estudiantes:
-     #   print x
     #print "Last Element: ",proofjson.__getitem__(7)
     #print len(proofjson)
     #print dir(proofjson.__getitem__(1).values())
@@ -542,9 +540,21 @@ def notas(periodo, codigo, grupo):
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los estudiantes
-    cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
-    estudiantes = cur2.fetchall()
-
+    #cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
+    #estudiantes = cur2.fetchall()
+    estudiantes = []
+    p_periodo = "0940"
+    group = "A"
+    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
+    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
+    proofjson =r.json()
+    #proofjson.sort()
+    for x in proofjson:
+        estudiante = [x.values()[1].capitalize(),x.values()[2]]
+        estudiantes.append(estudiante)
+    
+    estudiantes.sort()
+#    proofjson.sort()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje \
@@ -619,7 +629,6 @@ def notas(periodo, codigo, grupo):
         notas[i]=dict([(e[1],{}) for e in estudiantes])
     for (x,y,z,w) in notasInd:
         notas[x][z][y] = w
-
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
                'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas}
