@@ -7,8 +7,10 @@ from contextlib import closing
 from flask import Flask, request, g, redirect, url_for, \
     render_template, flash
 
+import requests
 from operator import itemgetter
 import sys
+from flask import json
 
 # Inicializacion de variables
 app = Flask(__name__)
@@ -71,15 +73,18 @@ def show_periods():
     # Accede a la base de datos
     db = get_db()
 
-    # Recupera (de la base de datos) los cursos
+    # Recupera (de la base de datos) los periodos
     cur1 = db.execute(
         "select distinct periodo from acreditacion_abet order by periodo asc"
         )
     periodos = cur1.fetchall()
-
+    prueba = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante?pCurso=300CIG006&pGrupo=A&pPeriodo=0940")
     # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web
     entries = {'periodos': periodos}
-    print(periodos)
+    print "URL: ", prueba.url
+    print "INFO: ",prueba.text
+    
+    
 
     return render_template('periods.html', entries=entries)
 
@@ -119,9 +124,21 @@ def asignatura(periodo, codigo, grupo):
         [codigo, grupo, periodo])
     detalles = cur1.fetchall()[0]
 
-    # Recupera (de la base de datos) los estudiantes
-    cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
-    estudiantes = cur2.fetchall()
+
+    # Recupera (del servicio web) los estudiantes
+   # cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
+    #estudiantes = cur2.fetchall()
+    #for x in estudiantes:
+     #   print x
+    estudiantes = []
+    p_periodo = "0940"
+    group = "A"
+    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
+    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
+    proofjson =r.json()
+    for x in proofjson:
+        estudiante = [x.values()[1],x.values()[2]]
+        estudiantes.append(estudiante)
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -205,6 +222,7 @@ def asignatura(periodo, codigo, grupo):
         notasIndicadores[i]=dict([(e[1],{}) for e in estudiantes])
     for (x,y,z,w) in notasInd:
         notasIndicadores[x][z][y] = round(w,1)
+        
 
     # Procesa los datos de las notas de los instrumentos guardadas previamente
     notasInstrumentos = {}
@@ -244,6 +262,19 @@ def asignatura(periodo, codigo, grupo):
     notasDefinitivas = dict([(e[1],0) for e in estudiantes])
     for (x,y) in notasDef:
         notasDefinitivas[x] = round(y,1)
+
+    #print "URL: ", r.url
+    #print "ContenteCurso: ",r.content
+    #print  proofjson.__sizeof__()
+
+    
+    #for x in estudiantes:
+     #   print x
+    #print "Last Element: ",proofjson.__getitem__(7)
+    #print len(proofjson)
+    #print dir(proofjson.__getitem__(1).values())
+    #print dir(proofjson)
+
 
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
