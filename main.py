@@ -273,6 +273,9 @@ def asignatura(periodo, codigo, grupo):
     #print dir(proofjson.__getitem__(1).values())
     #print dir(proofjson)
 
+    for i in estudiantes:
+        print i
+    print len(inst)
 
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
