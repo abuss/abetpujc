@@ -81,8 +81,8 @@ def show_periods():
     prueba = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante?pCurso=300CIG006&pGrupo=A&pPeriodo=0940")
     # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web
     entries = {'periodos': periodos}
-    print "URL: ", prueba.url
-    print "INFO: ",prueba.text
+    print ("URL: ", prueba.url)
+    print ("INFO: ",prueba.text)
     
     
 
@@ -135,8 +135,15 @@ def asignatura(periodo, codigo, grupo):
     p_periodo = "0940"
     group = "A"
     proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
+    # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
+    peval = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas", params=proof)
+
+    pevaljson =peval.json()
     proofjson =r.json()
+
+    print ("ContenteCurso: ",r.content)
+
     #proofjson.sort()
     for x in proofjson:
         estudiante = [x.values()[1].capitalize(),x.values()[2]]
@@ -274,8 +281,8 @@ def asignatura(periodo, codigo, grupo):
     #print dir(proofjson)
 
     for i in estudiantes:
-        print i
-    print len(inst)
+        print (i)
+    print (len(inst))
 
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
