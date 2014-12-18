@@ -26,7 +26,7 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 #class flask.ext.login.LoginManager(app=app, add_context_processor=True)
 
          
-# login_manager = LoginManager()
+ #login_manager = LoginManager()
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
