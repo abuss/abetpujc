@@ -18,11 +18,17 @@
         <br>
         <br>
         {% block body %}
+            {% if entries.periodos[0] > 0  %}
             Listado de periodos:
-            <ul>
-            {% for periodos in entries.periodos %}
-                 <li><a href="{{ url_for('show_courses',periodo=periodos[0]) }}">{{ periodos[0] }}</a>
-            {% endfor %}
+            <ul>            
+                {% for periodos in entries.periodos %}
+                     <li><a href="{{ url_for('show_courses',periodo=periodos[0]) }}">{{ periodos[0] }}</a>
+                {% endfor %}
+            {% else %}
+                No existe registro de periodos hasta el momento.
+            {% endif %}
+
+
             </ul>
         {% endblock %}
     </div>

@@ -82,11 +82,12 @@ def show_periods():
         "select distinct periodo from acreditacion_abet order by periodo asc"
         )
     periodos = cur1.fetchall()
-    prueba = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante?pCurso=300CIG006&pGrupo=A&pPeriodo=0940")
+    if len(periodos) == 0:
+        periodos.append(0)
+
     # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web
     entries = {'periodos': periodos}
-    print ("URL: ", prueba.url)
-    print ("INFO: ",prueba.text)
+ 
     
     
 
