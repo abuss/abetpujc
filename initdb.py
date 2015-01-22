@@ -21,7 +21,7 @@ def init_db():
         with open('scripts/DB_Abet_SQLite.sql', mode='r') as f:
             print("Creating DB")
             db.executescript(f.read())
-            #add_data(db)
+            add_data(db)
         db.commit()
 
 

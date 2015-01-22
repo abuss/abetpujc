@@ -61,9 +61,16 @@ CREATE TABLE ASIGNATURA
 );
 
 CREATE TABLE Descripcion_A_K  ( 
+	-- Id de la Descripcion
 	Id         	INTEGER PRIMARY KEY NOT NULL,
+	-- Ej. A, B.1, C.1.1
 	competencia	TEXT NOT NULL,
+	--Id de la descripcion padre, niveles 2 o 3.
 	superior   	INTEGER,
+	-- Nivel 1 corresponde a A..K, 
+	-- Nivel 2 corresponde a A.1, A.2, H.1, ...
+	-- Nivel 3 corresponde a A.1.1, A.1.2, C.2.3, ...
+	-- Si es un nivel 1 es el papa en el arbol de jerarquia
 	Nivel      	INTEGER NOT NULL,
 	FOREIGN KEY(superior)
 	REFERENCES Descripcion_A_K(Id)
