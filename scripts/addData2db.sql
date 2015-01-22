@@ -826,4 +826,8 @@ insert into porcentaje_abet values (1,2,'F.5.1',70,3,'F');
 insert into porcentaje_abet values (1,2,'H.1.3',45,3,'H');
 insert into porcentaje_abet values (1,2,'H.2.2',55,3,'H'); 
 
+insert into usuario values ('gsarria', 'Gerardo Sarria', '123',4);
+insert into usuario values ('admin', 'Admin', 'mlp123', 1);
+
+
 COMMIT;
