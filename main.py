@@ -109,7 +109,6 @@ def show_periods():
 def show_courses(periodo):
     # Accede a la base de datos
     db = get_db()
-
     # Recupera (de la base de datos) los cursos
     cur1 = db.execute(
         "select nombre_carrera, id_carrera from acreditacion_abet where periodo=? order by nombre_carrera asc",
@@ -117,13 +116,19 @@ def show_courses(periodo):
     carreras = cur1.fetchall()
 
     # Recupera (de la base de datos) los cursos
-    cur2 = db.execute(
+    if session['lvl'] == 4 :
+        cur2 = db.execute(
+        "select nombre, codigo, grupo, periodo, id_carrera from asignatura where periodo=? and id_profesor=? order by nombre asc",
+        [periodo,session['id_prof'][0][0]])
+    else:
+        cur2 = db.execute(
         "select nombre, codigo, grupo, periodo, id_carrera from asignatura where periodo=? order by nombre asc",
         [periodo])
     cursos = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3], carrera=row[4]) for row in cur2.fetchall()]
 
-    # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web
-    entries = {'carreras': carreras, 'cursos': cursos}
+    vacio = 0
+    # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web  
+    entries = {'carreras': carreras, 'cursos': cursos, 'vacio' : vacio }
 
     return render_template('main.html', entries=entries)
 
@@ -874,6 +879,13 @@ def login():
             usr = (request.form['username'],request.form['pswd'])
             if usr in detalles:
                 session['logged_in'] = True
+                cur1 = db.execute("select nivel_acceso from usuario where login = ?",[usr[0]])
+                lvlacc = cur1.fetchall()
+                session['lvl'] = lvlacc[0][0]
+                if lvlacc[0][0] == 4 :                    
+                    cur2 = db.execute("select p.id from usuario u inner join profesor p on u.nombre = p.nombre")
+                    idprof = cur2.fetchall()
+                    session['id_prof'] = idprof
                 return redirect(url_for('show_periods'))            
             else: 
                 error = "Usuario o contrasena incorrectos, intente de nuevo"
@@ -886,6 +898,9 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
+    session.pop('lvl', None)
+    if 'id_prof' in session:
+        session.pop('id_prof', None)
     return redirect(url_for('login'))
 
 if __name__ == '__main__':

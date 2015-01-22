@@ -29,8 +29,8 @@
                         <li><a href="{{ url_for('asignatura', periodo=entry.periodo, codigo=entry.cod, grupo=entry.grupo) }}">{{ entry.title }}</a>
                         <br><br>
                     {% endif %}
-                {% else %}
-                    <em>No hay cursos.</em>
+                    {% else%}
+                        <em>No hay cursos.</em>
                 {% endfor %}
             {% endfor %}
             </ul>
