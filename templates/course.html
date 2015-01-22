@@ -6,9 +6,9 @@
     <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
     <style>
-   	    .wrapper {
-     	    width: 800px;
-    	}
+        .wrapper {
+            width: 800px;
+        }
     </style>
     <script>
         $(function() {
@@ -60,19 +60,19 @@
                         <td>Definitiva</td>
                     </tr>
                     {% if entries.numestudiantes > 0 %}
-                        {% for j in entries.notasIndicadores[1].keys() %}
+                            {% for k in entries.estudiantes %}
                             <tr>
-                                {% for k in entries.estudiantes %}
+                                {% for j in entries.notasIndicadores[1].keys() %}
                                     {% if j == k[1] %}
                                         <td>{{k[0]}}</td>
                                     {% endif %}
                                 {% endfor %}
-                                {% for k in entries.resultadosTotales[j].keys() %}
+                                {% for j in entries.resultadosTotales[k[1]].keys() %}
                                     <td width="10">&nbsp;</td>
-                                    <td align="center">{{entries.resultadosTotales[j][k]}}</td>
+                                    <td align="center">{{entries.resultadosTotales[k[1]][j]}}</td>
                                 {% endfor %}
                                 <td width="10">&nbsp;</td>
-                                <td align="center">{{entries.notasDefinitivas[j]}}</td>
+                                <td align="center">{{entries.notasDefinitivas[k[1]]}}</td>
                             </tr>
                         {% endfor %}
                     {% endif %}
@@ -91,18 +91,18 @@
                             <td>Nota</td>
                         </tr>
                         {% if entries.numestudiantes > 0 %}
-                            {% for j in entries.notasIndicadores[i].keys() %}
+                            {% for k in entries.estudiantes %}
                                 <tr>
-                                    {% for k in entries.estudiantes %}
+                                    {% for j in entries.notasIndicadores[i].keys() %}
                                         {% if j == k[1] %}
                                             <td>{{k[0]}}</td>
                                         {% endif %}
                                     {% endfor %}
-                                    {% for k in range(1,entries.resprog[i-1][0]+1) %}
-                                        {% if entries.notasIndicadores[i][j] != {} %}
+                                    {% for j in range(1,entries.resprog[i-1][0]+1) %}
+                                        {% if entries.notasIndicadores[i][k[1]] != {} %}
                                             {% for l in entries.notasIndicadores[i].keys() %}
                                                 {% for m in entries.notasIndicadores[i][l].keys() %}
-                                                    {% if j == l and m == entries.resprog[i-1][k][2]%}
+                                                    {% if k[1] == l and m == entries.resprog[i-1][j][2]%}
                                                         <td width="10">&nbsp;</td>
                                                         <td align="center">{{entries.notasIndicadores[i][l][m]}}</td>
                                                     {% endif %}
@@ -113,9 +113,9 @@
                                             <td align="center">0.0</td>
                                         {% endif %}
                                     {% endfor %}
-                                    {% if entries.notasInstrumentos[i][j] != {} %}
+                                    {% if entries.notasInstrumentos[i][k[1]] != {} %}
                                         {% for l in entries.notasInstrumentos[i].keys() %}
-                                            {% if j == l %}
+                                            {% if k[1] == l %}
                                                 <td width="10">&nbsp;</td>
                                                 <td align="center">{{entries.notasInstrumentos[i][l]}}</td>
                                             {% endif %}
