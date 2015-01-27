@@ -803,10 +803,10 @@ insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE,
 insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (11,75,11,55,435);
 
 /* Prueba: Estudiantes (Ya se hace con los web services*/
-/*insert into estudiante values ('100001','Pepito Perez',1);
+insert into estudiante values ('100001','Pepito Perez',1);
 insert into estudiante values ('200002','Pepita Mendieta',1);
 insert into estudiante values ('100001','Pepito Perez',10);
-insert into estudiante values ('200002','Pepita Mendieta',10);*/
+insert into estudiante values ('200002','Pepita Mendieta',10);
 
 /* Prueba: Definicion de los porcentajes de los instrumentos */
 insert into porcentaje_abet values (1,1,'A.1.1',25,3,'A');

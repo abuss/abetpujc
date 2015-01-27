@@ -9,7 +9,7 @@ from flask import Flask, request, g, redirect, url_for, \
     render_template, flash, session
 import flask
 import requests
-from functools import wraps 
+from functools import wraps, reduce 
 from operator import itemgetter
 import sys
 from flask import json
@@ -93,11 +93,14 @@ def show_periods():
         "select distinct periodo from acreditacion_abet order by periodo asc"
         )
     periodos = cur1.fetchall()
+    per = 1
     if len(periodos) == 0:
-        periodos.append(0)
+        per = 0
+
+    print(periodos)
 
     # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web
-    entries = {'periodos': periodos}
+    entries = {'periodos': periodos, 'hayperiodos': per}
  
     
     
@@ -149,32 +152,28 @@ def asignatura(periodo, codigo, grupo):
 
 
     # Recupera (del servicio web) los estudiantes
-   # cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
-    #estudiantes = cur2.fetchall()
+    cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
+    estudiantes = cur2.fetchall()
     #for x in estudiantes:
      #   print x
-    estudiantes = []
-    p_periodo = "0940"
-    group = "A"
-    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
-    # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
-    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
-    peval = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas", params=proof)
+    # estudiantes = []
+    # p_periodo = "0940"
+    # group = "A"
+    # proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
+    # # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
+    # r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
+    # peval = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas", params=proof)
 
-    pevaljson =peval.json()
-    proofjson =r.json()
-
-    #print ("ContenteCurso: ",r.content)
-
-    #proofjson.sort()
-    for x in proofjson:
-        estudiante = [x.values()[1].capitalize(),x.values()[2]]
-        estudiantes.append(estudiante)
+    # pevaljson =peval.json()
+    # proofjson =r.json()
+    # for x in proofjson:
+    #     estudiante = [x.values()[1].capitalize(),x.values()[2]]
+    #     estudiantes.append(estudiante)
     estudiantes.sort()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
-        from instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e, resultado_de_programa as f \
         where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and (select dsak.competencia from porcentaje_abet as e inner join Descripcion_A_K as dsak on e.Id_COMPETENCIA = dsak.id) = f.id and e.asignatura=? \
             and f.carrera=? \
         order by d.id_evaluacion",
@@ -184,8 +183,8 @@ def asignatura(periodo, codigo, grupo):
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
     cur4 = db.execute(
         "select d.evaluacion, e.competencia, e.porcentaje, f.descripcion \
-        from instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
-        where d.id_evaluacion = e.evaluacion and f.id = (select dsak.competencia from porcentaje_abet as e inner join Descripcion_A_K as dsak on e.Id_COMPETENCIA = dsak.id) and e.nivel = 1")
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e, resultado_de_programa as f \
+        where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 1")
     porcresultados = cur4.fetchall()
 
     # Recupera (de la base de datos) la informacion de las notas de los indicadores ya contenida en la base de datos
@@ -579,25 +578,25 @@ def notas(periodo, codigo, grupo):
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los estudiantes
-    #cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
-    #estudiantes = cur2.fetchall()
-    estudiantes = []
-    p_periodo = "0940"
-    group = "A"
-    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
-    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
-    proofjson =r.json()
-    #proofjson.sort()
-    for x in proofjson:
-        estudiante = [x.values()[1].capitalize(),x.values()[2]]
-        estudiantes.append(estudiante)
+    cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
+    estudiantes = cur2.fetchall()
+    # estudiantes = []
+    # p_periodo = "0940"
+    # group = "A"
+    # proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
+    # r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
+    # proofjson =r.json()
+    # #proofjson.sort()
+    # for x in proofjson:
+    #     estudiante = [x.values()[1].capitalize(),x.values()[2]]
+    #     estudiantes.append(estudiante)
     
     estudiantes.sort()
 #    proofjson.sort()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje \
-        from instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e, resultado_de_programa as f \
         where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
         order by d.id_evaluacion",
         [detalles[4]])
@@ -606,7 +605,7 @@ def notas(periodo, codigo, grupo):
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
     cur4 = db.execute(
         "select d.evaluacion, e.competencia, e.porcentaje, e.superior, f.descripcion \
-        from instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e, indicador_de_desempeno as f \
         where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcindicadores = cur4.fetchall()
 
