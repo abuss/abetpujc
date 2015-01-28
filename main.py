@@ -97,7 +97,7 @@ def show_periods():
     if len(periodos) == 0:
         per = 0
 
-    print(periodos)
+    #print(periodos)
 
     # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web
     entries = {'periodos': periodos, 'hayperiodos': per}
@@ -152,23 +152,24 @@ def asignatura(periodo, codigo, grupo):
 
 
     # Recupera (del servicio web) los estudiantes
-    cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
-    estudiantes = cur2.fetchall()
+    # cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
+    # estudiantes = cur2.fetchall()
     #for x in estudiantes:
      #   print x
-    # estudiantes = []
-    # p_periodo = "0940"
-    # group = "A"
-    # proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
-    # # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
-    # r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
-    # peval = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas", params=proof)
+    estudiantes = []
+    p_periodo = "0940"
+    group = grupo
+    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
+    # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
+    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
+    #peval = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas", params=proof)
 
-    # pevaljson =peval.json()
-    # proofjson =r.json()
-    # for x in proofjson:
-    #     estudiante = [x.values()[1].capitalize(),x.values()[2]]
-    #     estudiantes.append(estudiante)
+    #pevaljson =peval.json()
+    proofjson =r.json()
+    for x in proofjson:
+        #print (x)
+        estudiante = [x['nombre'].capitalize(),x['emplid']]
+        estudiantes.append(estudiante)
     estudiantes.sort()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -578,18 +579,18 @@ def notas(periodo, codigo, grupo):
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los estudiantes
-    cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
-    estudiantes = cur2.fetchall()
-    # estudiantes = []
-    # p_periodo = "0940"
-    # group = "A"
-    # proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
-    # r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
-    # proofjson =r.json()
-    # #proofjson.sort()
-    # for x in proofjson:
-    #     estudiante = [x.values()[1].capitalize(),x.values()[2]]
-    #     estudiantes.append(estudiante)
+    # cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
+    # estudiantes = cur2.fetchall()
+    estudiantes = []
+    p_periodo = "0940"
+    group = grupo
+    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
+    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
+    proofjson =r.json()
+    #proofjson.sort()
+    for x in proofjson:
+        estudiante = [x['nombre'].capitalize(),x['emplid']]
+        estudiantes.append(estudiante)
     
     estudiantes.sort()
 #    proofjson.sort()
