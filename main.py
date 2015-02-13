@@ -415,8 +415,11 @@ def guardarPesosInstrumentos(periodo, codigo, grupo):
             numeroEval = cur.fetchall()
             for j in range(len(resultados)):
                 #NEED FIX HERE!(ASK)
-                db.execute('insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (?,?,?,?,?,?)',
-                           [detalles[4], numeroEval[0][0], resultados[j][0], datos2[i - 1][j], 1, ''])
+                idnxt = db.execute('select max(Id) from porcentaje_abet')
+                nxtid = idnxt.fetchall();
+                #insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (1,1,'A',80,1);
+                db.execute('insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (?,?,?,?,?)',
+                           [detalles[4], numeroEval[0][0], resultados[j][0], datos2[i - 1][j], int(nxtid[0][0])+1])
                 db.commit()
 
         flash("Datos guardados")
@@ -455,7 +458,9 @@ def indicadores(periodo, codigo, grupo):
         from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, indicador_de_desempeno as f \
         where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcindicadores = cur3.fetchall()
-
+    print("Leer")
+    print (porcindicadores)
+    print("fin")
     # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
     inst = []
     i = 0
@@ -521,7 +526,7 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
     # Procesa los datos guardados en la base de datos, necesarios para hacer la insercion
     temp = []
     i = 0
-    while i < range(len(instrumentos)):
+    while i < len(instrumentos):
         temp1 = []
         resprog = instrumentos[i][0]
         temp1.append(instrumentos[i])
@@ -549,17 +554,25 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
                               request.form["indicador" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)][:5],
                               request.form["pesoind" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)]])
 
+    #REVISAR ESTO!!!
     # Elimina de la base de datos los registros viejos
-    #db.execute('delete from porcentaje_abet where asignatura=? and nivel=?', [detalles[4], 3])
-    #db.commit()
-
+    #db.execute('delete from porcentaje_abet where asignatura=? and nivel=?', [detalles[4],3])
+    db.execute('delete from porcentaje_abet where asignatura=? and (select dsak.Nivel from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) = ?', [detalles[4],3])
+    db.commit()
+    lol2 = db.execute('select dsak.Nivel from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia')
+    print("pruebas")
+    print(lol2.fetchall())
     # Inserta la nueva informacion en la base de datos
     for d in datos:
         if d[2] != '---':
-            db.execute('insert into porcentaje_abet values (?,?,?,?,?,?)',
-                       [detalles[4], d[0], d[2], int(d[3]), 3, d[1]])
+            #insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (1,1,'A',80,1);
+            #insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values() insert into porcentaje_abet values
+            idnxt = db.execute('select max(Id) from porcentaje_abet')
+            nxtid = idnxt.fetchall()
+            db.execute('INSERT into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (?,?,?,?,?)',
+                       [detalles[4], d[0], d[2], int(d[3]),nxtid[0][0]])
+            db.execute('INSERT OR IGNORE  into Descripcion_A_K values (?,?,?)',[ d[2], d[1],3])
     db.commit()
-
     # Recarga la pagina de los indicadores
     return redirect(url_for('indicadores', periodo=periodo, codigo=codigo, grupo=grupo))
 
