@@ -174,8 +174,8 @@ def asignatura(periodo, codigo, grupo):
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
-        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e, resultado_de_programa as f \
-        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and (select dsak.competencia from porcentaje_abet as e inner join Descripcion_A_K as dsak on e.Id_COMPETENCIA = dsak.id) = f.id and e.asignatura=? \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, resultado_de_programa as f \
+        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
             and f.carrera=? \
         order by d.id_evaluacion",
         [detalles[4], detalles[5]])
@@ -184,7 +184,7 @@ def asignatura(periodo, codigo, grupo):
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
     cur4 = db.execute(
         "select d.evaluacion, e.competencia, e.porcentaje, f.descripcion \
-        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e, resultado_de_programa as f \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, resultado_de_programa as f \
         where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 1")
     porcresultados = cur4.fetchall()
 
@@ -266,7 +266,7 @@ def asignatura(periodo, codigo, grupo):
     cur9 = db.execute(
         "select d.evaluacion, d.competencia, d.codigo_estudiante, d.nota, e.porcentaje \
         from nota_abet as d, porcentaje_abet as e \
-        where d.asignatura=? and d.nivel=1 and d.evaluacion = e.evaluacion and d.competencia = (select dsak.competencia from porcentaje_abet as e inner join Descripcion_A_K as dsak on e.Id_COMPETENCIA = dsak.id) \
+        where d.asignatura=? and d.nivel=1 and d.evaluacion = e.evaluacion and d.competencia = (select dsak.competencia from porcentaje_abet as e inner join Descripcion_A_K as dsak on e.Id_COMPETENCIA = dsak.competencia) \
         order by d.competencia",
         [detalles[4]])
     temp1 = cur9.fetchall()
@@ -274,7 +274,7 @@ def asignatura(periodo, codigo, grupo):
     for i in resultados:
         cur10 = db.execute(
             "select e.evaluacion, dsak.competencia, e.porcentaje \
-            from porcentaje_abet as e inner join Descripcion_A_K as dsak on e.Id_COMPETENCIA = dsak.id \
+            from porcentaje_abet as e inner join Descripcion_A_K as dsak on e.Id_COMPETENCIA = dsak.competencia \
             where asignatura=? and dsak.competencia=? \
             order by competencia",
             [detalles[4],i])
@@ -350,7 +350,7 @@ def instrumentos(periodo, codigo, grupo):
     # y porcentaje de evaluaciones y resultados de programa
     cur3 = db.execute(
         'select d.evaluacion, d.porcentaje, e.competencia, e.porcentaje, d.id_evaluacion \
-        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e\
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e\
         where d.asignatura = e.asignatura and d.id_evaluacion = e.evaluacion and e.nivel = 1 and d.asignatura=?',
         [detalles[4]]
         )
@@ -442,7 +442,7 @@ def indicadores(periodo, codigo, grupo):
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur2 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
-        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e, resultado_de_programa as f \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, resultado_de_programa as f \
         where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
             and f.carrera=? \
         order by d.id_evaluacion",
@@ -452,7 +452,7 @@ def indicadores(periodo, codigo, grupo):
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
     cur3 = db.execute(
         "select d.evaluacion, e.competencia, e.porcentaje, e.superior \
-        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e, indicador_de_desempeno as f \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, indicador_de_desempeno as f \
         where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcindicadores = cur3.fetchall()
 
@@ -513,7 +513,7 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
     # Recupera de la base de datos los resultados de programa del curso
     cur2 = db.execute(
         'select d.id_evaluacion, d.evaluacion, e.competencia \
-        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e \
         where d.id_evaluacion = e.evaluacion and e.porcentaje > 0 and e.nivel = 1 and d.asignatura=?',
         [detalles[4]])
     instrumentos = cur2.fetchall()
@@ -597,7 +597,7 @@ def notas(periodo, codigo, grupo):
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje \
-        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e, resultado_de_programa as f \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, resultado_de_programa as f \
         where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
         order by d.id_evaluacion",
         [detalles[4]])
@@ -606,7 +606,7 @@ def notas(periodo, codigo, grupo):
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
     cur4 = db.execute(
         "select d.evaluacion, e.competencia, e.porcentaje, e.superior, f.descripcion \
-        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e, indicador_de_desempeno as f \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, indicador_de_desempeno as f \
         where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcindicadores = cur4.fetchall()
 
@@ -695,7 +695,7 @@ def guardarNotas(periodo, codigo, grupo):
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.porcentaje \
         from instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
-        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and (select dsak.competencia from porcentaje_abet as e inner join Descripcion_A_K as dsak on e.Id_COMPETENCIA = dsak.id) = f.id \
+        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and (select dsak.competencia from porcentaje_abet as e inner join Descripcion_A_K as dsak on e.Id_COMPETENCIA = dsak.competencia) = f.id \
             and e.asignatura=? order by d.id_evaluacion",
         [detalles[4]])
     resprog = cur3.fetchall()
@@ -704,7 +704,7 @@ def guardarNotas(periodo, codigo, grupo):
     cur4 = db.execute(
         "select d.evaluacion, dsak.competencia, e.porcentaje, dsak.superior, f.descripcion, d.id_evaluacion \
         from instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f, Descripcion_A_K as dsak \
-        where d.id_evaluacion = e.evaluacion and dsak.id = e.Id_COMPETENCIA and f.id = dsak.competencia and dsak.nivel = 3")
+        where d.id_evaluacion = e.evaluacion and dsak.competencia = e.Id_COMPETENCIA and f.id = dsak.competencia and dsak.nivel = 3")
     porcentaje_indicadores = cur4.fetchall()
     copia_porcentaje_indicadores = porcentaje_indicadores[:]
 

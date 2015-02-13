@@ -61,19 +61,17 @@ CREATE TABLE ASIGNATURA
 );
 
 CREATE TABLE Descripcion_A_K  ( 
-	-- Id de la Descripcion
-	Id         	INTEGER PRIMARY KEY NOT NULL,
 	-- Ej. A, B.1, C.1.1
-	competencia	TEXT NOT NULL,
+	competencia	TEXT PRIMARY KEY NOT NULL,
 	--Id de la descripcion padre, niveles 2 o 3.
-	superior   	INTEGER,
+	superior   	TEXT,
 	-- Nivel 1 corresponde a A..K, 
 	-- Nivel 2 corresponde a A.1, A.2, H.1, ...
 	-- Nivel 3 corresponde a A.1.1, A.1.2, C.2.3, ...
 	-- Si es un nivel 1 es el papa en el arbol de jerarquia
 	Nivel      	INTEGER NOT NULL,
 	FOREIGN KEY(superior)
-	REFERENCES Descripcion_A_K(Id)
+	REFERENCES Descripcion_A_K(competencia)
 );
 
 CREATE TABLE ESTUDIANTE
@@ -213,16 +211,16 @@ CREATE TABLE PORCENTAJE_ABET  (
 	-- Id de la evaluacion.
 	EVALUACION    	INT NOT NULL,
 	-- Id de la competencia que se esta evaluando.
-	Id_COMPETENCIA	INTEGER NOT NULL,
+	Id_COMPETENCIA	TEXT NOT NULL,
 	--Porcentaje que se le da.
 	PORCENTAJE    	INT NOT NULL,
 	-- Id del porcentaje
-	Id           	INTEGER NOT NULL,
+	Id           	INTEGER,
 	-- Id de la pregunta.
 	Id_Pregunta   	INTEGER,
 	PRIMARY KEY(ASIGNATURA,EVALUACION,Id_COMPETENCIA),
 	FOREIGN KEY(Id_COMPETENCIA)
-	REFERENCES Descripcion_A_K(Id),
+	REFERENCES Descripcion_A_K(competencia),
 	FOREIGN KEY(Id_Pregunta)
 	REFERENCES Pregunta(Id),
 	FOREIGN KEY(ASIGNATURA, EVALUACION)
