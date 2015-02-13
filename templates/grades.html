@@ -50,7 +50,9 @@
             <td><h4>Facultad de Ingeniería<br>{{entries.detalles[6]}}</h4></td>
         </tr>
     </table>
-    <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET</h1>
+    <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET <form action="{{ url_for('logout')}}">
+        <input type=submit value='Log Out'>
+        </form></h1>
     <hr>
     <h4>{{ entries.detalles[0] }} - Grupo {{ entries.detalles[2] }}</h4>
     <h4>Período {{ entries.detalles[3] }}</h4>

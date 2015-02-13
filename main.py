@@ -414,7 +414,7 @@ def guardarPesosInstrumentos(periodo, codigo, grupo):
                              [datos1[i - 1][0], detalles[4]])
             numeroEval = cur.fetchall()
             for j in range(len(resultados)):
-                #NEED FIX HERE
+                #NEED FIX HERE!(ASK)
                 db.execute('insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (?,?,?,?,?,?)',
                            [detalles[4], numeroEval[0][0], resultados[j][0], datos2[i - 1][j], 1, ''])
                 db.commit()
@@ -513,7 +513,7 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
     # Recupera de la base de datos los resultados de programa del curso
     cur2 = db.execute(
         'select d.id_evaluacion, d.evaluacion, e.competencia \
-        from instrumento as d, porcentaje_abet as e \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.id) as e \
         where d.id_evaluacion = e.evaluacion and e.porcentaje > 0 and e.nivel = 1 and d.asignatura=?',
         [detalles[4]])
     instrumentos = cur2.fetchall()
@@ -550,8 +550,8 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
                               request.form["pesoind" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)]])
 
     # Elimina de la base de datos los registros viejos
-    db.execute('delete from porcentaje_abet where asignatura=? and nivel=?', [detalles[4], 3])
-    db.commit()
+    #db.execute('delete from porcentaje_abet where asignatura=? and nivel=?', [detalles[4], 3])
+    #db.commit()
 
     # Inserta la nueva informacion en la base de datos
     for d in datos:
