@@ -458,9 +458,6 @@ def indicadores(periodo, codigo, grupo):
         from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, indicador_de_desempeno as f \
         where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcindicadores = cur3.fetchall()
-    print("Leer")
-    print (porcindicadores)
-    print("fin")
     # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
     inst = []
     i = 0
@@ -557,11 +554,7 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
     #REVISAR ESTO!!!
     # Elimina de la base de datos los registros viejos
     #db.execute('delete from porcentaje_abet where asignatura=? and nivel=?', [detalles[4],3])
-    db.execute('delete from porcentaje_abet where asignatura=? and (select dsak.Nivel from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) = ?', [detalles[4],3])
-    db.commit()
-    lol2 = db.execute('select dsak.Nivel from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia')
-    print("pruebas")
-    print(lol2.fetchall())
+    
     # Inserta la nueva informacion en la base de datos
     for d in datos:
         if d[2] != '---':
@@ -569,9 +562,11 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
             #insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values() insert into porcentaje_abet values
             idnxt = db.execute('select max(Id) from porcentaje_abet')
             nxtid = idnxt.fetchall()
-            db.execute('INSERT into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (?,?,?,?,?)',
-                       [detalles[4], d[0], d[2], int(d[3]),nxtid[0][0]])
             db.execute('INSERT OR IGNORE  into Descripcion_A_K values (?,?,?)',[ d[2], d[1],3])
+            db.execute('INSERT or IGNORE into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (?,?,?,?,?)',
+                       [detalles[4], d[0], d[2], int(d[3]),nxtid[0][0]])
+            db.execute('UPDATE or IGNORE porcentaje_abet SET PORCENTAJE = ? where ASIGNATURA = ? and EVALUACION = ? and Id_COMPETENCIA = ? and Id = ?',
+                       [int(d[3]), detalles[4], d[0], d[2], nxtid[0][0]])
     db.commit()
     # Recarga la pagina de los indicadores
     return redirect(url_for('indicadores', periodo=periodo, codigo=codigo, grupo=grupo))
@@ -715,22 +710,23 @@ def guardarNotas(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
     cur4 = db.execute(
-        "select d.evaluacion, dsak.competencia, e.porcentaje, dsak.superior, f.descripcion, d.id_evaluacion \
-        from instrumento as d, porcentaje_abet as e, indicador_de_desempeno as f, Descripcion_A_K as dsak \
-        where d.id_evaluacion = e.evaluacion and dsak.competencia = e.Id_COMPETENCIA and f.id = dsak.competencia and dsak.nivel = 3")
+        "select d.evaluacion, e.competencia, e.porcentaje, e.superior, f.descripcion, d.id_evaluacion \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, indicador_de_desempeno as f \
+        where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcentaje_indicadores = cur4.fetchall()
     copia_porcentaje_indicadores = porcentaje_indicadores[:]
-
+    print("IND1: ", porcentaje_indicadores, "\n\n\nCOPIA", copia_porcentaje_indicadores, "IGUAL?", porcentaje_indicadores == copia_porcentaje_indicadores)
     # Recupera (de la base de datos) y procesa los datos de nombre de evaluaciones,
     # y porcentaje de evaluaciones y resultados de programa
     cur5 = db.execute(
         'select d.evaluacion, d.porcentaje, e.competencia, e.porcentaje, d.id_evaluacion \
-        from instrumento as d, porcentaje_abet as e \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e \
         where d.asignatura = e.asignatura and d.id_evaluacion = e.evaluacion and e.nivel = 1 and d.asignatura=?',
         [detalles[4]])
     instrumentos = []
     for row in cur5.fetchall():
         instrumentos.append(row)
+
 
     # Recupera (de la base de datos) el numero de evaluaciones
     cur6 = db.execute("select count(*) from instrumento where asignatura=?", [detalles[4]])
@@ -761,10 +757,11 @@ def guardarNotas(periodo, codigo, grupo):
             temp3 = []
 
             k = 0
+            #REVISAR ESTO
             while k < len(copia_porcentaje_indicadores):
                 if copia_porcentaje_indicadores[k][0] == temp1[j][0] and copia_porcentaje_indicadores[k][3] == temp1[j][2]:
                     temp2.append([copia_porcentaje_indicadores[k][1], copia_porcentaje_indicadores[k][2]])
-                    temp3.append(copia_porcentaje_indicadores[k][1])
+                    temp3.append(copia_porcentaje_indicadores[k][2])
                     del copia_porcentaje_indicadores[k]
                 else:
                     k = k + 1
@@ -773,9 +770,11 @@ def guardarNotas(periodo, codigo, grupo):
             temp4.append(temp3)
 
         indicadores.append(reduce(lambda x, y: x + y, temp4))
+        print("MAGIC: ",reduce(lambda x, y: x + y, temp4))
         pesos.append(temp5)
         evaluacion.append(numero)
 
+    print ("INDICADORES: ",indicadores)
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
     for i in range(1,len(indicadores)+1):
