@@ -576,7 +576,7 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
                        [int(d[3]), detalles[4], d[0], d[2], nxtid[0][0]])
     for r in registrados:
         if r not in datos:
-            db.execute('DELETE from porcentaje_abet where evaluacion = ? and Id_COMPETENCIA = ?',[r[0],r[2]])
+            db.execute('DELETE from porcentaje_abet where evaluacion = ? and Id_COMPETENCIA = ? and asignatura = ?',[r[0],r[2],detalles[4]])
     db.commit()
     # Recarga la pagina de los indicadores
     return redirect(url_for('indicadores', periodo=periodo, codigo=codigo, grupo=grupo))
