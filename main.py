@@ -162,15 +162,19 @@ def asignatura(periodo, codigo, grupo):
     proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
-    #peval = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas", params=proof)
-
-    #pevaljson =peval.json()
+    peval = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas", params=proof)
+    pevaljson =peval.json()
     proofjson =r.json()
     for x in proofjson:
         #print (x)
         estudiante = [x['nombre'].capitalize(),x['emplid']]
         estudiantes.append(estudiante)
     estudiantes.sort()
+
+
+    for p in pevaljson:
+        db.execute('UPDATE or IGNORE instrumento set porcentaje = ? where asignatura = ? and evaluacion = ?',[ detalles[4], p['descripcion'],p['porcentaje']])
+        db.commit()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
@@ -547,14 +551,17 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
         for j in range(len(temp[i])):
             numero = int(request.form['numeroDeFilas' + str(temp[i][j][0]) + str(temp[i][j][2])])
             for k in range(numero - 2):
-                datos.append([temp[i][j][0], temp[i][j][2],
+                datos.append((temp[i][j][0], temp[i][j][2],
                               request.form["indicador" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)][:5],
-                              request.form["pesoind" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)]])
+                              request.form["pesoind" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)]))
 
     #REVISAR ESTO!!!
     # Elimina de la base de datos los registros viejos
     #db.execute('delete from porcentaje_abet where asignatura=? and nivel=?', [detalles[4],3])
     
+    curmagico = db.execute('select e.evaluacion, e.superior ,e.Id_COMPETENCIA , cast(e.PORCENTAJE as text)   from (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e  where e.nivel = 3 and e.asignatura=?',[detalles[4]])
+    registrados = curmagico.fetchall()
+
     # Inserta la nueva informacion en la base de datos
     for d in datos:
         if d[2] != '---':
@@ -567,6 +574,9 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
                        [detalles[4], d[0], d[2], int(d[3]),nxtid[0][0]])
             db.execute('UPDATE or IGNORE porcentaje_abet SET PORCENTAJE = ? where ASIGNATURA = ? and EVALUACION = ? and Id_COMPETENCIA = ? and Id = ?',
                        [int(d[3]), detalles[4], d[0], d[2], nxtid[0][0]])
+    for r in registrados:
+        if r not in datos:
+            db.execute('DELETE from porcentaje_abet where evaluacion = ? and Id_COMPETENCIA = ?',[r[0],r[2]])
     db.commit()
     # Recarga la pagina de los indicadores
     return redirect(url_for('indicadores', periodo=periodo, codigo=codigo, grupo=grupo))
