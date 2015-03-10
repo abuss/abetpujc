@@ -614,7 +614,7 @@ def notas(periodo, codigo, grupo):
 #    proofjson.sort()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
-        "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje \
+        "select  distinct d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje \
         from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, resultado_de_programa as f \
         where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
         order by d.id_evaluacion",
@@ -627,30 +627,29 @@ def notas(periodo, codigo, grupo):
         from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, indicador_de_desempeno as f \
         where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcindicadores = cur4.fetchall()
-
     # Recupera (de la base de datos) la informacion de las notas de los indicadores ya contenida en la base de datos
     cur5 = db.execute(
         "select evaluacion, competencia, codigo_estudiante, nota from nota_abet where asignatura=? and nivel=3",
         [detalles[4]])
     notasInd = cur5.fetchall()
-
+    print("notasInd",notasInd)
+    print("resprog",resprog)
     # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
     inst = []
     indicadores = []
     i = 0
     while i < len(resprog):
         temp1 = []
-        numero = resprog[i][1]
-        temp1.append(resprog[i])
+        numero = resprog[i][1] #Id evaluacion
+        temp1.append(resprog[i]) #Evaluacion 
         if i >= len(resprog) - 1:
             break
         i = i + 1
         while numero == resprog[i][1]:
-            temp1.append(resprog[i])
+            temp1.append(resprog[i]) #Las competencias que faltan en la evaluacion que se esta revisando
             if i >= len(resprog) - 1:
                 break
             i = i + 1
-
         temp5 = 0
         temp6 = []
         temp8 = []
@@ -785,6 +784,7 @@ def guardarNotas(periodo, codigo, grupo):
         evaluacion.append(numero)
 
     print ("INDICADORES: ",indicadores)
+    print ("Evaluacion: ",evaluacion)
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
     for i in range(1,len(indicadores)+1):
@@ -794,6 +794,7 @@ def guardarNotas(periodo, codigo, grupo):
             if indicadores[j-1][0] != 0:
                 for k in range(len(indicadores[i-1])):
                     temp2.append(request.form["ind" + str(i) + str(estudiantes[j-1][1]) + str(k)])
+                    print("request form",request.form["ind" + str(i) + str(estudiantes[j-1][1]) + str(k)])
             temp1.append(temp2)
         datos.append(temp1)
 
