@@ -90,16 +90,16 @@
                                                 {% for l in entries.notas[i].keys() %}
                                                     {% for m in entries.notas[i][l].keys() %}
                                                         {% if k[0] == l and m == entries.indicadores[i-1][1][j] %}
-                                                            <td align="center"><input type="number" size="3" step="1" min="0" max="100" id="ind{{i}}{{k[0]}}{{j}}" name="ind{{i}}{{k[0]}}{{j}}" onchange="calcularNota()" value="{{entries.notas[i][l][m]}}"></td>
+                                                            <td align="center"><input type="number" size="3" step="1" min="0" max="100" id="ind{{i}}{{k[1]}}{{j}}" name="ind{{i}}{{k[0]}}{{j}}" onchange="calcularNota()" value="{{entries.notas[i][l][m]}}"></td>
                                                         {% endif %}
                                                     {% endfor %}
                                                 {% endfor %}
                                             {% else %}
-                                                <td align="center"><input type="number" size="3" step="1" min="0" max="100" id="ind{{i}}{{k[0]}}{{j}}" name="ind{{i}}{{k[0]}}{{j}}" onchange="calcularNota()"></td>
+                                                <td align="center"><input type="number" size="3" step="1" min="0" max="100" id="ind{{i}}{{k[1]}}{{j}}" name="ind{{i}}{{k[0]}}{{j}}" onchange="calcularNota()"></td>
                                             {% endif %}
                                         {% endfor %}
                                     <td width="10">&nbsp;</td>
-                                    <td id="nota{{i}}{{k[0]}}" align="center">0.0</td>
+                                    <td id="nota{{i}}{{k[1]}}" align="center">0.0</td>
                                 </tr>
                             {% endfor %}
                         {% endif %}
