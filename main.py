@@ -125,9 +125,20 @@ def show_courses(periodo):
         [periodo,session['id_prof'][0][0]])
     else:
         cur2 = db.execute(
-        "select nombre, codigo, grupo, periodo, id_carrera from asignatura where periodo=? order by nombre asc",
+        "select nombre, codigo, grupo, periodo, id_carrera, id from asignatura where periodo=? order by nombre asc",
         [periodo])
-    cursos = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3], carrera=row[4]) for row in cur2.fetchall()]
+    cursos = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3], carrera=row[4], id=row[5]) for row in cur2.fetchall()]
+    p_periodo = "0940"
+    #print (cursos)
+    for c in cursos:
+        proof = {'pCurso': c['cod'], 'pGrupo' : c['grupo'], 'pPeriodo' : p_periodo }
+        peval = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas", params=proof)
+        pevaljson =peval.json()
+        for p in pevaljson:
+            db.execute('INSERT OR IGNORE into instrumento  (asignatura, evaluacion, porcentaje) values (?,?,?)',[ c['id'], p['descripcion'],p['porcentaje']])
+            #print([ c['id'], p['descripcion'],p['porcentaje']])
+    
+    db.commit()
 
     vacio = 0
     # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web  
@@ -150,7 +161,6 @@ def asignatura(periodo, codigo, grupo):
         [codigo, grupo, periodo])
     detalles = cur1.fetchall()[0]
 
-
     # Recupera (del servicio web) los estudiantes
     # cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
     # estudiantes = cur2.fetchall()
@@ -162,8 +172,7 @@ def asignatura(periodo, codigo, grupo):
     proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
-    peval = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas", params=proof)
-    pevaljson =peval.json()
+    
     proofjson =r.json()
     for x in proofjson:
         #print (x)
@@ -171,20 +180,19 @@ def asignatura(periodo, codigo, grupo):
         estudiantes.append(estudiante)
     estudiantes.sort()
 
+   # print ([detalles[4], detalles[5]])
 
-    for p in pevaljson:
-        db.execute('UPDATE or IGNORE instrumento set porcentaje = ? where asignatura = ? and evaluacion = ?',[ detalles[4], p['descripcion'],p['porcentaje']])
-        db.commit()
+    
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
-    cur3 = db.execute(
-        "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
+    cur3 = db.execute("select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
         from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, resultado_de_programa as f \
-        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
+        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and d.asignatura=? \
             and f.carrera=? \
         order by d.id_evaluacion",
         [detalles[4], detalles[5]])
-    resprog = cur3.fetchall()
 
+    resprog = cur3.fetchall()
+    print(resprog)
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
     cur4 = db.execute(
         "select d.evaluacion, e.competencia, e.porcentaje, f.descripcion \
@@ -330,7 +338,8 @@ def instrumentos(periodo, codigo, grupo):
         from asignatura as d, acreditacion_abet as e \
         where d.codigo=? and d.grupo=? and d.periodo=? and d.id_carrera = e.id_carrera",
         [codigo, grupo, periodo])
-    detalles = cur1.fetchall()[0]
+    detalles = cur1.fetchall()
+    detalles = detalles[0]
 
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
     cur2 = db.execute(
@@ -559,9 +568,7 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
     # Elimina de la base de datos los registros viejos
     #db.execute('delete from porcentaje_abet where asignatura=? and nivel=?', [detalles[4],3])
     
-    curmagico = db.execute('select e.evaluacion, e.superior ,e.Id_COMPETENCIA , cast(e.PORCENTAJE as text)   from (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e  where e.nivel = 3 and e.asignatura=?',[detalles[4]])
-    registrados = curmagico.fetchall()
-
+    
     # Inserta la nueva informacion en la base de datos
     for d in datos:
         if d[2] != '---':
@@ -572,8 +579,11 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
             db.execute('INSERT OR IGNORE  into Descripcion_A_K values (?,?,?)',[ d[2], d[1],3])
             db.execute('INSERT or IGNORE into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (?,?,?,?,?)',
                        [detalles[4], d[0], d[2], int(d[3]),nxtid[0][0]])
-            db.execute('UPDATE or IGNORE porcentaje_abet SET PORCENTAJE = ? where ASIGNATURA = ? and EVALUACION = ? and Id_COMPETENCIA = ? and Id = ?',
+            db.execute('UPDATE porcentaje_abet SET PORCENTAJE = ? where ASIGNATURA = ? and EVALUACION = ? and Id_COMPETENCIA = ? and Id = ?',
                        [int(d[3]), detalles[4], d[0], d[2], nxtid[0][0]])
+
+    curmagico = db.execute('select e.evaluacion, e.superior ,e.Id_COMPETENCIA , cast(e.PORCENTAJE as text)   from (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e  where e.nivel = 3 and e.asignatura=?',[detalles[4]])
+    registrados = curmagico.fetchall()
     for r in registrados:
         if r not in datos:
             db.execute('DELETE from porcentaje_abet where evaluacion = ? and Id_COMPETENCIA = ? and asignatura = ?',[r[0],r[2],detalles[4]])
@@ -632,8 +642,8 @@ def notas(periodo, codigo, grupo):
         "select evaluacion, competencia, codigo_estudiante, nota from nota_abet where asignatura=? and nivel=3",
         [detalles[4]])
     notasInd = cur5.fetchall()
-    print("notasInd",notasInd)
-    print("resprog",resprog)
+    #print("notasIndcarga",notasInd)
+    #print("resprogcarga",resprog)
     # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
     inst = []
     indicadores = []
@@ -705,18 +715,29 @@ def guardarNotas(periodo, codigo, grupo):
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los estudiantes
-    cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre desc", [detalles[4]])
-    estudiantes = cur2.fetchall()
-
+    #cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre desc", [detalles[4]])
+    #estudiantes = cur2.fetchall()
+    estudiantes = []
+    p_periodo = "0940"
+    group = grupo
+    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
+    # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
+    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
+    proofjson =r.json()
+    for x in proofjson:
+        #print (x)
+        estudiante = [x['nombre'].capitalize(),x['emplid']]
+        estudiantes.append(estudiante)
+    estudiantes.sort()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
-        "select d.evaluacion, d.id_evaluacion, e.porcentaje \
-        from instrumento as d, porcentaje_abet as e, resultado_de_programa as f \
-        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and (select dsak.competencia from porcentaje_abet as e inner join Descripcion_A_K as dsak on e.Id_COMPETENCIA = dsak.competencia) = f.id \
+        "select d.evaluacion, d.id_evaluacion, e.superior, e.porcentaje \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, resultado_de_programa as f \
+        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.superior = f.id \
             and e.asignatura=? order by d.id_evaluacion",
         [detalles[4]])
     resprog = cur3.fetchall()
-
+    #print("resprog",resprog)
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
     cur4 = db.execute(
         "select d.evaluacion, e.competencia, e.porcentaje, e.superior, f.descripcion, d.id_evaluacion \
@@ -724,7 +745,7 @@ def guardarNotas(periodo, codigo, grupo):
         where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3")
     porcentaje_indicadores = cur4.fetchall()
     copia_porcentaje_indicadores = porcentaje_indicadores[:]
-    print("IND1: ", porcentaje_indicadores, "\n\n\nCOPIA", copia_porcentaje_indicadores, "IGUAL?", porcentaje_indicadores == copia_porcentaje_indicadores)
+    #print("IND1: ", porcentaje_indicadores, "\n\n\nCOPIA", copia_porcentaje_indicadores, "IGUAL?", porcentaje_indicadores == copia_porcentaje_indicadores)
     # Recupera (de la base de datos) y procesa los datos de nombre de evaluaciones,
     # y porcentaje de evaluaciones y resultados de programa
     cur5 = db.execute(
@@ -736,65 +757,75 @@ def guardarNotas(periodo, codigo, grupo):
     for row in cur5.fetchall():
         instrumentos.append(row)
 
-
+    #print(instrumentos)
     # Recupera (de la base de datos) el numero de evaluaciones
     cur6 = db.execute("select count(*) from instrumento where asignatura=?", [detalles[4]])
     numevals = cur6.fetchall()
-
     # Procesa los datos de los indicadores de evaluacion, incluyendo la informacion previamente guardada
     indicadores = []
     pesos = []
     evaluacion = []
     i = 0
+    #print(resprog)
+    #print("copia_porcentaje_indicadores", copia_porcentaje_indicadores)
     while i < len(resprog):
         temp1 = []
         numero = resprog[i][1]
-        temp1.append(resprog[i])
+        temp1.append(resprog[i])#Temp1 ej: [('Talleres', 31, 'A', 30), ('Talleres', 31, 'J', 70)]
+
         if i >= len(resprog) - 1:
             break
         i += 1
+        
         while numero == resprog[i][1]:
             temp1.append(resprog[i])
+            print(resprog[i])
             if i >= len(resprog) - 1:
                 break
             i += 1
-
+        print(temp1)
         temp4 = []
         temp5 = []
         for j in range(len(temp1)):
             temp2 = []
             temp3 = []
-
             k = 0
             #REVISAR ESTO
             while k < len(copia_porcentaje_indicadores):
                 if copia_porcentaje_indicadores[k][0] == temp1[j][0] and copia_porcentaje_indicadores[k][3] == temp1[j][2]:
                     temp2.append([copia_porcentaje_indicadores[k][1], copia_porcentaje_indicadores[k][2]])
                     temp3.append(copia_porcentaje_indicadores[k][2])
+                    #print("COSAS",[copia_porcentaje_indicadores[k][1], copia_porcentaje_indicadores[k][2]])
                     del copia_porcentaje_indicadores[k]
                 else:
                     k = k + 1
             for l in range(len(temp2)):
+                #print(temp2[l][1],"*",temp1[j][3],"/",10000,"=",temp2[l][1]*temp1[j][3]/10000)
                 temp5.append(temp2[l][1]*temp1[j][3]/10000)
             temp4.append(temp3)
 
+        print(temp4,"reduce",reduce(lambda x, y: x + y, temp4))
         indicadores.append(reduce(lambda x, y: x + y, temp4))
-        print("MAGIC: ",reduce(lambda x, y: x + y, temp4))
+        #print("MAGIC: ",reduce(lambda x, y: x + y, temp4))
         pesos.append(temp5)
         evaluacion.append(numero)
+        print(indicadores, pesos, evaluacion)
 
-    print ("INDICADORES: ",indicadores)
-    print ("Evaluacion: ",evaluacion)
+    #print ("INDICADORES: ",indicadores)
+    #print ("Evaluacion: ",evaluacion)
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
-    for i in range(1,len(indicadores)+1):
+    #print(request.form)
+    print(estudiantes)
+    for i in range(len(indicadores)):
         temp1 = []
-        for j in range(1,len(estudiantes)+1):
+        for j in range(len(estudiantes)):
             temp2 = []
             if indicadores[j-1][0] != 0:
                 for k in range(len(indicadores[i-1])):
-                    temp2.append(request.form["ind" + str(i) + str(estudiantes[j-1][1]) + str(k)])
-                    print("request form",request.form["ind" + str(i) + str(estudiantes[j-1][1]) + str(k)])
+                    print("ind" + str(i+1) + str(estudiantes[j-1][0]) + str(k))
+                    #temp2.append(request.form["ind" + str(i) + str(estudiantes[j-1][0]) + str(k)])
+                    #print("request form",request.form["ind" + str(i) + str(estudiantes[j-1][0]) + str(k)])
             temp1.append(temp2)
         datos.append(temp1)
 

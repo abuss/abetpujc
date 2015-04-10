@@ -261,6 +261,7 @@ insert into formula values ('J',11,3);
 insert into formula values ('K',11,2);
 
 /* Definicion de la Calificacion General */
+/*
 insert into instrumento (asignatura, evaluacion, porcentaje) values (1,'Parcial 1',20);
 insert into instrumento (asignatura, evaluacion, porcentaje) values (1,'Parcial 2',20);
 insert into instrumento (asignatura, evaluacion, porcentaje) values (1,'Parcial 3',20);
@@ -342,7 +343,7 @@ insert into instrumento (asignatura, evaluacion, porcentaje) values (11,'Tareas,
 insert into instrumento (asignatura, evaluacion, porcentaje) values (11,'Primer Parcial',25);
 insert into instrumento (asignatura, evaluacion, porcentaje) values (11,'Segundo Parcial',25);
 insert into instrumento (asignatura, evaluacion, porcentaje) values (11,'Tercer Parcial',25);
-
+*/
 /* Definicion de la Calificacion ABET */
 insert into Descripcion_A_K (competencia, Nivel) values ('A',1);
 insert into Descripcion_A_K (competencia, Nivel) values ('B',1);
