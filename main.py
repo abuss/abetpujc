@@ -55,6 +55,39 @@ def get_db():
         g.sqlite_db = connect_db()
     return g.sqlite_db
 
+def get_students(periodo, grupo,codigo):
+     #   print x
+    estudiantes = []
+    p_periodo = periodo
+    group = grupo
+    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
+    # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
+    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
+    
+    proofjson =r.json()
+    for x in proofjson:
+        #print (x)
+        estudiante = [x['nombre'].capitalize(),int(x['emplid'])]
+        estudiantes.append(estudiante)
+
+    for e in estudiantes:
+        nombre = e[0].rsplit(' ')
+        if len(nombre) >3 :
+            temp1 = nombre[0].capitalize()
+            temp2 = nombre[1].capitalize()
+            nombre[0] = nombre[2].capitalize()
+            nombre[1] = nombre[3].capitalize()
+            nombre[2] = temp1
+            nombre[3] = temp2
+        else:
+            temp1 = nombre[0].capitalize()
+            nombre[0] = nombre[1].capitalize()
+            nombre[1] = nombre[2].capitalize()
+            nombre[2] = temp1
+        e[0] = reduce(lambda x,y:x+' '+y, nombre)
+    estudiantes.sort()
+    return estudiantes
+
 def login_required(f):
    @wraps(f)
    def wrap(*args, **kwargs):
@@ -156,25 +189,10 @@ def asignatura(periodo, codigo, grupo):
     # estudiantes = cur2.fetchall()
     #for x in estudiantes:
      #   print x
-    estudiantes = []
     p_periodo = "0940"
-    group = grupo
-    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
-    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
-    peval = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas", params=proof)
-    pevaljson =peval.json()
-    proofjson =r.json()
-    for x in proofjson:
-        #print (x)
-        estudiante = [x['nombre'].capitalize(),x['emplid']]
-        estudiantes.append(estudiante)
-    estudiantes.sort()
+    estudiantes = get_students(p_periodo,grupo,codigo)
 
-
-    for p in pevaljson:
-        db.execute('UPDATE or IGNORE instrumento set porcentaje = ? where asignatura = ? and evaluacion = ?',[ detalles[4], p['descripcion'],p['porcentaje']])
-        db.commit()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
@@ -554,9 +572,7 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
                               request.form["indicador" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)][:5],
                               request.form["pesoind" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)]))
 
-    #REVISAR ESTO!!!
-    # Elimina de la base de datos los registros viejos
-    #db.execute('delete from porcentaje_abet where asignatura=? and nivel=?', [detalles[4],3])
+   
     
     # Inserta la nueva informacion en la base de datos
     for d in datos:
@@ -596,19 +612,11 @@ def notas(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los estudiantes
     # cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
-    # estudiantes = cur2.fetchall()
     estudiantes = []
     p_periodo = "0940"
-    group = grupo
-    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
-    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
-    proofjson =r.json()
-    #proofjson.sort()
-    for x in proofjson:
-        estudiante = [x['nombre'].capitalize(),x['emplid']]
-        estudiantes.append(estudiante)
-    
-    estudiantes.sort()
+    proof = {'pCurso': codigo, 'pGrupo' : grupo, 'pPeriodo' : p_periodo }
+    estudiantes = get_students(p_periodo,grupo,codigo)
+
 #    proofjson.sort()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -631,6 +639,15 @@ def notas(periodo, codigo, grupo):
         "select evaluacion, competencia, codigo_estudiante, nota from nota_abet where asignatura=? and nivel=3",
         [detalles[4]])
     notasInd = cur5.fetchall()
+    cur6 = db.execute(
+        "select  distinct d.id_evaluacion \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, resultado_de_programa as f \
+        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
+        order by d.id_evaluacion",
+        [detalles[4]])
+    supinst = cur6.fetchall()
+    supinst = reduce(lambda x,y:x+y, supinst)
+    #print(supinst)
     #print("notasInd",notasInd)
    # print("resprog",resprog)
     # Procesa los datos de los instrumentos de evaluacion, incluyendo la informacion previamente guardada
@@ -677,17 +694,38 @@ def notas(periodo, codigo, grupo):
 
         indicadores.append([temp5, reduce(lambda x, y: x + y, temp6), reduce(lambda x, y: x + y, temp8), temp9])
         inst.append(temp1)
-
+   # print("indicadores",indicadores)
+   # print("inst",inst)
     # Procesa los datos de las notas guardadas previamente
+    #print("notas ind",notasInd)#id,competencia,codigo,nota
+#[(e[1],{}) for e in estudiantes]
+   # supinst = list(supinst)
+
+   # notas = dict([(ind,{}) for ind in supinst])
+
+    #for nota in notas:
+     #   notas[nota] = dict( [(e[1],{}) for e in estudiantes])
+        #print(nota)
+    #notasp = dict( [(e[1],{}) for e in estudiantes])
+    #print(notasp)
+    #print (notas)
+    #for i in notas:
+     #   i = dict([(e[1],{}) for e in estudiantes])
+    tempnota = nota[0][0]
+    nots = 1
+    #for nota in notasInd:
+     #   while tempnota =:
+      #      pass
+
+
     notas = {}
     for i in range(1,len(inst)+1):
         notas[i]=dict([(e[1],{}) for e in estudiantes])
 
-    #print (notas)
     for (x,y,z,w) in notasInd:
-        notas[x][z][y] = w
-        print(x,"\n",z ,"\n","y=",y,"\n",w)
-
+        notas[x][z][y] = w #x es el instrumento, z es el codigo del estudiante, y es la subcompetencia, w es la nota
+        #continue
+        #print("x= ",x," z= ",z ," y= ",y," w= ",w)
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
                'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas}
@@ -710,18 +748,10 @@ def guardarNotas(periodo, codigo, grupo):
     # Recupera (de la base de datos) los estudiantes
     #cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre desc", [detalles[4]])
     #estudiantes = cur2.fetchall()
-    estudiantes = []
     p_periodo = "0940"
-    group = grupo
-    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
-    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
-    proofjson =r.json()
-    for x in proofjson:
-        #print (x)
-        estudiante = [x['nombre'].capitalize(),x['emplid']]
-        estudiantes.append(estudiante)
-    estudiantes.sort()
+    estudiantes = get_students(p_periodo,grupo,codigo)
+
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.superior, e.porcentaje \
@@ -744,6 +774,7 @@ def guardarNotas(periodo, codigo, grupo):
         where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 3 and d.asignatura = ?",[detalles[4]])
     porcentaje_indicadores = cur4.fetchall()
     copia_porcentaje_indicadores = porcentaje_indicadores[:]
+    #print("porcentaje_indicadores",porcentaje_indicadores)
     #print("IND1: ", porcentaje_indicadores, "\n\n\nCOPIA", copia_porcentaje_indicadores, "IGUAL?", porcentaje_indicadores == copia_porcentaje_indicadores)
     # Recupera (de la base de datos) y procesa los datos de nombre de evaluaciones,
     # y porcentaje de evaluaciones y resultados de programa
@@ -793,17 +824,18 @@ def guardarNotas(periodo, codigo, grupo):
             while k < len(copia_porcentaje_indicadores):
                 if copia_porcentaje_indicadores[k][0] == temp1[j][0] and copia_porcentaje_indicadores[k][3] == temp1[j][2]:
                     temp2.append([copia_porcentaje_indicadores[k][1], copia_porcentaje_indicadores[k][2]])
-                    temp3.append(copia_porcentaje_indicadores[k][2])
+                    temp3.append(copia_porcentaje_indicadores[k][1])
                     #print("COSAS",[copia_porcentaje_indicadores[k][1], copia_porcentaje_indicadores[k][2]])
                     del copia_porcentaje_indicadores[k]
                 else:
                     k = k + 1
+            
             for l in range(len(temp2)):
                 #print(temp2[l][1],"*",temp1[j][3],"/",10000,"=",temp2[l][1]*temp1[j][3]/10000)
                 temp5.append(temp2[l][1]*temp1[j][3]/10000)
             temp4.append(temp3)
 
-        print(temp4,"reduce",reduce(lambda x, y: x + y, temp4))
+        #print(temp4,"reduce",reduce(lambda x, y: x + y, temp4))
         indicadores.append(reduce(lambda x, y: x + y, temp4))
         #print("MAGIC: ",reduce(lambda x, y: x + y, temp4))
         pesos.append(temp5)
@@ -816,20 +848,20 @@ def guardarNotas(periodo, codigo, grupo):
     datos = []
     #print(request.form)
     #print("ind:", indicadores)
-    for i in range(len(estudiantes)):
+    for i in range(len(indicadores)):
         temp1 = []
-        for j in range(len(indicadores)):
+        for j in range(len(estudiantes)):
             temp2 = []
-            for k in range(len(indicadores[j])):
+            for k in range(len(indicadores[i])):
                 #print("ind" + str(j+1) + str(estudiantes[i][0]) + str(k))
-                if request.form["ind" + str(j+1) + str(estudiantes[i][0]) + str(k)] == "" :
-                    temp2.append(0)
+                if request.form["ind" + str(i+1) + str(estudiantes[j][0]) + str(k)] == "" :
+                    temp2.append("0")
                 else:    
-                    temp2.append(int(request.form["ind" + str(j+1) + str(estudiantes[i][0]) + str(k)]))
-                    print("request form",request.form["ind" + str(j+1) + str(estudiantes[i][0]) + str(k)])
+                    temp2.append(request.form["ind" + str(i+1) + str(estudiantes[j][0]) + str(k)])
+                    #print("request form",str(estudiantes[j][0]),request.form["ind" + str(i+1) + str(estudiantes[j][0]) + str(k)])
             temp1.append(temp2)
         datos.append(temp1)
-    print(datos)
+    #print(datos)
     # Elimina de la base de datos los registros viejos
    # db.execute('delete from nota_abet where asignatura=?',[detalles[4]])
     #db.execute('delete from nota_instrumento where asignatura=?',[detalles[4]])
@@ -843,7 +875,7 @@ def guardarNotas(periodo, codigo, grupo):
     for d in range(len(datos)):
         n = m
         if m < len(porcentaje_indicadores):
-            temp1 = porcentaje_indicadores[m][0]
+            temp1 = porcentaje_indicadores[m][0] #Nombre evaluacion
         # Ciclo para los estudiantes (filas)
         for e in range(len(datos[d])):
             if datos[d][e] == []:
@@ -853,88 +885,114 @@ def guardarNotas(periodo, codigo, grupo):
 
                 # Procesa e inserta los valores de los indicadores
                 for i in range(len(datos[d][e])):
-                    if datos[d][e][i] != u'':
+                    #print(indicadores[d][i], estudiantes[e][1], int(datos[d][e][i]))
+                    if not db.execute("select CODIGO_ESTUDIANTE from nota_abet where CODIGO_ESTUDIANTE = ? and NIVEL = 3 and COMPETENCIA = ?",[estudiantes[e][1],indicadores[d][i]]).fetchall() :
                         db.execute(
-                            "insert or IGNORE into nota_abet values (?,?,?,?,?,?)",
+                            "insert into nota_abet values (?,?,?,?,?,?)",
                             [detalles[4], evaluacion[d], indicadores[d][i], 3, estudiantes[e][1], int(datos[d][e][i])])
-                        db.execute(
-                            #ASIGNATURA EVALUACION COMPETENCIA NIVEL CODIGO_ESTUDIANTE NOTA
-                            "update or IGNORE nota_abet set NOTA = ? where asignatura = ? and codigo_estudiante = ?",
-                            [int(datos[d][e][i]),detalles[4],estudiantes[e][1]])
-
-                        definitiva_instrumento += (5.0*int(datos[d][e][i])*pesos[d][i]/100)
+                        #print("Subind",indicadores[d][i], 3, estudiantes[e][1], int(datos[d][e][i]))
                     else:
                         db.execute(
-                            "insert or IGNORE into nota_abet (asignatura, evaluacion, competencia, nivel, codigo_estudiante) \
-                            values (?,?,?,?,?)",
-                            [detalles[4], evaluacion[d], indicadores[d][i], 3, estudiantes[e][1]])
-                        db.execute(
-                            "update or IGNORE nota_abet set NOTA = ? where asignatura = ? and codigo_estudiante = ?",
+                            #ASIGNATURA EVALUACION COMPETENCIA NIVEL CODIGO_ESTUDIANTE NOTA
+                            "update nota_abet set NOTA = ? where asignatura = ? and codigo_estudiante = ? and NIVEL = 3",
                             [int(datos[d][e][i]),detalles[4],estudiantes[e][1]])
 
+                    definitiva_instrumento += (5.0*int(datos[d][e][i])*pesos[d][i]/100)
+                    #print(definitiva_instrumento)
                 # Procesa e inserta los valores de los resultados de programa
                 m = n
                 resultado = 0.0
                 o = 0
                 if m < len(porcentaje_indicadores):
-                    temp2 = porcentaje_indicadores[m][3]
+                    temp2 = porcentaje_indicadores[m][3]#Es la competencia
                     while temp1 == porcentaje_indicadores[m][0]:
                         if temp2 == porcentaje_indicadores[m][3]:
-                            if datos[d][e][o] != '':
+                            if datos[d][e][o] != "0":
                                 resultado += 5*int(datos[d][e][o])*porcentaje_indicadores[m][2]/10000
+                                #print(temp2,resultado)
                             m += 1
                             o += 1
                         else:
-                            db.execute(
-                                "insert or IGNORE into nota_abet values (?,?,?,?,?,?)",
-                                [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], round(resultado,1)])                            
-                            db.execute(
-                            "update or IGNORE nota_abet set NOTA = ? where asignatura = ? and codigo_estudiante = ?",
-                            [int(datos[d][e][i]),detalles[4],estudiantes[e][1]])
+                            if not db.execute("select CODIGO_ESTUDIANTE from nota_abet where CODIGO_ESTUDIANTE = ? and NIVEL = 1 and competencia = ?",[estudiantes[e][1],temp2]).fetchall() :
+                                db.execute(
+                                    "insert or IGNORE into nota_abet values (?,?,?,?,?,?)",
+                                    [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], round(resultado,1)])
+                                #print(temp2,estudiantes[e][1], round(resultado,1))                            
+                            else:
+                                db.execute(
+                                "update or IGNORE nota_abet set NOTA = ? where asignatura = ? and codigo_estudiante = ? and nivel = 1",
+                                [int(datos[d][e][i]),detalles[4],estudiantes[e][1]])
                             resultado = 0.0
                             temp2 = porcentaje_indicadores[m][3]
                         if m >= len(porcentaje_indicadores):
+                            if not db.execute("select CODIGO_ESTUDIANTE from nota_abet where CODIGO_ESTUDIANTE = ? and NIVEL = 1 and competencia = ?",[estudiantes[e][1],temp2]).fetchall() :
+                                db.execute(
+                                    "insert or IGNORE into nota_abet values (?,?,?,?,?,?)",
+                                    [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], round(resultado,1)])
+                                #print(temp2,estudiantes[e][1], round(resultado,1))                            
+                            else:
+                                db.execute(
+                                "update or IGNORE nota_abet set NOTA = ? where asignatura = ? and codigo_estudiante = ? and nivel = 1",
+                                [int(datos[d][e][i]),detalles[4],estudiantes[e][1]])
                             break
 
-                    db.execute(
-                        "insert or IGNORE into nota_abet values (?,?,?,?,?,?)",
-                        [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], round(resultado,1)])
-                    db.execute(
-                            "update or IGNORE nota_abet set NOTA = ? where asignatura = ? and codigo_estudiante = ?",
-                            [int(datos[d][e][i]),detalles[4],estudiantes[e][1]])
+                    """if not db.execute("select CODIGO_ESTUDIANTE from nota_abet where CODIGO_ESTUDIANTE = ? and NIVEL = 1",[estudiantes[e][1]]).fetchall() :
+                        db.execute(
+                            "insert or IGNORE into nota_abet values (?,?,?,?,?,?)",
+                            [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], round(resultado,1)])
+                        print(temp2,estudiantes[e][1], round(resultado,1)) 
+                    else:
+                        db.execute(
+                            "update or IGNORE nota_abet set NOTA = ? where asignatura = ? and codigo_estudiante = ? and nivel = 1",
+                                [int(datos[d][e][i]),detalles[4],estudiantes[e][1]])"""
 
                 # Inserta el valor de la nota definitiva de las evaluaciones
-                db.execute(
-                    "insert or IGNORE into nota_instrumento values (?,?,?,?)",
-                    [detalles[4], evaluacion[d], estudiantes[e][1], round(definitiva_instrumento,1)])
-                db.execute(
-                    #ASIGNATURA EVALUACION CODIGO_ESTUDIANTE NOTA
-                    "update or IGNORE nota_abet set NOTA = ? where asignatura = ? and codigo_estudiante = ?",
-                    [round(definitiva_instrumento,1),detalles[4],estudiantes[e][1]])
+                if not db.execute("select CODIGO_ESTUDIANTE from nota_instrumento where CODIGO_ESTUDIANTE = ?",[estudiantes[e][1]]).fetchall() :
+                    db.execute(
+                        "insert or IGNORE into nota_instrumento values (?,?,?,?)",
+                        [detalles[4], evaluacion[d], estudiantes[e][1], round(definitiva_instrumento/m,1)])
+                    #print("nota instrumento",estudiantes[e][1], round(definitiva_instrumento/m,1)) 
+                else:
+                    db.execute(
+                        #ASIGNATURA EVALUACION CODIGO_ESTUDIANTE NOTA
+                        "update or IGNORE nota_abet set NOTA = ? where asignatura = ? and codigo_estudiante = ?",
+                        [round(definitiva_instrumento,1),detalles[4],estudiantes[e][1]])
 
-                definitiva_asignatura.append([definitiva_instrumento, evaluacion[d], estudiantes[e][1]])
+                definitiva_asignatura.append([definitiva_instrumento/m, evaluacion[d], estudiantes[e][1]])
         db.commit()
 
     # Procesa e inserta la nueva informacion de nota definitiva de una asignatura en la base de datos
     porcentajes_instrumentos = []
     for i in range(0, len(instrumentos), int(len(instrumentos)/numevals[0][0])):
         porcentajes_instrumentos.append(instrumentos[i])
-    definitiva_asignatura = sorted(definitiva_asignatura, key=itemgetter(2))
+    #print(porcentajes_instrumentos)
+    #print("definitiva_asignatura",definitiva_asignatura)
+   # definitiva_asignatura = sorted(definitiva_asignatura, key=itemgetter(2))
+    #print("definitiva_asignatura",definitiva_asignatura)
     j = 0
     for i in range(len(estudiantes)):
         nota_def = 0.0
         est = estudiantes[i][1]
-        if j >= len(definitiva_asignatura) - 1:
-                break
+        #print("DEF",len(definitiva_asignatura))
+        #print(est,definitiva_asignatura[j][2])
         while est == definitiva_asignatura[j][2]:
+            w = j
             for k in porcentajes_instrumentos:
-                if k[4] == definitiva_asignatura[j][1]:
-                    nota_def += definitiva_asignatura[j][0] * k[1] / 100
+                #print(definitiva_asignatura[w],w)
+                #print(k[4], "==", definitiva_asignatura[w][1])
+                if k[4] == definitiva_asignatura[w][1]:
+                    #print(nota_def,"+=",definitiva_asignatura[w][0], "*", k[1], "/", 100)
+                    nota_def += definitiva_asignatura[w][0] * k[1] / 100
+                w += 8            
             j += 1
-            if j >= len(definitiva_asignatura) - 1:
+            if j >= len(definitiva_asignatura)-1:
                 break
-        db.execute("insert or IGNORE into nota_definitiva values (?,?,?)", [detalles[4], estudiantes[i][1], round(nota_def,1)])
-        db.execute("update or IGNORE nota_definitiva set NOTA = ? where asignatura = ? and codigo_estudiante = ?", [round(nota_def,1),detalles[4], estudiantes[i][1]])
+
+        if not db.execute("select CODIGO_ESTUDIANTE from nota_definitiva where CODIGO_ESTUDIANTE = ? ",[estudiantes[e][1]]).fetchall() :
+            db.execute("insert or IGNORE into nota_definitiva values (?,?,?)", [detalles[4], estudiantes[i][1], round(nota_def,1)])
+            print("definitiva",estudiantes[i][1], round(nota_def,1))
+        else:
+            db.execute("update or IGNORE nota_definitiva set NOTA = ? where asignatura = ? and codigo_estudiante = ?", [round(nota_def,1),detalles[4], estudiantes[i][1]])
         db.commit()
 
     # Recarga la pagina de los indicadores
