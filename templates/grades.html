@@ -10,6 +10,7 @@
      	    width: 800px;
     	}
     </style>
+    <script src="js/lib/angular.min.js"></script>
     <script>
         $(function() {
             $( "#tabs" ).tabs();
@@ -26,7 +27,7 @@
     <script>
         var calcularNota = function(event) {
             {% for i in range(1,entries.numinstrumentos+1) %}
-                {% for j in entries.notas[i].keys() %}
+                {% for j in entries.notas[entries.idinst[i-1]].keys() %}
                     {% if entries.indicadores[i-1][0] > 0 %}
                         var total = 0
                         {% for k in range(0,entries.indicadores[i-1][0]) %}
@@ -40,7 +41,7 @@
     </script>
 </head>
 
-<body onload="calcularNota()">
+<body onload="calcularNota()" ng-app="Notas">
 <div class=page>
     {% block body %}
     <table>
@@ -79,18 +80,18 @@
                         {% if entries.numestudiantes > 0 %}
                             {% for k in entries.estudiantes %}
                                 <tr>
-                                    {% for j in entries.notas[i].keys() %}
+                                    {% for j in entries.notas[entries.idinst[i-1]].keys() %}
                                         {% if j == k[1] %}
                                             <td>{{k[0]}}</td>
                                         {% endif %}
                                     {% endfor %}
                                     <td width="10">&nbsp;</td>
                                         {% for j in range(0,entries.indicadores[i-1][0]) %}
-                                            {% if entries.notas[i][k[1]] != {} %}
-                                                {% for l in entries.notas[i].keys() %}
-                                                    {% for m in entries.notas[i][l].keys() %}
-                                                        {% if k[0] == l and m == entries.indicadores[i-1][1][j] %}
-                                                            <td align="center"><input type="number" size="3" step="1" min="0" max="100" id="ind{{i}}{{k[1]}}{{j}}" name="ind{{i}}{{k[0]}}{{j}}" onchange="calcularNota()" value="{{entries.notas[i][l][m]}}"></td>
+                                            {% if entries.notas[entries.idinst[i-1]][k[1]] != {} %}
+                                                {% for l in entries.notas[entries.idinst[i-1]].keys() %}
+                                                    {% for m in entries.notas[entries.idinst[i-1]][l].keys() %}
+                                                        {% if k[1] == l and m == entries.indicadores[i-1][1][j] %}
+                                                            <td align="center"><input type="number" size="3" step="1" min="0" max="100" id="ind{{i}}{{k[1]}}{{j}}" name="ind{{i}}{{k[0]}}{{j}}" onchange="calcularNota()" value="{{entries.notas[entries.idinst[i-1]][l][m]}}"></td>
                                                         {% endif %}
                                                     {% endfor %}
                                                 {% endfor %}
@@ -117,4 +118,6 @@
     </form>
     {% endblock %}
 </div>
+
+    <script src="js/app.js"></script>
 </body>

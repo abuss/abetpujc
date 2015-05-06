@@ -212,10 +212,10 @@ def asignatura(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) la informacion de las notas de los indicadores ya contenida en la base de datos
     cur5 = db.execute(
-        "select evaluacion, competencia, codigo_estudiante, nota from nota_abet where asignatura=? and nivel=1",
+        "select evaluacion, codigo_estudiante,competencia, nota from nota_abet where asignatura=? and nivel=1",
         [detalles[4]])
     notasInd = cur5.fetchall()
-
+    #print(notasInd)
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
     cur6 = db.execute(
         "select d.resultado_de_programa, d.peso, e.descripcion from formula as d, resultado_de_programa as e \
@@ -270,19 +270,62 @@ def asignatura(periodo, codigo, grupo):
         inst[i].insert(0,len(inst[i]))
 
     # Procesa los datos de las notas de los resultados de programa de cada instrumento guardadas previamente
-    notasIndicadores = {}
-    for i in range(1,len(inst)+1):
-        notasIndicadores[i]=dict([(e[1],{}) for e in estudiantes])
-    for (x,y,z,w) in notasInd:
-        notasIndicadores[x][z][y] = round(w,1)
-        
+    supinst = []
+    for com in resprog:
+        if com[1] not in supinst:
+            supinst.append(com[1])
+    compt = dict([(ind,{}) for ind in supinst])
+    tempcompt = []
+    idtemp = resprog[0][1]
+    for com in resprog:
+        if idtemp == com[1]:
+            tempcompt.append(com[2])
+        else:
+            compt[idtemp]=tempcompt
+            idtemp = com[1]
+            tempcompt = [com[2]]
+    compt[supinst[len(supinst)-1]] =tempcompt
+    #print('competencias',compt)
 
+    #supinst = list(supinst)
+    #print(supinst)
+    notasIndicadores = dict([(ind,{}) for ind in supinst])
+
+    for nota in notasIndicadores:
+        notasIndicadores[nota] = dict( [(e[1],{}) for e in estudiantes])
+
+    for nota in notasIndicadores:
+        for estudiante in notasIndicadores[nota]:
+            notasIndicadores[nota][estudiante] = dict( [(comp,{}) for comp in compt[nota]] )
+            #print(nota,notasIndicadores[nota][estudiante])
+
+    #notasIndicadores = {}
+    #for i in range(1,len(inst)+1):
+        #notasIndicadores[i]=dict([(e[1],{}) for e in estudiantes])
+    #print("notasInd",notasInd)
+    for (x,y,z,w) in notasInd:
+        #print("x= ",x," z= ",z ," y= ",y," w= ",w)
+        notasIndicadores[x][y][z] = round(w,1)
+
+    #print("not",notasIndicadores)
+    #for x in notasIndicadores:
+     #   print(x,notasIndicadores[x])
+      #  print("\n\n")
     # Procesa los datos de las notas de los instrumentos guardadas previamente
-    notasInstrumentos = {}
-    for i in range(1,len(inst)+1):
-        notasInstrumentos[i]=dict([(e[1],{}) for e in estudiantes])
+    notasInstrumentos = dict([(ind,{}) for ind in supinst])
+
+    for nota in notasInstrumentos:
+        notasInstrumentos[nota] = dict( [(e[1],{}) for e in estudiantes])
+
+    #notasInstrumentos = {}
+   # for i in range(1,len(inst)+1):
+       # notasInstrumentos[i]=dict([(e[1],{}) for e in estudiantes])
+
+    #print (notasInstrumentos)
+   # print(notasIns)
     for (x,y,z) in notasIns:
         notasInstrumentos[x][y] = round(z,1)
+   
 
     # Procesa los datos de las notas de los resultados de programa totales
     cur9 = db.execute(
@@ -332,7 +375,7 @@ def asignatura(periodo, codigo, grupo):
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
                'numestudiantes': len(estudiantes), 'notasIndicadores': notasIndicadores, 'conteo': conteo,
                'formula': formula, 'notasInstrumentos': notasInstrumentos, 'notasDefinitivas': notasDefinitivas,
-               'resultadosTotales': resultadosTotales, 'periodo': periodo}
+               'resultadosTotales': resultadosTotales, 'periodo': periodo, 'idinst': supinst}
     return render_template('course.html', entries=entries)
 
 
@@ -694,41 +737,46 @@ def notas(periodo, codigo, grupo):
 
         indicadores.append([temp5, reduce(lambda x, y: x + y, temp6), reduce(lambda x, y: x + y, temp8), temp9])
         inst.append(temp1)
-   # print("indicadores",indicadores)
-   # print("inst",inst)
+    #print("indicadores",indicadores)
+    #print("inst",inst)
     # Procesa los datos de las notas guardadas previamente
     #print("notas ind",notasInd)#id,competencia,codigo,nota
 #[(e[1],{}) for e in estudiantes]
-   # supinst = list(supinst)
+    supinst = list(supinst)
+    subcompt = dict([(ind,{}) for ind in supinst])
+    for Subind,idinst in zip(indicadores,supinst):
+        subcompt[idinst]=Subind[1]
+        #print(Subind)
+    print(subcompt)
+    notas = dict([(ind,{}) for ind in supinst])
 
-   # notas = dict([(ind,{}) for ind in supinst])
+    for nota in notas:
+        notas[nota] = dict( [(e[1],{}) for e in estudiantes])
 
-    #for nota in notas:
-     #   notas[nota] = dict( [(e[1],{}) for e in estudiantes])
-        #print(nota)
-    #notasp = dict( [(e[1],{}) for e in estudiantes])
-    #print(notasp)
-    #print (notas)
-    #for i in notas:
-     #   i = dict([(e[1],{}) for e in estudiantes])
-    tempnota = nota[0][0]
-    nots = 1
+    for nota in notas:
+        for estudiante in notas[nota]:
+            notas[nota][estudiante] = dict( [(scomp,{}) for scomp in subcompt[nota]] )
+        
+    #print("notas",notas)
+    #tempnota = nota[0][0]
+    #nots = 1
     #for nota in notasInd:
      #   while tempnota =:
       #      pass
 
 
-    notas = {}
-    for i in range(1,len(inst)+1):
-        notas[i]=dict([(e[1],{}) for e in estudiantes])
+    #notas = {}
+ #   for i in range(1,len(inst)+1):
+      #  notas[i]=dict([(e[1],{}) for e in estudiantes])
 
     for (x,y,z,w) in notasInd:
         notas[x][z][y] = w #x es el instrumento, z es el codigo del estudiante, y es la subcompetencia, w es la nota
         #continue
         #print("x= ",x," z= ",z ," y= ",y," w= ",w)
+    #print(notas)
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
-               'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas}
+               'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas, 'idinst' : supinst}
     return render_template('grades.html', entries=entries)
 
 
@@ -963,12 +1011,13 @@ def guardarNotas(periodo, codigo, grupo):
 
     # Procesa e inserta la nueva informacion de nota definitiva de una asignatura en la base de datos
     porcentajes_instrumentos = []
+  #  print(instrumentos)
+    #print(0, len(instrumentos), int(len(instrumentos)/numevals[0][0]))
     for i in range(0, len(instrumentos), int(len(instrumentos)/numevals[0][0])):
         porcentajes_instrumentos.append(instrumentos[i])
     #print(porcentajes_instrumentos)
     #print("definitiva_asignatura",definitiva_asignatura)
    # definitiva_asignatura = sorted(definitiva_asignatura, key=itemgetter(2))
-    #print("definitiva_asignatura",definitiva_asignatura)
     j = 0
     for i in range(len(estudiantes)):
         nota_def = 0.0
@@ -983,14 +1032,17 @@ def guardarNotas(periodo, codigo, grupo):
                 if k[4] == definitiva_asignatura[w][1]:
                     #print(nota_def,"+=",definitiva_asignatura[w][0], "*", k[1], "/", 100)
                     nota_def += definitiva_asignatura[w][0] * k[1] / 100
-                w += 8            
+                #print(len(definitiva_asignatura)/(len(estudiantes)+w),len(definitiva_asignatura)/(len(estudiantes)+w) > 0)
+                if len(definitiva_asignatura)/(len(estudiantes)+w) > 1:
+                    w += len(estudiantes)
+                    
             j += 1
             if j >= len(definitiva_asignatura)-1:
                 break
 
         if not db.execute("select CODIGO_ESTUDIANTE from nota_definitiva where CODIGO_ESTUDIANTE = ? ",[estudiantes[e][1]]).fetchall() :
             db.execute("insert or IGNORE into nota_definitiva values (?,?,?)", [detalles[4], estudiantes[i][1], round(nota_def,1)])
-            print("definitiva",estudiantes[i][1], round(nota_def,1))
+            #print("definitiva",estudiantes[i][1], round(nota_def,1))
         else:
             db.execute("update or IGNORE nota_definitiva set NOTA = ? where asignatura = ? and codigo_estudiante = ?", [round(nota_def,1),detalles[4], estudiantes[i][1]])
         db.commit()
