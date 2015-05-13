@@ -55,6 +55,56 @@ def get_db():
         g.sqlite_db = connect_db()
     return g.sqlite_db
 
+def get_students(periodo, grupo,codigo):
+     #   print x
+    estudiantes = []
+    p_periodo = periodo
+    group = grupo
+    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
+    # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
+    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
+    
+    proofjson =r.json()
+    for x in proofjson:
+        #print (x)
+        estudiante = [x['nombre'].capitalize(),x['emplid']]
+        estudiantes.append(estudiante)
+
+    for e in estudiantes:
+        nombre = e[0].rsplit(' ')
+        if len(nombre) >3 :
+            temp1 = nombre[0].capitalize()
+            temp2 = nombre[1].capitalize()
+            nombre[0] = nombre[2].capitalize()
+            nombre[1] = nombre[3].capitalize()
+            nombre[2] = temp1
+            nombre[3] = temp2
+        else:
+            temp1 = nombre[0].capitalize()
+            nombre[0] = nombre[1].capitalize()
+            nombre[1] = nombre[2].capitalize()
+            nombre[2] = temp1
+        e[0] = reduce(lambda x,y:x+' '+y, nombre)
+    estudiantes.sort()
+    return estudiantes
+def get_courses(cursos,p_periodo,p):
+    db=get_db()
+    for c in cursos:
+        proof = {'pCurso': c['cod'], 'pGrupo' : c['grupo'], 'pPeriodo' : p_periodo }
+        peval = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas", params=proof)
+        pevaljson =peval.json()
+        for p in pevaljson:
+            db.execute('INSERT OR IGNORE into instrumento  (asignatura, evaluacion, porcentaje) values (?,?,?)',[ c['id'], p['descripcion'],p['porcentaje']])            
+            idasig = db.execute('select max(id) from ')
+            idcarrera = ""
+            curmagico =  db.execute(
+        "select d.resultado_de_programa, d.peso, e.descripcion from formula as d, resultado_de_programa as e \
+        where asignatura=? and e.id = d.resultado_de_programa and e.carrera=?",
+        [idasig, idcarrera])
+            competencias = curmagico.fetchall()[0]
+    db.commit()
+
+
 def login_required(f):
    @wraps(f)
    def wrap(*args, **kwargs):
@@ -130,16 +180,12 @@ def show_courses(periodo):
     cursos = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3], carrera=row[4], id=row[5]) for row in cur2.fetchall()]
     p_periodo = "0940"
     #print (cursos)
-    for c in cursos:
-        proof = {'pCurso': c['cod'], 'pGrupo' : c['grupo'], 'pPeriodo' : p_periodo }
-        peval = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas", params=proof)
-        pevaljson =peval.json()
-        for p in pevaljson:
-            db.execute('INSERT OR IGNORE into instrumento  (asignatura, evaluacion, porcentaje) values (?,?,?)',[ c['id'], p['descripcion'],p['porcentaje']])
-            #print([ c['id'], p['descripcion'],p['porcentaje']])
     
-    db.commit()
-
+    curprueba = db.execute(
+        "select nombre from (select asig.nombre, asig.periodo from asignatura as asig inner join instrumento as ins on asig.ID = ins.asignatura) where periodo = ?",[periodo])
+    cboolp = curprueba.fetchall()
+    if not cboolp :
+        get_courses(cursos,p_periodo,periodo)
     vacio = 0
     # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web  
     entries = {'carreras': carreras, 'cursos': cursos, 'vacio' : vacio }
@@ -166,22 +212,12 @@ def asignatura(periodo, codigo, grupo):
     # estudiantes = cur2.fetchall()
     #for x in estudiantes:
      #   print x
-    estudiantes = []
     p_periodo = "0940"
-    group = grupo
-    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
-    # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
-    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
+    estudiantes = get_students(p_periodo,grupo,codigo)
     
-    proofjson =r.json()
-    for x in proofjson:
-        #print (x)
-        estudiante = [x['nombre'].capitalize(),x['emplid']]
-        estudiantes.append(estudiante)
-    estudiantes.sort()
-
+    # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
+    
    # print ([detalles[4], detalles[5]])
-
     
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute("select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
@@ -192,7 +228,7 @@ def asignatura(periodo, codigo, grupo):
         [detalles[4], detalles[5]])
 
     resprog = cur3.fetchall()
-    print(resprog)
+    #print(resprog)
     # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
     cur4 = db.execute(
         "select d.evaluacion, e.competencia, e.porcentaje, f.descripcion \
@@ -338,9 +374,7 @@ def instrumentos(periodo, codigo, grupo):
         from asignatura as d, acreditacion_abet as e \
         where d.codigo=? and d.grupo=? and d.periodo=? and d.id_carrera = e.id_carrera",
         [codigo, grupo, periodo])
-    detalles = cur1.fetchall()
-    detalles = detalles[0]
-
+    detalles = cur1.fetchall()[0]
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
     cur2 = db.execute(
         "select d.resultado_de_programa, d.peso, e.descripcion \
@@ -348,6 +382,7 @@ def instrumentos(periodo, codigo, grupo):
         where asignatura=? and d.resultado_de_programa = e.id and e.carrera=?",
         [detalles[4], detalles[5]])
     formula = cur2.fetchall()
+    
     suma = 0
     for i in formula:
         suma = suma + i[1]
@@ -355,26 +390,28 @@ def instrumentos(periodo, codigo, grupo):
         temp1 = list(formula[i])
         temp1.append(int(formula[i][1] * 1000 / suma))
         formula[i] = tuple(temp1)
-
+    
     # Variable para saber el numero de resultados de programa
     conteo = len(formula)
-
+    
     # Recupera (de la base de datos) y procesa los datos de nombre de evaluaciones,
     # y porcentaje de evaluaciones y resultados de programa
     cur3 = db.execute(
         'select d.evaluacion, d.porcentaje, e.competencia, e.porcentaje, d.id_evaluacion \
         from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e\
-        where d.asignatura = e.asignatura and d.id_evaluacion = e.evaluacion and e.nivel = 1 and d.asignatura=?',
+        where  d.id_evaluacion = e.evaluacion and e.nivel = 1 and d.asignatura=?',
         [detalles[4]]
         )
     evaluaciones = []
     for row in cur3.fetchall():
         evaluaciones.append(row)
-
     # Recupera (de la base de datos) el numero de evaluaciones
     cur4 = db.execute("select count(*) from instrumento where asignatura=?", [detalles[4]])
     numevals = cur4.fetchall()
-
+    curmagico2 = db.execute("select * from (select pa.asignatura,pa.evaluacion, pa.Id_COMPETENCIA from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) where asignatura = ?",[detalles[4]])
+    curmag2 = curmagico2.fetchall()
+    print("NOMBRE",curmag2)
+    print("formula\n",formula,"\n\nevaluaciones\n",evaluaciones, "\n\n",conteo, "\n\n\n\n numevals", numevals)
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'resprog': formula, 'suma': suma, 'numevals': numevals[0][0],
                'evaluaciones': evaluaciones, 'conteo': conteo}
@@ -609,18 +646,8 @@ def notas(periodo, codigo, grupo):
     # Recupera (de la base de datos) los estudiantes
     # cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
     # estudiantes = cur2.fetchall()
-    estudiantes = []
     p_periodo = "0940"
-    group = grupo
-    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
-    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
-    proofjson =r.json()
-    #proofjson.sort()
-    for x in proofjson:
-        estudiante = [x['nombre'].capitalize(),x['emplid']]
-        estudiantes.append(estudiante)
-    
-    estudiantes.sort()
+    estudiantes = get_students(p_periodo,grupo,codigo)
 #    proofjson.sort()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -714,21 +741,13 @@ def guardarNotas(periodo, codigo, grupo):
         [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
-    # Recupera (de la base de datos) los estudiantes
+    # Recupera (de la base de datos)del servicio web los estudiantes
     #cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre desc", [detalles[4]])
     #estudiantes = cur2.fetchall()
     estudiantes = []
     p_periodo = "0940"
-    group = grupo
-    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
-    # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
-    r = requests.get("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante", params=proof)
-    proofjson =r.json()
-    for x in proofjson:
-        #print (x)
-        estudiante = [x['nombre'].capitalize(),x['emplid']]
-        estudiantes.append(estudiante)
-    estudiantes.sort()
+    estudiantes = get_students(p_periodo,grupo,codigo)
+
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.superior, e.porcentaje \
@@ -804,7 +823,7 @@ def guardarNotas(periodo, codigo, grupo):
                 temp5.append(temp2[l][1]*temp1[j][3]/10000)
             temp4.append(temp3)
 
-        print(temp4,"reduce",reduce(lambda x, y: x + y, temp4))
+        #print(temp4,"reduce",reduce(lambda x, y: x + y, temp4))
         indicadores.append(reduce(lambda x, y: x + y, temp4))
         #print("MAGIC: ",reduce(lambda x, y: x + y, temp4))
         pesos.append(temp5)

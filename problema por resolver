@@ -1,0 +1,4 @@
+1) --El problema con el servicio web, es que no se esta insertando las cosas en la tabla de porcentaje abet, porque las insercciones que hay es con unos datos que ya deberian ser insertados, entonces por eso tiene problemas a la hora de mostrarlo en la pagina arreglar eso y deberia quedar funcional, recomendacion insertar todo en donde se organizan las materias al principio --Att: Tu yo del pasado a las 4/22/15 3:51 AM :D --Avances lo que te inserta los cursos ahora es una funcion, toca revisar a ver si se inserta lo que dice mas arriba. -----Att: Tu yo del pasado a las 4/23/15 2:47 AM :D --Revisar BD revisar typos asignatura en cada tabla y revisar referencias para que todo este bien
+
+
+2)Checked --4/23/15 12:30 AM :D --Organizarlo para ordenar por apellido, pd: deberias hacer una funcion que traiga los estudiantes y los ordene te ahorrarias lineas de codigo y seria mas facil de leer :D --Att: Tu yo del pasado a las 4/22/15 3:53 AM :D

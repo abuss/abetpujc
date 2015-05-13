@@ -214,8 +214,6 @@ CREATE TABLE PORCENTAJE_ABET  (
 	Id_COMPETENCIA	TEXT NOT NULL,
 	--Porcentaje que se le da.
 	PORCENTAJE    	INT NOT NULL,
-	-- Id del porcentaje
-	Id           	INTEGER,
 	-- Id de la pregunta.
 	Id_Pregunta   	INTEGER,
 	PRIMARY KEY(ASIGNATURA,EVALUACION,Id_COMPETENCIA),
