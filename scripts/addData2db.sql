@@ -797,8 +797,27 @@ insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE,
 /* Prueba: Estudiantes (Ya se hace con los web services*/
 insert into estudiante values ('100001','Pepito Perez',1);
 insert into estudiante values ('200002','Pepita Mendieta',1);
-insert into estudiante values ('100001','Pepito Perez',10);
-insert into estudiante values ('200002','Pepita Mendieta',10);
+insert into estudiante values ('300001','Pepito Perez',2);
+insert into estudiante values ('400002','Pepita Mendieta',2);
+insert into estudiante values ('500001','Pepito Perez',3);
+insert into estudiante values ('600002','Pepita Mendieta',3);
+insert into estudiante values ('700001','Pepito Perez',4);
+insert into estudiante values ('800002','Pepita Mendieta',4);
+insert into estudiante values ('900001','Pepito Perez',5);
+insert into estudiante values ('110002','Pepita Mendieta',5);
+insert into estudiante values ('120001','Pepito Perez',6);
+insert into estudiante values ('130002','Pepita Mendieta',6);
+insert into estudiante values ('140001','Pepito Perez',7);
+insert into estudiante values ('150002','Pepita Mendieta',7);
+insert into estudiante values ('160001','Pepito Perez',8);
+insert into estudiante values ('170002','Pepita Mendieta',8);
+insert into estudiante values ('180001','Pepito Perez',9);
+insert into estudiante values ('190002','Pepita Mendieta',9);
+insert into estudiante values ('200001','Pepito Perez',10);
+insert into estudiante values ('210002','Pepita Mendieta',10);
+insert into estudiante values ('220001','Pepito Perez',11);
+insert into estudiante values ('230002','Pepita Mendieta',11);
+
 
 /* Prueba: Definicion de los porcentajes de los instrumentos */
 insert into porcentaje_abet values (1,1,'A.1.1',25,3,'A');

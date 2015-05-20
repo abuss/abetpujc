@@ -93,7 +93,7 @@ CREATE TABLE FORMULA
 		-- Ej. A .. K
 	RESULTADO_DE_PROGRAMA TEXT NOT NULL,
 		-- Id de la Asignatura.
-	ASIGNATURA INT NOT NULL,
+	ASIGNATURA INTEGER NOT NULL,
 		-- Ej. 1 , 2, .., 5 (Dependiendo de la carrera)
 	PESO INT NOT NULL,
 
@@ -139,7 +139,7 @@ CREATE TABLE INSTRUMENTO  (
 CREATE TABLE NOTA_ABET
 (
 		-- Id de la Asignatura
-	ASIGNATURA TEXT NOT NULL,
+	ASIGNATURA INTEGER NOT NULL,
 		-- Identificaci�n para la Evaluacion. Ej. Expos, Parcial1
 	EVALUACION INT NOT NULL,
 		-- Ej. A.1.1
@@ -163,7 +163,7 @@ CREATE TABLE NOTA_ABET
 CREATE TABLE NOTA_DEFINITIVA
 (
 		-- Id de la Asignatura.
-	ASIGNATURA TEXT NOT NULL,
+	ASIGNATURA INTEGER NOT NULL,
 		-- Ej. 0201001
 	CODIGO_ESTUDIANTE INT NOT NULL,
 		-- Nota de cada estudiantes por evaluacion
@@ -179,7 +179,7 @@ CREATE TABLE NOTA_DEFINITIVA
 CREATE TABLE NOTA_INSTRUMENTO
 (
 		-- Id de la Asignatura.
-	ASIGNATURA TEXT NOT NULL,
+	ASIGNATURA INTEGER NOT NULL,
 		-- Identificaci�n para la Evaluacion. Ej. Expos, Parcial1
 	EVALUACION INT NOT NULL,
 		-- Ej. 0201001

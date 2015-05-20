@@ -55,38 +55,50 @@ def get_db():
         g.sqlite_db = connect_db()
     return g.sqlite_db
 
-def get_students(urlget,periodo, grupo,codigo):
+def get_students(src,args):
      #   print x
-    estudiantes = []
-    p_periodo = periodo
-    group = grupo
-    proof = {'pCurso': codigo, 'pGrupo' : group, 'pPeriodo' : p_periodo }
-    # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
-    r = requests.get(urlget, params=proof)
-    
-    proofjson =r.json()
-    for x in proofjson:
-        #print (x)
-        estudiante = [x['nombre'].capitalize(),int(x['emplid'])]
-        estudiantes.append(estudiante)
+     #periodo="", grupo="",codigo="",urlget=""
+    if src == "ws":    
 
-    for e in estudiantes:
-        nombre = e[0].rsplit(' ')
-        if len(nombre) >3 :
-            temp1 = nombre[0].capitalize()
-            temp2 = nombre[1].capitalize()
-            nombre[0] = nombre[2].capitalize()
-            nombre[1] = nombre[3].capitalize()
-            nombre[2] = temp1
-            nombre[3] = temp2
-        else:
-            temp1 = nombre[0].capitalize()
-            nombre[0] = nombre[1].capitalize()
-            nombre[1] = nombre[2].capitalize()
-            nombre[2] = temp1
-        e[0] = reduce(lambda x,y:x+' '+y, nombre)
-    estudiantes.sort()
-    return estudiantes
+        estudiantes = []
+        p_periodo = args[0]
+        group = args[1]
+        proof = {'pCurso': args[2], 'pGrupo' : group, 'pPeriodo' : p_periodo }
+        # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
+        r = requests.get(args[3], params=proof)
+        
+        proofjson =r.json()
+        for x in proofjson:
+            #print (x)
+            estudiante = [x['nombre'].capitalize(),int(x['emplid'])]
+            estudiantes.append(estudiante)
+
+        for e in estudiantes:
+            nombre = e[0].rsplit(' ')
+            if len(nombre) >3 :
+                temp1 = nombre[0].capitalize()
+                temp2 = nombre[1].capitalize()
+                nombre[0] = nombre[2].capitalize()
+                nombre[1] = nombre[3].capitalize()
+                nombre[2] = temp1
+                nombre[3] = temp2
+            else:
+                temp1 = nombre[0].capitalize()
+                nombre[0] = nombre[1].capitalize()
+                nombre[1] = nombre[2].capitalize()
+                nombre[2] = temp1
+            e[0] = reduce(lambda x,y:x+' '+y, nombre)
+        estudiantes.sort()
+        return estudiantes
+    elif src == "bd":
+        db = get_db()
+        cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [args[4]])
+        estudiantes = cur2.fetchall()
+        for x in estudiantes:
+            print (x)
+        return estudiantes
+    else:
+        print("No hay procedimiento para la fuente: ", src)
 
 def login_required(f):
    @wraps(f)
@@ -184,14 +196,18 @@ def asignatura(periodo, codigo, grupo):
     detalles = cur1.fetchall()[0]
 
 
-    # Recupera (del servicio web) los estudiantes
-    # cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
-    # estudiantes = cur2.fetchall()
+    # Recupera los estudiantes
+    #cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
+    #estudiantes = cur2.fetchall()
     #for x in estudiantes:
-     #   print x
+    #   print (x)
     p_periodo = "0940"
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
-    estudiantes = get_students("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante",p_periodo,grupo,codigo)
+    urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
+     #periodo="", grupo="",codigo="",urlget=""
+    #argmnts = [p_periodo,grupo,codigo,geturl]
+    #estudiantes = get_students("ws",argmnts)
+    estudiantes = get_students("bd",detalles)
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -657,8 +673,12 @@ def notas(periodo, codigo, grupo):
     # cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
     estudiantes = []
     p_periodo = "0940"
-    proof = {'pCurso': codigo, 'pGrupo' : grupo, 'pPeriodo' : p_periodo }
-    estudiantes = get_students("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante",p_periodo,grupo,codigo)
+    #proof = {'pCurso': codigo, 'pGrupo' : grupo, 'pPeriodo' : p_periodo }
+    geturl = "http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
+     #periodo="", grupo="",codigo="",urlget=""
+    #argmnts = [p_periodo,grupo,codigo,geturl]
+    #estudiantes = get_students("ws",argmnts)
+    estudiantes = get_students("bd",detalles)
 
 #    proofjson.sort()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
@@ -798,7 +818,11 @@ def guardarNotas(periodo, codigo, grupo):
     #estudiantes = cur2.fetchall()
     p_periodo = "0940"
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
-    estudiantes = get_students("http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante",p_periodo,grupo,codigo)
+    geturl = "http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
+     #periodo="", grupo="",codigo="",urlget=""
+    #argmnts = [p_periodo,grupo,codigo,geturl]
+    #estudiantes = get_students("ws",argmnts)
+    estudiantes = get_students("bd",detalles)
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -976,7 +1000,7 @@ def guardarNotas(periodo, codigo, grupo):
                             resultado = 0.0
                             temp2 = porcentaje_indicadores[m][3]
                         if m >= len(porcentaje_indicadores):
-                            if not db.execute("select CODIGO_ESTUDIANTE from nota_abet where CODIGO_ESTUDIANTE = ? and NIVEL = 1 and competencia = ? and materia = ?",[estudiantes[e][1],temp2,detalles[4]]).fetchall() :
+                            if not db.execute("select CODIGO_ESTUDIANTE from nota_abet where CODIGO_ESTUDIANTE = ? and NIVEL = 1 and competencia = ? and asignatura = ?",[estudiantes[e][1],temp2,detalles[4]]).fetchall() :
                                 db.execute(
                                     "insert or IGNORE into nota_abet values (?,?,?,?,?,?)",
                                     [detalles[4], evaluacion[d], temp2, 1, estudiantes[e][1], round(resultado,1)*m])
@@ -999,7 +1023,7 @@ def guardarNotas(periodo, codigo, grupo):
                                 [int(datos[d][e][i]),detalles[4],estudiantes[e][1]])"""
 
                 # Inserta el valor de la nota definitiva de las evaluaciones
-                if not db.execute("select CODIGO_ESTUDIANTE from nota_instrumento where CODIGO_ESTUDIANTE = ? and asignatura = ? and EVALUACION = ?",[estudiantes[e][1]],detalles[4],evaluacion[d]).fetchall() :
+                if not db.execute("select CODIGO_ESTUDIANTE from nota_instrumento where CODIGO_ESTUDIANTE = ? and asignatura = ? and EVALUACION = ?",[estudiantes[e][1],detalles[4],evaluacion[d]]).fetchall() :
                     db.execute(
                         "insert or IGNORE into nota_instrumento values (?,?,?,?)",
                         [detalles[4], evaluacion[d], estudiantes[e][1], round(definitiva_instrumento/m,1)])
