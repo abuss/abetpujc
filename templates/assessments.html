@@ -21,47 +21,48 @@
     	$(".ui-accordion-header.ui-state-active").css("background", "rgb(255,228,181)");
   	});
 	</script>
-  	<script>
-  	var sumarPorcentajes = function(event) {
-    	event = event || window.event;
-    	{% for inst in entries.resprog %}
-      		{% for entry in inst %}
-        		var numfilas = document.getElementById('tabla{{entry[1]}}{{entry[2]}}').getElementsByTagName('tr').length;
-        		var total = 0;
-        		for (var i=0; i<numfilas-2; i++) 
-        		{
-        			total = total + Number($("#tabla{{entry[1]}}{{entry[2]}}").find("#pesoind{{inst[0][1]}}{{entry[2]}}"+String(i))[0].value);
-        		}
-        		document.getElementById('totalsuma{{inst[0][1]}}{{entry[2]}}').innerHTML = String(total)+'%';
-      		{% endfor %}
-    	{% endfor %}
-  	};
-  	</script>
-  	<script>
-    	$(function(){
-        	{% for inst in entries.resprog %}
-        		{% for entry in inst %}
-        			$("#botonadd{{inst[0][1]}}{{entry[2]}} ").click(function(){
-	        			var numfilas = document.getElementById('tabla{{entry[1]}}{{entry[2]}}').getElementsByTagName('tr').length;
-            		var htmlToAppend = "<tr><td><select style='width: 600px' name='indicador{{inst[0][1]}}{{entry[2]}}"+String(numfilas-2)+"'><option>---</option>{% for i in entries.indicdesemp %}{% if i[2] == entry[2] %}<option>{{i[0]}}: {{i[1]}}</option>{% endif %}{% endfor %}</select></td><td width='20'>&nbsp;</td><td><input type=number step='1' min='0' max='100' name='pesoind{{inst[0][1]}}{{entry[2]}}"+String(numfilas-2)+"' id='pesoind{{inst[0][1]}}{{entry[2]}}"+String(numfilas-2)+"'onchange='sumarPorcentajes()' size='3'><input type=hidden name='numeroDeFilas{{inst[0][1]}}{{entry[2]}}' id='numeroFilas{{inst[0][1]}}{{entry[2]}}' value='"+String(numfilas+1)+"'></td></tr>";
-		            	$("#tabla{{entry[1]}}{{entry[2]}} > tbody > tr").eq(numfilas-1).before(htmlToAppend);
-    		        numfilas = numfilas + 1;
+    <script>
+    var sumarPorcentajes = function(event) {
+      event = event || window.event;
+      {% for inst in entries.resprog %}
+          {% for entry in inst %}
+            var numfilas = document.getElementById('tabla{{entry[1]}}{{entry[2]}}').getElementsByTagName('tr').length;
+            var total = 0;
+            for (var i=0; i<numfilas-2; i++) 
+            {
+              total = total + Number($("#tabla{{entry[1]}}{{entry[2]}}").find("#pesoind{{inst[0][1]}}{{entry[2]}}"+String(i))[0].value);
+            }
+            document.getElementById('totalsuma{{inst[0][1]}}{{entry[2]}}').innerHTML = String(total)+'%';
+            if (total > 100) {alert("La suma para el indicador "+String('{{entry[2]}}')+ " debe ser 100, en el momento es "+String(total))};
+          {% endfor %}
+      {% endfor %}
+    };
+    </script>
+    <script>
+      $(function(){
+          {% for inst in entries.resprog %}
+            {% for entry in inst %}
+              $("#botonadd{{inst[0][1]}}{{entry[2]}} ").click(function(){
+                var numfilas = document.getElementById('tabla{{entry[1]}}{{entry[2]}}').getElementsByTagName('tr').length;
+                var htmlToAppend = "<tr><td><select style='width: 600px' name='indicador{{inst[0][1]}}{{entry[2]}}"+String(numfilas-2)+"'><option>---</option>{% for i in entries.indicdesemp %}{% if i[2] == entry[2] %}<option>{{i[0]}}: {{i[1]}}</option>{% endif %}{% endfor %}</select></td><td width='20'>&nbsp;</td><td><input type=number step='1' min='0' max='100' name='pesoind{{inst[0][1]}}{{entry[2]}}"+String(numfilas-2)+"' id='pesoind{{inst[0][1]}}{{entry[2]}}"+String(numfilas-2)+"'onchange='sumarPorcentajes()' size='3'><input type=hidden name='numeroDeFilas{{inst[0][1]}}{{entry[2]}}' id='numeroFilas{{inst[0][1]}}{{entry[2]}}' value='"+String(numfilas+1)+"'></td></tr>";
+                  $("#tabla{{entry[1]}}{{entry[2]}} > tbody > tr").eq(numfilas-1).before(htmlToAppend);
+                numfilas = numfilas + 1;
                 $("#forma").find("#numeroFilas{{inst[0][1]}}{{entry[2]}}")[0].value = numfilas;
-        			});
-        			$("#botondel{{inst[0][1]}}{{entry[2]}} ").click(function(){
-	        			var numfilas = document.getElementById('tabla{{entry[1]}}{{entry[2]}}').getElementsByTagName('tr').length;
-	        			if(numfilas>3)
-	        			{
-			            $("#tabla{{entry[1]}}{{entry[2]}} tr:nth-last-of-type(2)").remove();
-    			        numfilas = numfilas - 1;
+              });
+              $("#botondel{{inst[0][1]}}{{entry[2]}} ").click(function(){
+                var numfilas = document.getElementById('tabla{{entry[1]}}{{entry[2]}}').getElementsByTagName('tr').length;
+                if(numfilas>3)
+                {
+                  $("#tabla{{entry[1]}}{{entry[2]}} tr:nth-last-of-type(2)").remove();
+                  numfilas = numfilas - 1;
                   $("#forma").find("#numeroFilas{{inst[0][1]}}{{entry[2]}}")[0].value = numfilas;
-    			      }
-    			      sumarPorcentajes();
-        			});
-        		{% endfor %}
-        	{% endfor %}
-    	});
-  	</script>
+                }
+                sumarPorcentajes();
+              });
+            {% endfor %}
+          {% endfor %}
+      });
+    </script>
 </head>
 
 <body onload="sumarPorcentajes()">
@@ -146,7 +147,8 @@
   </div>
   </div>
   <br>
-  <input type=submit value='Guardar'>
+  </script>
+  <input type=submit id="guardarNotas" value='Guardar'>
   </form>
   <form name="botonvolver" action="{{ url_for('instrumentos', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
   <input type=submit value='Volver a definir evaluaciones para {{entries.detalles[0]}}'>
