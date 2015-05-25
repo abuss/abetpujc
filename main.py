@@ -494,30 +494,49 @@ def guardarPesosInstrumentos(periodo, codigo, grupo):
             tmp.append(request.form[resultados[j][0] + str(i)])
         datos2.append(tmp)
 
+    #print(datos1)
+    #print(datos2)
     # Validacion antes de insertar: si el instrumento ya existe no se puede ingresar
     # Si no hay datos repetidos que no pueden ser guardados
     if request.form['hayRepetidos'] == '0':
-        # Elimina de la base de datos los registros viejos
-        db.execute('delete from porcentaje_abet where asignatura=?', [detalles[4]])
-        db.execute('delete from instrumento where asignatura=?', [detalles[4]])
-        db.commit()
-
         # Inserta la nueva informacion en la base de datos
         for i in range(1, int(numero) - 3):
-            db.execute('insert into instrumento (asignatura, evaluacion, porcentaje) values (?,?,?)',
+            if not db.execute("select asignatura from instrumento where asignatura = ? and evaluacion = ? ",[detalles[4], datos1[i - 1][0]]).fetchall() :
+                db.execute('insert or IGNORE into instrumento (asignatura, evaluacion, porcentaje) values (?,?,?)',
                        [detalles[4], datos1[i - 1][0], datos1[i - 1][1]])
-            db.commit()
-            cur = db.execute('select id_evaluacion from instrumento where evaluacion=? and asignatura=?',
-                             [datos1[i - 1][0], detalles[4]])
-            numeroEval = cur.fetchall()
-            for j in range(len(resultados)):
-                #NEED FIX HERE!(ASK)
-                idnxt = db.execute('select max(Id) from porcentaje_abet')
-                nxtid = idnxt.fetchall();
-                #insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (1,1,'A',80,1);
-                db.execute('insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (?,?,?,?,?)',
-                           [detalles[4], numeroEval[0][0], resultados[j][0], datos2[i - 1][j], int(nxtid[0][0])+1])
                 db.commit()
+                cur = db.execute('select id_evaluacion from instrumento where evaluacion=? and asignatura=?',
+                             [datos1[i - 1][0], detalles[4]])
+                numeroEval = cur.fetchall()
+                for j in range(len(resultados)):
+                    #NEED FIX HERE!(ASK)
+                    idnxt = db.execute('select max(Id) from porcentaje_abet')
+                    nxtid = idnxt.fetchall();
+                    #insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (1,1,'A',80,1);
+                    db.execute('insert or IGNORE into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (?,?,?,?,?)',
+                           [detalles[4], numeroEval[0][0], resultados[j][0], datos2[i - 1][j], int(nxtid[0][0])+1])
+                    db.commit()
+            else:
+                db.execute('UPDATE or IGNORE instrumento set porcentaje = ? where asignatura =? and evaluacion = ?',
+                       [datos1[i - 1][1],detalles[4], datos1[i - 1][0]])
+                db.commit()
+                cur = db.execute('select id_evaluacion from instrumento where evaluacion=? and asignatura=?',
+                             [datos1[i - 1][0], detalles[4]])
+                numeroEval = cur.fetchall()
+                for j in range(len(resultados)):
+                    #NEED FIX HERE!(ASK)
+                    if not db.execute("select asignatura from porcentaje_abet where asignatura = ? and evaluacion = ? and Id_COMPETENCIA = ?",[detalles[4], numeroEval[0][0], resultados[j][0]]).fetchall() :
+                        idnxt = db.execute('select max(Id) from porcentaje_abet')
+                        nxtid = idnxt.fetchall();
+                        #insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (1,1,'A',80,1);
+                        db.execute('INSERT or IGNORE into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (?,?,?,?,?)',
+                            [detalles[4], numeroEval[0][0], resultados[j][0], datos2[i - 1][j], int(nxtid[0][0])+1])
+                        db.commit()
+                    else:
+                        db.execute('UPDATE or IGNORE porcentaje_abet set porcentaje = ? where asignatura =? and evaluacion = ? and Id_COMPETENCIA = ?',
+                       [datos2[i - 1][j],detalles[4], numeroEval[0][0], resultados[j][0]])
+                        db.commit()
+
 
         flash("Datos guardados")
 
@@ -640,6 +659,7 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
 
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
+    #print(temp)
     for i in range(len(temp)):
         for j in range(len(temp[i])):
             numero = int(request.form['numeroDeFilas' + str(temp[i][j][0]) + str(temp[i][j][2])])
@@ -647,6 +667,7 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
                 datos.append((temp[i][j][0], temp[i][j][2],
                               request.form["indicador" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)][:5],
                               request.form["pesoind" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)]))
+                
 
    
     
@@ -995,13 +1016,14 @@ def guardarNotas(periodo, codigo, grupo):
                 m = n
                 resultado = 0.0
                 o = 0
+                #print(m,porcentaje_indicadores)
                 if m < len(porcentaje_indicadores):
                     temp2 = porcentaje_indicadores[m][3]#Es la competencia
                     while temp1 == porcentaje_indicadores[m][0]:
                         if temp2 == porcentaje_indicadores[m][3]:
                             if datos[d][e][o] != "0":
                                 resultado += int(datos[d][e][o])*porcentaje_indicadores[m][2]/100
-                                #print(datos[d][e][o],porcentaje_indicadores[m][2],temp2,resultado)
+                                print(datos[d][e][o],porcentaje_indicadores[m][2],temp2,resultado)
                             m += 1
                             o += 1
                         else:
