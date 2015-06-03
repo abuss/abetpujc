@@ -723,7 +723,6 @@ def notas(periodo, codigo, grupo):
     #estudiantes = get_students("ws",argmnts)
     estudiantes = get_students("bd",detalles)
 
-#    proofjson.sort()
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select  distinct d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje \
@@ -1187,6 +1186,39 @@ def logout():
     if 'id_prof' in session:
         session.pop('id_prof', None)
     return redirect(url_for('login'))
+
+@app.route('/<periodo>/<codigo>/<grupo>/reporte', methods=['GET', 'POST'])
+def reporte(periodo, codigo, grupo):
+    db = get_db()
+    # Recupera (de la base de datos) los detalles del curso
+    cur1 = db.execute(
+        "select a.nombre, a.codigo, a.grupo, a.periodo, a.id, p.nombre \
+        from asignatura as a, profesor as p \
+        where codigo=? and grupo=? and periodo=? and a.id_profesor = p.id",
+        [codigo,grupo,periodo])
+    detalles = cur1.fetchall()[0]
+    # Recupera (de la base de datos) la informacion de las notas de los instrumentos ya contenida en la base de datos
+    cur2 = db.execute(
+        "select codigo_estudiante, nota from nota_definitiva where asignatura=?",
+        [detalles[4]])
+    notasDef = cur2.fetchall()
+    perder = 0
+    print(notasDef)
+    for x in notasDef:
+        if x[1]  < 3:
+            perder += 1
+    maxnota = max(notasDef)
+    minnota = min(notasDef)
+
+    promgeneralind = dict()
+    promgeneralindaprob= dict()
+    estud = [] 
+    lowest= []
+    high= []
+
+
+    entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1] ,'minnota': minnota[1], 'promgeneralind':promgeneralind, 'promgeneralindaprob':promgeneralindaprob}
+    return render_template('report.html', entries=entries)
 
 if __name__ == '__main__':
     if len(sys.argv)>2 and sys.argv[1]=='initdb':

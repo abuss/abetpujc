@@ -21,3 +21,39 @@ html 			{ font-size: 70%; }
 .flash          { background: #cee5F5; padding: 0.5em;
                   border: 1px solid #aacbe2; }
 .error          { background: #f0d6d6; padding: 0.5em; }
+
+.thickh2        
+{  
+	font-weight: 600; 
+}
+
+.textIn         
+{
+ width:80%;height:100px;
+}
+
+.note-table{
+	empty-cells: show;
+	border: 1px solid;
+}
+
+.border-table{
+  border-left:1px solid;
+  border-bottom:1px solid;
+  padding:.5em .5em .5em 3em;
+}
+.Fborder-table{
+  padding:.5em .5em .5em 3em;
+  border-bottom:1px solid;
+}
+.Hborder-table{
+  font-weight: bold;
+  border-left:1px solid;
+  border-bottom:1px solid;
+  padding:.5em .5em .5em 3em;
+}
+.FHborder-table{
+  font-weight: bold;
+  border-bottom:1px solid;
+  padding:.5em .5em .5em 3em;
+}

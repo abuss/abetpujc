@@ -1,0 +1,136 @@
+<!doctype html>
+<head>
+    <title>ABET - Facultad de Ingeniería</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class=page>
+        <table>
+            <tr>
+                <td><img src="../../../static/logo.png"></td>
+                <td width="20">&nbsp;</td>
+                <td><h4>Facultad de Ingeniería<br></h4></td>
+            </tr>
+        </table>
+        <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET</h1>
+        <hr>
+        <br>
+        <br>
+        {% block body %}
+            <form action="" method="post">
+            <h2 class="thickh2">Formato Evaluación Cursos ABET {{ entries.detalles[3] }}</h2>
+            <hr>
+            <ul>
+                <li>Nombre del curso: {{ entries.detalles[0] }}</li>
+                <li>Coordinador del curso: {{ entries.detalles[5] }}</li>
+                <li>Periodo academico: {{ entries.detalles[3] }}</li>
+            </ul>
+
+            <h2 class="thickh2">I. Contribución del curso a los resultados de estudiantes</h2>
+            <hr>
+            <h3> Por mediciones directas de desempeños</h3>
+            <hr>
+            El consolidado de las notas de los estudiantes se encuentra en el archivo adjunto: Notas {{ entries.detalles[3] }}.<br>
+            Comentarios:<br>
+            <textarea class="textIn" name="1comments1" >
+El curso {{ entries.detalles[0] }}
+
+
+({{ entries.perder }}) estudiantes no aprobaron la asignatura.
+
+
+La nota más alta del curso fue {{ entries.maxnota }} y la más baja fue {{ entries.minnota }}.
+
+
+Los promedios del grupo por cada resultado de programa son los siguientes:
+            </textarea>
+            <table class='note-table'>
+              <tr>
+                <td class='FHborder-table'>Grupo</td>
+                <td class='Hborder-table'>A</td>
+                <td class='Hborder-table'>B</td>
+                <td class='Hborder-table'>C</td>
+                <td class='Hborder-table'>D</td>
+                <td class='Hborder-table'>E</td>
+                <td class='Hborder-table'>F</td>
+                <td class='Hborder-table'>G</td>
+                <td class='Hborder-table'>H</td>
+                <td class='Hborder-table'>I</td>
+                <td class='Hborder-table'>J</td>
+                <td class='Hborder-table'>K</td>
+              </tr>
+              <tr>
+                <td class='Fborder-table'>  entries.estud[0] estudiantes que terminan  </td>
+               
+              </tr>
+              <tr>
+                <td class='Fborder-table'>  entries.estud[1] estudiantes que aprobaron  </td>
+               
+              </tr>
+            </table>
+            <textarea class="textIn" name="1comments2" >
+Puede notarse que las notas más bajas se encuentran en los resultados de programa  entries.lowest[0][0] :  entries.lowest[0][1]   e/y  entries.lowest[1][0] :  entries.lowest[1][1] . 
+
+El mejor resultado de programa es  entries.high[0]  :  entries.high[1] 
+            </textarea>
+
+        <h3>Descripción del método utilizado para recoger la información referida</h3>
+        <hr>
+        Los instrumentos de medición directa fueron los parciales, las tareas, una exposición y el proyecto. Los porcentajes delos instrumentos y las habilidades evaluadas fueron:<br>
+        <table></table>
+        Comentarios:<br>
+        A continuación se presenta una breve descripción de los instrumentos de medición directa:<br>
+        <ul>
+
+        </ul>
+        <h2 class="thickh2">II. Logro de los objetivos de aprendizaje del curso</h2>
+        <hr>
+        <h2 class="thickh2">III. Desarrollo de los procesos del curso</h2>
+        <hr>
+        <h3>Cubrimiento del programa y del cuerpo de conocimiento</h3>
+        <hr>
+        <h3>Integración curricular (fórmula del curso)</h3>
+        <hr>
+        <h3>Tiempo de estudio de los estudiantes</h3>
+        <hr>
+        <h3>Texto, otras fuentes de información y software</h3>
+        <hr>
+        <h3>Instalaciones y Recursos</h3>
+        <hr>
+        <h3>Políticas y Reglas del Curso</h3>
+        <hr>
+        <h2 class="thickh2">IV. Acciones de mejoramiento implementadas en el período académico</h2>
+        <hr>
+        <h3>En cuanto a la fórmula y balance de evaluación del curso</h3>
+        <hr>
+        <h3>En cuanto al contenido del curso</h3>
+        <hr>
+        <h3>En cuanto a la metodología del curso</h3>
+        <hr>
+        <h3>En cuanto a recursos e instalaciones</h3>
+        <hr>
+        
+        <h2 class="thickh2">V. Recomendaciones sobre desarrollo futuro</h2>
+        <hr>
+        <h3>Integración curricular (fórmula del curso)</h3>
+        <hr>
+        <h3>Calificación de los resultados de estudiantes</h3>
+        <hr>
+        <h3>Áreas de interés especial</h3>
+        <hr>
+        <h3>Contenido y programación</h3>
+        <hr>
+        <h3>Recursos: texto, otras fuentes de información, software, instalaciones, etc.</h3>
+        <hr>
+        <h2 class="thickh2">VI. Comentarios Adicionales</h2>
+        <br>   
+        <form action="{{ url_for('show_courses', periodo=entries.detalles[3]) }}" >
+        <input type=submit value='Volver al listado de cursos' hidden=true>
+        </form>
+         <form name="botonvolver" action="{{ url_for('asignatura', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}" >
+             <input type=submit value='Volver a {{entries.detalles[0]}}'>
+        </form>        
+        {% endblock %}
+    </div>
+</body>

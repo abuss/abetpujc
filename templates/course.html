@@ -147,6 +147,9 @@
     <form action="{{ url_for('instrumentos', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2]) }}" method=post>
         <input type=submit value='Definir Evaluaciones'>
     </form>
+    <form action="{{ url_for('reporte', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2]) }}" method=post>
+        <input type=submit value='Generar Reporte'>
+    </form>  
     <form action="{{ url_for('show_courses', periodo=entries.periodo) }}">
         <input type=submit value='Volver al listado de cursos'>
     </form>
