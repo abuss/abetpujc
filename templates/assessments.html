@@ -166,17 +166,20 @@
   </div>
   </div>
   <br>
-  <input type=submit id="guardarNotas" onmouseover="myFunction()" value='Guardar'>
+  <input type=submit id="guardarNotas" onmouseover="Endisable()" value='Guardar'>
+
+  </form>
+  <form name="botonvolver"  action="{{ url_for('instrumentos', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
+    <input type=submit  onmouseover="Endisable()"  value='Volver a definir evaluaciones para {{entries.detalles[0]}}'>
+
+  </form>
   <script>
-function myFunction() {
+
+function Endisable() {
   if (arr.length > 0) {document.getElementById("guardarNotas").disabled = true} else{document.getElementById("guardarNotas").disabled = false};
     
 }
 </script>
-  </form>
-  <form name="botonvolver"  action="{{ url_for('instrumentos', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
-  <input type=submit value='Volver a definir evaluaciones para {{entries.detalles[0]}}'>
-  </form>
   {% endblock %}
 </div>
 </body>

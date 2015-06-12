@@ -3,7 +3,7 @@
 from __future__ import division
 import sqlite3
 from contextlib import closing
-
+import math,statistics
 
 from flask import Flask, request, g, redirect, url_for, \
     render_template, flash, session
@@ -183,6 +183,7 @@ def show_courses(periodo):
 
 
 @app.route('/<periodo>/<codigo>/<grupo>', methods=['GET', 'POST'])
+@login_required
 def asignatura(periodo, codigo, grupo):
     # Accede a la base de datos
     db = get_db()
@@ -1188,13 +1189,14 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/<periodo>/<codigo>/<grupo>/reporte', methods=['GET', 'POST'])
+@login_required
 def reporte(periodo, codigo, grupo):
     db = get_db()
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
-        "select a.nombre, a.codigo, a.grupo, a.periodo, a.id, p.nombre \
-        from asignatura as a, profesor as p \
-        where codigo=? and grupo=? and periodo=? and a.id_profesor = p.id",
+        "select a.nombre, a.codigo, a.grupo, a.periodo, a.id, a.id_carrera, e.nombre_carrera, p.nombre \
+        from asignatura as a, profesor as p, acreditacion_abet as e \
+        where a.codigo=? and a.grupo=? and a.periodo=? and a.id_profesor = p.id and a.id_carrera = e.id_carrera",
         [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
     # Recupera (de la base de datos) la informacion de las notas de los instrumentos ya contenida en la base de datos
@@ -1203,22 +1205,207 @@ def reporte(periodo, codigo, grupo):
         [detalles[4]])
     notasDef = cur2.fetchall()
     perder = 0
-    print(notasDef)
+    perdieron = []
+    aprobados = []
     for x in notasDef:
         if x[1]  < 3:
+            perdieron.append(x[0])
             perder += 1
+        else:
+            aprobados.append(x[0])
     maxnota = max(notasDef)
     minnota = min(notasDef)
 
-    promgeneralind = dict()
-    promgeneralindaprob= dict()
-    estud = [] 
-    lowest= []
-    high= []
+    estudiantes = get_students("bd",detalles)
+     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
+    cur3 = db.execute(
+        "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion,d.porcentaje \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, resultado_de_programa as f \
+        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
+            and f.carrera=? \
+        order by d.id_evaluacion",
+        [detalles[4], detalles[5]])
+    resprog = cur3.fetchall()
 
+    # Recupera (de la base de datos) la informacion de las evaluaciones ya contenida en la base de datos
+    cur4 = db.execute(
+        "select distinct d.evaluacion, e.competencia, e.porcentaje, f.descripcion \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, resultado_de_programa as f \
+        where d.id_evaluacion = e.evaluacion and f.id = e.competencia and e.nivel = 1 and d.asignatura=?",[detalles[4]])
+    porcresultados = cur4.fetchall()
 
-    entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1] ,'minnota': minnota[1], 'promgeneralind':promgeneralind, 'promgeneralindaprob':promgeneralindaprob}
+    # Recupera (de la base de datos) la informacion de las notas de los indicadores ya contenida en la base de datos
+    cur5 = db.execute(
+        "select evaluacion, codigo_estudiante,competencia, nota from nota_abet where asignatura=? and nivel=1",
+        [detalles[4]])
+    notasInd = cur5.fetchall()
+    # Recupera (de la base de datos) y procesa los datos de resultados de programa
+    cur6 = db.execute(
+        "select d.resultado_de_programa, d.peso, e.descripcion from formula as d, resultado_de_programa as e \
+        where asignatura=? and e.id = d.resultado_de_programa and e.carrera=?",
+        [detalles[4], detalles[5]])
+    # Recupera(de la base de datos) la competencia con su descripcion
+    cur8 = db.execute(
+        "select distinct e.competencia, f.descripcion \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, resultado_de_programa as f \
+        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
+            and f.carrera=? \
+        order by d.id_evaluacion",
+        [detalles[4], detalles[5]])
+    descAK = dict(cur8.fetchall())
+
+    formula = cur6.fetchall()
+    #formula2 = dict(formula)
+    numResultados = len(formula)
+    resultados = []
+    for a,b,c in formula:
+        resultados.append(a)
+    suma = 0
+    for i in formula:
+        suma = suma + i[1]
+    for i in range(len(formula)):
+        temp1 = list(formula[i])
+        temp1.append(int(formula[i][1] * 1000 / suma))
+        formula[i] = tuple(temp1)
+
+    # Variable para saber el numero de resultados de programa
+    conteo = len(formula)
+    # Procesa los datos de las notas de los resultados de programa totales
+    cur9 = db.execute(
+        "select d.evaluacion, d.competencia, d.codigo_estudiante, d.nota, e.porcentaje \
+        from nota_abet as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e\
+        where d.asignatura=? and d.nivel=1 and d.evaluacion = e.evaluacion and d.competencia = e.competencia \
+        order by d.competencia",
+        [detalles[4]])
+    temp1 = cur9.fetchall()
+
+    sumaResultados = dict(zip(resultados,[0]*len(resultados)))
+    for i in resultados:
+        cur10 = db.execute(
+            "select e.evaluacion, dsak.competencia, e.porcentaje \
+            from porcentaje_abet as e inner join Descripcion_A_K as dsak on e.Id_COMPETENCIA = dsak.competencia \
+            where asignatura=? and dsak.competencia=? \
+            order by competencia",
+            [detalles[4],i])
+        temp2 = cur10.fetchall()
+        suma = 0
+        for j,k,l in temp2:
+            suma += l
+        sumaResultados[i] = suma
+    #print (temp1)
+    resultadosTotales = dict( [(e[1],{}) for e in estudiantes])
+    resultadosTotalesaprob = dict( [(e,{}) for e in aprobados])
+    for e in estudiantes:
+        resultadosTotales[e[1]] = dict(zip(resultados,[0]*len(resultados)))
+    for e in aprobados:
+        resultadosTotalesaprob[e] = dict(zip(resultados,[0]*len(resultados)))
+    #print (resultadosTotales)
+    for (a,b,c,d,e) in temp1:
+        resultadosTotales[c][b] = round(resultadosTotales[c][b]+(d*e/sumaResultados[b]),2)
+        if c in aprobados:
+            resultadosTotalesaprob[c][b] = round(resultadosTotalesaprob[c][b]+(d*e/sumaResultados[b]),2)
+
+    for est in resultadosTotales:
+        for compt in resultadosTotales[est]:
+            resultadosTotales[est][compt] = round(5*resultadosTotales[est][compt]/100,1)
+            if est in aprobados:
+                resultadosTotalesaprob[est][compt] = round(5*resultadosTotalesaprob[est][compt]/100,1)
+    
+    # Procesa los datos de las notas definitivas guardadas previamente
+    notasDefinitivas = dict([(e[1],0) for e in estudiantes])
+    for (x,y) in notasDef:
+        notasDefinitivas[x] = round(y,1)
+    comptorg = list(resultadosTotales[estudiantes[0][1]].keys())
+    comptorg.sort()
+    competencias = ['A','B','C','D','E','F','G','H','I','J','K']
+    promgeneralind = dict( [(c,0) for c in competencias])
+    #print('resultadosTotales',resultadosTotales,'\n resultadosTotalesaprob',resultadosTotalesaprob)
+    promgeneralindaprob= dict( [(c,0) for c in competencias])
+    notascompt =dict( [(c,[]) for c in competencias])
+    desviacion= dict( [(c,0) for c in competencias])
+    minimo= dict( [(c,0) for c in competencias])
+    maximo= dict( [(c,0) for c in competencias])
+    aprueban= dict( [(c,0) for c in competencias])
+    for estud in resultadosTotales:
+        for compt in promgeneralind:
+            if compt in resultadosTotales[estud]:
+                notascompt[compt].append(resultadosTotales[estud][compt])
+                promgeneralind[compt] += resultadosTotales[estud][compt]
+            else:
+                notascompt[compt].append(0)
+            if estud in aprobados:
+                if compt in resultadosTotalesaprob[estud]:
+                    promgeneralindaprob[compt] += resultadosTotalesaprob[estud][compt]
+
+    lowest= [['A','desc',5],['C','desc',5]]
+    high= ['A','desc',0]
+
+    for compt in promgeneralind:
+        promgeneralind[compt] = round(promgeneralind[compt]/len(estudiantes),2)
+        if promgeneralind[compt] < lowest[1][2] and promgeneralind[compt] > 0:            
+            if promgeneralind[compt] < lowest[0][2]:
+                lowest[1][0] = lowest[0][0]
+                lowest[1][2] = lowest[0][2]
+                lowest[0][0] = compt
+                lowest[0][2] = promgeneralind[compt]
+            else:
+                lowest[1][0] = compt
+                lowest[1][2] = promgeneralind[compt]
+        if promgeneralind[compt] > high[2] :
+            high[0] = compt
+            high[2] = promgeneralind[compt]
+        promgeneralindaprob[compt] = round(promgeneralindaprob[compt]/len(aprobados),2)
+
+    for nota in notascompt:
+        desviacion[nota] = round(statistics.stdev(notascompt[nota],promgeneralind[compt]),2)
+        minimo[nota] = min(notascompt[nota])
+        maximo[nota] = max(notascompt[nota])
+        for notas in notascompt[nota]:
+            if notas > 3:
+                aprueban[nota]+=1
+    for nota in aprueban:
+        aprueban[nota]=round(aprueban[nota]/len(estudiantes),2)
+        aprueban[nota]=int(aprueban[nota])*100
+    # for estud in resultadosTotales:
+     #    for compt in promgeneralind:
+     #        if compt in resultadosTotales[estud]:
+     #            desviacion[compt] += resultadosTotales[estud][compt] - promgeneralind[compt] 
+            
+    #print('promgeneralind', promgeneralind)
+    #print('promgeneralindaprob', promgeneralindaprob)
+    #print(aprueban,desviacion)
+    lowest [0][1] = descAK[lowest[0][0]]
+    lowest [1][1] = descAK[lowest[1][0]]
+    high[1] = descAK[high[0]]
+    instss=[]
+    #[ ins[0] for ins in resprog if not (ins[0] in instss]
+    [instss.append(item[0]) for item in resprog if item[0] not in instss]
+    inssts = dict( [(i,0) for i in instss])
+    insxcompt = dict( [(i,0) for i in instss])
+    promins = dict( [(c,[]) for c in competencias])
+    for ins in insxcompt:
+        insxcompt[ins] = dict( [(c,0) for c in competencias])
+    for (a,b,c,d,e,f) in resprog:
+        insxcompt[a][c] = d
+        promins[c].append(d)
+        inssts[a]=f
+
+    for ins in promins:
+        if promins[ins]:
+            if len(promins[ins]) < len(instss):
+                [promins[ins].append(0) for i in range(len(instss)-len(promins[ins]))]
+            promins[ins] = round(statistics.mean(promins[ins]),2)
+        else:
+            promins[ins] = 0
+            
+
+    entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1] ,'minnota': minnota[1], 'promgeneralind':promgeneralind, 'promgeneralindaprob':promgeneralindaprob, 'estud':len(estudiantes), 'ordcompt': competencias, 'high':high, 'lowest':lowest, 'instrumentos':instss,'desviacion':desviacion,'minimo':minimo, 'maximo':maximo,'aprueban':aprueban,'inspor':inssts,'inscompt':insxcompt, 'promins':promins}
     return render_template('report.html', entries=entries)
+
+@app.route('/<periodo>/<codigo>/<grupo>/guardarPeriodo', methods=['POST'])
+@login_required
+def guardarReporte(periodo, codigo, grupo):
+    pass
 
 if __name__ == '__main__':
     if len(sys.argv)>2 and sys.argv[1]=='initdb':

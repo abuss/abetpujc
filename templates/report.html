@@ -18,12 +18,12 @@
         <br>
         <br>
         {% block body %}
-            <form action="" method="post">
+            <form name="forma" id="forma" action="{{ url_for('guardarReporte', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}" method=post>
             <h2 class="thickh2">Formato Evaluación Cursos ABET {{ entries.detalles[3] }}</h2>
             <hr>
             <ul>
                 <li>Nombre del curso: {{ entries.detalles[0] }}</li>
-                <li>Coordinador del curso: {{ entries.detalles[5] }}</li>
+                <li>Coordinador del curso: {{ entries.detalles[7] }}</li>
                 <li>Periodo academico: {{ entries.detalles[3] }}</li>
             </ul>
 
@@ -61,72 +61,238 @@ Los promedios del grupo por cada resultado de programa son los siguientes:
                 <td class='Hborder-table'>K</td>
               </tr>
               <tr>
-                <td class='Fborder-table'>  entries.estud[0] estudiantes que terminan  </td>
-               
+                <td class='Fborder-table'>  {{ entries.estud }} estudiantes que terminan  </td>
+               {% for j in entries.ordcompt %}
+                    {% if entries.promgeneralind[j] > 0 %}
+                        <td class='border-table'>{{ entries.promgeneralind[j] }}</td>
+                    {% else %}
+                        <td class='border-table'></td>
+                    {% endif %}
+
+                {% endfor %}
               </tr>
               <tr>
-                <td class='Fborder-table'>  entries.estud[1] estudiantes que aprobaron  </td>
+                <td class='FLborder-table'>  {{ entries.estud - entries.perder }} estudiantes que aprobaron  </td>
+                {% for j in entries.ordcompt %}
+                    {% if entries.promgeneralindaprob[j] > 0 %}
+                        <td class='Lborder-table'>{{ entries.promgeneralindaprob[j] }}</td>
+                    {% else %}
+                        <td class='Lborder-table'></td>
+                    {% endif %}
+
+                {% endfor %}
                
               </tr>
             </table>
             <textarea class="textIn" name="1comments2" >
-Puede notarse que las notas más bajas se encuentran en los resultados de programa  entries.lowest[0][0] :  entries.lowest[0][1]   e/y  entries.lowest[1][0] :  entries.lowest[1][1] . 
+Puede notarse que las notas más bajas se encuentran en los resultados de programa {{ entries.lowest[0][0] }}: {{ entries.lowest[0][1] }}  e/y {{ entries.lowest[1][0] }}: {{ entries.lowest[1][1] }}. 
 
-El mejor resultado de programa es  entries.high[0]  :  entries.high[1] 
+El mejor resultado de programa es  {{ entries.high[0] }} : {{ entries.high[1] }}
+A continuación se presenta el resumen de los resultados obtenidos:
             </textarea>
+        <table class='note-table'>
+            <caption class='caption-style'>Población Total</caption>
+            <tr>
+                <td class='Fborder-table'>  Promedio </td>
+               {% for j in entries.ordcompt %}
+                    {% if entries.promgeneralind[j] > 0 %}
+                        <td class='border-table'>{{ entries.promgeneralind[j] }}</td>
+                    {% else %}
+                        <td class='border-table'>0.00</td>
+                    {% endif %}
+
+                {% endfor %}
+              </tr>
+            <tr>
+                <td class='Fborder-table'> Desv. Estandar </td>
+                {% for j in entries.ordcompt %}
+                    {% if entries.desviacion[j] > 0 %}
+                        <td class='border-table'>{{ entries.desviacion[j] }}</td>
+                    {% else %}
+                        <td class='border-table'>0.00</td>
+                    {% endif %}
+
+                {% endfor %}
+            </tr>
+            <tr>
+                <td class='Fborder-table'> Mínimo </td>
+                {% for j in entries.ordcompt %}
+                    {% if entries.minimo[j] > 0 %}
+                        <td class='border-table'>{{ entries.minimo[j] }}</td>
+                    {% else %}
+                        <td class='border-table'>0.00</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            </tr>
+            <tr>
+                <td class='Fborder-table'> Máximo </td>
+                {% for j in entries.ordcompt %}
+                    {% if entries.maximo[j] > 0 %}
+                        <td class='border-table'>{{ entries.maximo[j] }}</td>
+                    {% else %}
+                        <td class='border-table'>0.00</td>
+                    {% endif %}
+
+                {% endfor %}
+            </tr>
+            <tr>
+                <td class='FSborder-table'> No. Estudiantes </td>
+                {% for j in entries.ordcompt %}
+                    {% if j=='K' %}
+                        <td class='Sborder-table'>{{ entries.estud }}</td>
+                    {% else %}
+                        <td class='Sborder-table'></td>
+                    {% endif %}
+
+                {% endfor %}
+            </tr>
+            <tr>
+                <td class='FLborder-table'> % Aprueban </td>
+                {% for j in entries.ordcompt %}
+                    {% if entries.promgeneralind[j] > 0 %}
+                        <td class='Lborder-table'>{{ entries.promgeneralind[j] }} %</td>
+                    {% else %}
+                        <td class='Lborder-table'>0%</td>
+                    {% endif %}
+
+                {% endfor %}
+            </tr>
+
+        </table>
+        <table class='note-table'>
+            <caption class='caption-style'>Estudiantes que aprobaron</caption>
+            <tr>
+                <td class='FLborder-table'>  Promedio </td>
+               {% for j in entries.ordcompt %}
+                    {% if entries.promgeneralind[j] > 0 %}
+                        <td class='Lborder-table'>{{ entries.promgeneralind[j] }}</td>
+                    {% else %}
+                        <td class='Lborder-table'>0.00</td>
+                    {% endif %}
+
+                {% endfor %}
+              </tr>
+            <tr>
+        </table>
 
         <h3>Descripción del método utilizado para recoger la información referida</h3>
         <hr>
-        Los instrumentos de medición directa fueron los parciales, las tareas, una exposición y el proyecto. Los porcentajes delos instrumentos y las habilidades evaluadas fueron:<br>
-        <table></table>
+        <textarea class = 'textIn'>
+Los instrumentos de medición directa fueron . Los porcentajes de los instrumentos y las habilidades evaluadas fueron:
+        </textarea>
+
+        <br>
+        <table class='note-table'>
+            <tr>
+                <td class='Fborder-table'> Instrumento</td>
+                <td class='border-table'> Porcentaje en la nota del curso</td>
+                <td class='border-table'> Porcentaje evaluado en cada competencia</td>
+            </tr>
+            {% for j in entries.instrumentos %}
+                <tr>
+                    <td class='Fborder-table'>{{ j }} </td>
+                    <td class='border-table'> {{ entries.inspor[j] }} </td>
+                    {% for i in entries.ordcompt %}
+                        <td class='border-table'> {{ entries.inscompt[j][i] }} </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            <tr>
+                <td class='FLborder-table'>Porcentaje Total Evaluado </td>
+                <td class='Lborder-table'> 100% </td>
+                {% for j in entries.ordcompt %}
+                    {% if entries.promins[j] > 0 %}
+                        <td class='Lborder-table'>{{ entries.promins[j] }}</td>
+                    {% else %}
+                        <td class='Lborder-table'></td>
+                    {% endif %}
+
+                {% endfor %}
+
+            </tr>
+        </table>
         Comentarios:<br>
         A continuación se presenta una breve descripción de los instrumentos de medición directa:<br>
         <ul>
-
+            {% for j in entries.instrumentos %}
+                    <li>{{ j }}:</li><input class='textIn2'></input>
+            {% endfor %}
         </ul>
         <h2 class="thickh2">II. Logro de los objetivos de aprendizaje del curso</h2>
         <hr>
+        <textarea class='textIn'></textarea>
         <h2 class="thickh2">III. Desarrollo de los procesos del curso</h2>
         <hr>
         <h3>Cubrimiento del programa y del cuerpo de conocimiento</h3>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <hr>
         <h3>Integración curricular (fórmula del curso)</h3>
         <hr>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h3>Tiempo de estudio de los estudiantes</h3>
         <hr>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h3>Texto, otras fuentes de información y software</h3>
         <hr>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h3>Instalaciones y Recursos</h3>
         <hr>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h3>Políticas y Reglas del Curso</h3>
         <hr>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h2 class="thickh2">IV. Acciones de mejoramiento implementadas en el período académico</h2>
         <hr>
         <h3>En cuanto a la fórmula y balance de evaluación del curso</h3>
         <hr>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h3>En cuanto al contenido del curso</h3>
         <hr>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h3>En cuanto a la metodología del curso</h3>
         <hr>
         <h3>En cuanto a recursos e instalaciones</h3>
         <hr>
-        
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h2 class="thickh2">V. Recomendaciones sobre desarrollo futuro</h2>
         <hr>
         <h3>Integración curricular (fórmula del curso)</h3>
         <hr>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h3>Calificación de los resultados de estudiantes</h3>
         <hr>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h3>Áreas de interés especial</h3>
         <hr>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h3>Contenido y programación</h3>
         <hr>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h3>Recursos: texto, otras fuentes de información, software, instalaciones, etc.</h3>
         <hr>
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
         <h2 class="thickh2">VI. Comentarios Adicionales</h2>
-        <br>   
-        <form action="{{ url_for('show_courses', periodo=entries.detalles[3]) }}" >
-        <input type=submit value='Volver al listado de cursos' hidden=true>
+        <hr>   
+        Comentarios:<br>
+        <textarea class='textIn'></textarea>
+        <br>
+        <input type=submit value='Guardar'>
         </form>
          <form name="botonvolver" action="{{ url_for('asignatura', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}" >
              <input type=submit value='Volver a {{entries.detalles[0]}}'>

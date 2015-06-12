@@ -29,12 +29,19 @@ html 			{ font-size: 70%; }
 
 .textIn         
 {
- width:80%;height:100px;
+ width:80%;
+ height:100px;
 }
-
+.textIn2         
+{
+ width:60%;
+ height:60px;
+}
 .note-table{
 	empty-cells: show;
-	border: 1px solid;
+  border: 1px solid;
+  margin-top: 1%;
+  margin-bottom: 1%;
 }
 
 .border-table{
@@ -42,9 +49,25 @@ html 			{ font-size: 70%; }
   border-bottom:1px solid;
   padding:.5em .5em .5em 3em;
 }
+.Sborder-table{
+  border-bottom:1px solid;
+  padding:.5em .5em .5em 3em;
+}
+.Lborder-table{
+  border-left:1px solid;
+  padding:.5em .5em .5em 3em;
+}
 .Fborder-table{
   padding:.5em .5em .5em 3em;
   border-bottom:1px solid;
+}
+.FSborder-table{
+  padding:.5em .5em .5em 3em;
+  border-bottom:1px solid;
+  border-right:1px solid;
+}
+.FLborder-table{
+  padding:.5em .5em .5em 3em;
 }
 .Hborder-table{
   font-weight: bold;
@@ -56,4 +79,9 @@ html 			{ font-size: 70%; }
   font-weight: bold;
   border-bottom:1px solid;
   padding:.5em .5em .5em 3em;
+}
+.caption-style{
+  text-align: center; 
+  background-color: gray; 
+  border: 1px solid black;
 }
