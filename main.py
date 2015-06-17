@@ -13,6 +13,9 @@ from functools import wraps, reduce
 from operator import itemgetter
 import sys
 from flask import json
+from os import path
+import xlsxwriter
+
 
 # Inicializacion de variables
 app = Flask(__name__)
@@ -1354,7 +1357,10 @@ def reporte(periodo, codigo, grupo):
         if promgeneralind[compt] > high[2] :
             high[0] = compt
             high[2] = promgeneralind[compt]
-        promgeneralindaprob[compt] = round(promgeneralindaprob[compt]/len(aprobados),2)
+        if len(aprobados) > 0:
+            promgeneralindaprob[compt] = round(promgeneralindaprob[compt]/len(aprobados),2)
+        else:
+            promgeneralindaprob[compt] = 0
 
     for nota in notascompt:
         desviacion[nota] = round(statistics.stdev(notascompt[nota],promgeneralind[compt]),2)
@@ -1397,15 +1403,81 @@ def reporte(periodo, codigo, grupo):
             promins[ins] = round(statistics.mean(promins[ins]),2)
         else:
             promins[ins] = 0
-            
+    
+    cur12 = db.execute(
+        "select distinct periodo from acreditacion_abet order by periodo asc"
+        )
+    periodos = cur12.fetchall()
+    pastper = 0
+    for per in periodos:
+        if per[0] == periodo:
+            break
+        pastper+=1
+    load = 0
+    reporteg = 1
+    dirar = str(periodos[pastper][0])+str(codigo)+str(grupo)
+    if path.isfile(str(periodo)+str(codigo)+str(grupo)+".json"):
+        dirar = str(periodo)+str(codigo)+str(grupo)
+    else:
+        dirar = str(periodos[pastper][0])+str(codigo)+str(grupo)
 
-    entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1] ,'minnota': minnota[1], 'promgeneralind':promgeneralind, 'promgeneralindaprob':promgeneralindaprob, 'estud':len(estudiantes), 'ordcompt': competencias, 'high':high, 'lowest':lowest, 'instrumentos':instss,'desviacion':desviacion,'minimo':minimo, 'maximo':maximo,'aprueban':aprueban,'inspor':inssts,'inscompt':insxcompt, 'promins':promins}
+    with open(str(dirar)+".json") as reportef:
+        reporteg = json.load(reportef) 
+        load = 1
+
+    entries = dict()
+    if load == 0:
+        entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1] ,'minnota': minnota[1], 'promgeneralind':promgeneralind, 'promgeneralindaprob':promgeneralindaprob, 'estud':len(estudiantes), 'ordcompt': competencias, 'high':high, 'lowest':lowest, 'instrumentos':instss,'desviacion':desviacion,'minimo':minimo, 'maximo':maximo,'aprueban':aprueban,'inspor':inssts,'inscompt':insxcompt, 'promins':promins, 'load':load}
+    else:
+        entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1] ,'minnota': minnota[1], 'promgeneralind':promgeneralind, 'promgeneralindaprob':promgeneralindaprob, 'estud':len(estudiantes), 'ordcompt': competencias, 'high':high, 'lowest':lowest, 'instrumentos':instss,'desviacion':desviacion,'minimo':minimo, 'maximo':maximo,'aprueban':aprueban,'inspor':inssts,'inscompt':insxcompt, 'promins':promins, 'load':load,'store':reporteg}
+
     return render_template('report.html', entries=entries)
 
 @app.route('/<periodo>/<codigo>/<grupo>/guardarPeriodo', methods=['POST'])
 @login_required
 def guardarReporte(periodo, codigo, grupo):
-    pass
+    db = get_db()
+    filename = str(periodo)+str(codigo)+str(grupo)+".json"
+    data = {"1comments1": request.form["1comments1"],"1comments2":request.form["1comments2"],"1comments3":request.form["1comments3"],
+            "2comments1":request.form["2comments1"],"3comments1":request.form["3comments1"],"3comments2":request.form["3comments2"],
+            "3comments3":request.form["3comments3"], "3comments4":request.form["3comments4"], "3comments5":request.form["3comments5"],
+            "3comments6":request.form["3comments6"], "4comments1":request.form["4comments1"],"4comments2":request.form["4comments2"],
+            "4comments3":request.form["4comments3"], "5comments1":request.form["5comments1"],"5comments2":request.form["5comments2"],
+            "5comments3":request.form["5comments3"], "5comments4":request.form["5comments4"], "5comments5":request.form["5comments5"],
+            "6comments1":request.form["6comments1"]}
+    
+    cur1 = db.execute(
+        "select a.nombre, a.codigo, a.grupo, a.periodo, a.id, a.id_carrera, e.nombre_carrera, p.nombre \
+        from asignatura as a, profesor as p, acreditacion_abet as e \
+        where a.codigo=? and a.grupo=? and a.periodo=? and a.id_profesor = p.id and a.id_carrera = e.id_carrera",
+        [codigo,grupo,periodo])
+    detalles = cur1.fetchall()[0]
+     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
+    cur2 = db.execute(
+        "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion,d.porcentaje \
+        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e, resultado_de_programa as f \
+        where e.porcentaje > 0 and d.id_evaluacion = e.evaluacion and e.competencia = f.id and e.asignatura=? \
+            and f.carrera=? \
+        order by d.id_evaluacion",
+        [detalles[4], detalles[5]])
+    resprog = cur2.fetchall()
+    instss=[]
+    [instss.append(item[0]) for item in resprog if item[0] not in instss]
+    for ints in instss:
+        data[ints] = request.form[ints]
+    with open(filename, 'w') as outfile:
+        json.dump(data, outfile)
+    #Recarga la pagina del reporte
+    return redirect(url_for('reporte', periodo=periodo, codigo=codigo, grupo=grupo))
+
+@app.route('/<periodo>/<codigo>/<grupo>/excel', methods=['POST'])
+@login_required
+def NotasExcel(periodo, codigo, grupo,data):
+    nombre ='algo.xlsx'
+    workbook = xlsxwriter.Workbook(nombre)
+    worksheet = workbook.add_worksheet()
+    print(data)
+    return redirect(url_for('reporte', periodo=periodo, codigo=codigo, grupo=grupo))
 
 if __name__ == '__main__':
     if len(sys.argv)>2 and sys.argv[1]=='initdb':
