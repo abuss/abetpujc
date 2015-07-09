@@ -10,7 +10,7 @@ def connect_db():
 
 
 def add_data(db):
-    with open('scripts/addDataPruebasdb.sql', mode='r') as f:
+    with open('scripts/addData2db.sql', mode='r') as f:
         print("Filling DB")
         db.executescript(f.read())
     db.commit()

@@ -80,6 +80,12 @@ html 			{ font-size: 70%; }
   border-bottom:1px solid;
   padding:.5em .5em .5em 3em;
 }
+
+.Cborder-table{
+  border:1px solid;
+  padding:.5em .5em .5em 3em;
+}
+
 .caption-style{
   text-align: center; 
   background-color: gray; 

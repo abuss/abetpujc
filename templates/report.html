@@ -31,7 +31,7 @@
             <hr>
             <h3> Por mediciones directas de desempeños</h3>
             <hr>
-            El consolidado de las notas de los estudiantes se encuentra en el archivo adjunto: Notas {{ entries.detalles[3] }} .<br>
+            El consolidado de las notas de los estudiantes se encuentra en el archivo adjunto: <a  href="excel/{{entries.detalles[3]}}{{entries.detalles[1]}}{{entries.detalles[2]}}.xlsx" download="{{entries.detalles[3]}}{{entries.detalles[1]}}{{entries.detalles[2]}}.xlsx">Notas {{ entries.detalles[3] }}</a> .<br>
             Comentarios:<br>
             {% if entries.load == 0 %}
             <textarea class="textIn" name="1comments1" >
@@ -125,6 +125,18 @@ A continuación se presenta el resumen de los resultados obtenidos:
                 {% endfor %}
             </tr>
             <tr>
+                <td class='Fborder-table'> DE/Promedio </td>
+                {% for j in entries.ordcompt %}
+                    {% if entries.devmed[j] > 0 %}
+                        <td class='border-table'>{{ entries.devmed[j] }}</td>
+                    {% else %}
+                        <td class='border-table'>0.00</td>
+                    {% endif %}
+
+                {% endfor %}
+
+            </tr>
+            <tr>
                 <td class='Fborder-table'> Mínimo </td>
                 {% for j in entries.ordcompt %}
                     {% if entries.minimo[j] > 0 %}
@@ -161,8 +173,8 @@ A continuación se presenta el resumen de los resultados obtenidos:
             <tr>
                 <td class='FLborder-table'> % Aprueban </td>
                 {% for j in entries.ordcompt %}
-                    {% if entries.promgeneralind[j] > 0 %}
-                        <td class='Lborder-table'>{{ entries.promgeneralind[j] }} %</td>
+                    {% if entries.promgeneralindaprob[j] > 0 %}
+                        <td class='Lborder-table'>{{ entries.promgeneralindaprob[j] }} %</td>
                     {% else %}
                         <td class='Lborder-table'>0%</td>
                     {% endif %}
@@ -176,8 +188,8 @@ A continuación se presenta el resumen de los resultados obtenidos:
             <tr>
                 <td class='FLborder-table'>  Promedio </td>
                {% for j in entries.ordcompt %}
-                    {% if entries.promgeneralind[j] > 0 %}
-                        <td class='Lborder-table'>{{ entries.promgeneralind[j] }}</td>
+                    {% if entries.promgeneralindaprob[j] > 0 %}
+                        <td class='Lborder-table'>{{ entries.promgeneralindaprob[j] }}</td>
                     {% else %}
                         <td class='Lborder-table'>0.00</td>
                     {% endif %}
@@ -202,9 +214,20 @@ Los instrumentos de medición directa fueron . Los porcentajes de los instrument
         <br>
         <table class='note-table'>
             <tr>
-                <td class='Fborder-table'> Instrumento</td>
-                <td class='border-table'> Porcentaje en la nota del curso</td>
-                <td class='border-table'> Porcentaje evaluado en cada competencia</td>
+                <th class='Fborder-table'> Instrumento</th>
+                <th class='border-table'> Porcentaje en la nota del curso</th>
+                <td class='border-table' colspan="11" style='text-align: center;'>  
+                    <table width="100%">
+                   <tr> 
+                   <th colspan="11" style='border-bottom:2px solid;'>Porcentaje evaluado en cada competencia</th>
+                   </tr>
+                   <tr>
+                   {% for i in entries.ordcompt %}
+                        <td class='Cborder-table' style='text-align: left;'> {{ i }} </td>
+                    {% endfor %}
+                   </tr>
+                   </table>
+                </td>
             </tr>
             {% for j in entries.instrumentos %}
                 <tr>
@@ -216,11 +239,11 @@ Los instrumentos de medición directa fueron . Los porcentajes de los instrument
                 </tr>
             {% endfor %}
             <tr>
-                <td class='FLborder-table'>Porcentaje Total Evaluado </td>
-                <td class='Lborder-table'> 100% </td>
+                <td class='FLborder-table' style=''><b>Porcentaje Total Evaluado</b> </td>
+                <td class='Lborder-table'> <b> 100% </b></td>
                 {% for j in entries.ordcompt %}
                     {% if entries.promins[j] > 0 %}
-                        <td class='Lborder-table'>{{ entries.promins[j] }}</td>
+                        <td class='Lborder-table'><b>{{ entries.promins[j] }} </b></td>
                     {% else %}
                         <td class='Lborder-table'></td>
                     {% endif %}
@@ -443,10 +466,7 @@ Los instrumentos de medición directa fueron . Los porcentajes de los instrument
         {% endif %}
         <br>
         <input type=submit value='Guardar'>
-        </form>
-        <form name="GenerarExcel" action="{{ url_for('NotasExcel', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2], data=entries)}}" >
-             <input type=submit value='Generar Excel' hidden = true>
-        </form>     
+        </form>  
          <form name="botonvolver" action="{{ url_for('asignatura', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}" >
              <input type=submit value='Volver a {{entries.detalles[0]}}'>
         </form>        

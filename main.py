@@ -103,6 +103,262 @@ def get_students(src,args):
     else:
         print("No hay procedimiento para la fuente: ", src)
 
+
+def NotasExcel(periodo, codigo, grupo,data):
+    nombre ='excel/'+str(periodo)+str(codigo)+str(grupo)+'.xlsx'
+    workbook = xlsxwriter.Workbook(nombre)
+    worksheet = workbook.add_worksheet()
+    merge_format = workbook.add_format({
+    'bold': 1,
+    'border': 1,
+    'align': 'center',
+    'valign': 'vcenter',
+    'fg_color': 'silver'})
+    merge_format2 = workbook.add_format({'border': 1})
+    merge_format3 = workbook.add_format({'border': 1, 'fg_color': '#FFD1A3','align':'right'})
+    formatb = workbook.add_format({
+    'bold': 1,
+    'border': 1,
+    'align': 'center',
+    'valign': 'vcenter'})
+    format = workbook.add_format({'border': 1})
+    formatp = workbook.add_format({'border': 1})
+    formatp.set_num_format('0.0%')
+    formatn = workbook.add_format({'border': 1})
+    formatn.set_num_format('0.00')
+    format2 = workbook.add_format({'border': 1,'fg_color': '#FFD1A3'})
+    formatp2 = workbook.add_format({'border': 1,'fg_color': '#FFD1A3'})
+    formatp2.set_num_format('0.0%')
+    formatn2 = workbook.add_format({'border': 1,'fg_color': '#FFD1A3'})
+    formatn2.set_num_format('0.00')
+    worksheet.write('A2','Curso:',merge_format2)
+    worksheet.write('A3','Periodo:',merge_format2)
+    worksheet.write('A4','Profesor:',merge_format2)
+    worksheet.merge_range('A1:M1', 'Resumen de las calificaciones de los estudiantes', merge_format)
+    worksheet.merge_range('B2:M2',data['detalles'][0], merge_format2)
+    worksheet.merge_range('B3:M3',data['detalles'][3], merge_format2)
+    worksheet.merge_range('B4:M4',data['detalles'][7], merge_format2)
+    worksheet.merge_range('A6:M6', 'Fórmula del Curso', merge_format)
+    worksheet.add_table('B7:L7',{'header_row': False})
+    i = 6
+    j = 1
+    worksheet.write(i,0,'',formatb)
+    for c in data['ordcompt']:
+        worksheet.write(i,j,c,formatb)
+        j+=1
+    worksheet.write(i,j,'Total',formatb)
+    i = 7
+    j = 0
+    sumtot = 0
+    worksheet.write(i,j,'Pesos',format)
+    for f in data['ordcompt']:
+        sumtot +=data['formm'][f]
+        if data['formm'][f] == 0:
+            worksheet.write(i,j+1,' ',formatn)  
+        else:
+            worksheet.write(i,j+1,data['formm'][f],formatn)
+        j+=1
+    worksheet.write_formula(i,j+1, '=SUM(B8:L8)',formatn2)
+    i = 8
+    j = 0
+    tot2=0
+    worksheet.write(i,j,'Porcentajes',format)
+    for f in data['ordcompt']:
+        if data['formm'][f] == 0:
+            worksheet.write(i,j+1,0,formatp)  
+        else:
+            worksheet.write(i,j+1,round((data['formm'][f]/sumtot),1),formatp)
+            tot2 +=(data['formm'][f]/sumtot)
+        j+=1
+    worksheet.write(i,j+1, tot2,formatp2)
+    worksheet.merge_range('A12:M12', 'Resultados', merge_format)
+    i = 12
+    j = 0
+    worksheet.write(i,j,'Estudiante',format)
+    for c in data['ordcompt']:
+        worksheet.write(i,j+1,c,formatb)
+        j+=1
+    worksheet.write(i,j+1,'Nota Final',formatb)
+    i = 13
+    for estud in data['sestud']:
+        j=0
+        worksheet.write(i,j,estud[0],format)
+        for c in data['ordcompt']:
+            if c in data['comres'][estud[1]]:
+                worksheet.write(i,j+1,data['comres'][estud[1]][c],formatn)
+            else:
+                worksheet.write(i,j+1,' ',format)
+            j+=1
+        worksheet.write(i,j+1,data['notdef'][estud[1]],formatn)
+        i+=1
+
+    if data['estud'] <= 26:
+        num = 27 - data['estud']
+        for x in range(num):
+            j=0
+            worksheet.write(i,j,'',formatn)
+            for c in data['ordcompt']:
+                worksheet.write(i,j+1,' ',formatn)
+                j+=1
+            worksheet.write(i,j+1,'',formatn)
+            i+=1
+        worksheet.merge_range('A41:M41', 'Población Total', merge_format)
+        i += 1
+        j = 0
+        worksheet.write(i,j,'Promedio',format)
+        for c in data['ordcompt']:
+            if data['promgeneralind'][c] > 0:
+                worksheet.write(i,j+1,data['promgeneralind'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=SI.ERROR(PROMEDIO(M14:M40),0)',format2)
+        i += 1
+        j = 0
+        worksheet.write(i,j,'Desv. Estándar',format)
+        for c in data['ordcompt']:
+            if data['desviacion'][c] > 0:
+                worksheet.write(i,j+1,data['desviacion'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=SI.ERROR(PROMEDIO(M14:M40),0)',format2)
+        i += 1
+        j = 0
+        worksheet.write(i,j,'DE/Promedio',format)
+        for c in data['ordcompt']:
+            if data['devmed'][c] > 0:
+                worksheet.write(i,j+1,data['devmed'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=SI.ERROR(M43/M42,0)',format2)
+        i += 1
+        j = 0
+        worksheet.write(i,j,'Mínimo',format)
+        for c in data['ordcompt']:
+            if data['minimo'][c] > 0:
+                worksheet.write(i,j+1,data['minimo'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=MIN(M14:M40)',format2)
+        i += 1
+        j = 0
+        worksheet.write(i,j,'Maximo',format)
+        for c in data['ordcompt']:
+            if data['maximo'][c] > 0:
+                worksheet.write(i,j+1,data['maximo'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=MAX(M14:M40)',format2)
+        i += 2
+        j = 0
+        worksheet.write(i-1,j,'No Estudiantes',format)
+        worksheet.merge_range('B47:M47',data['estud'], merge_format3)
+        worksheet.write(i,j,'%Aprueban',format)
+        for c in data['ordcompt']:
+            if data['promgeneralindaprob'][c] > 0:
+                worksheet.write(i,j+1,data['promgeneralindaprob'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=CONTAR.SI(M14:M40,">=2.95")/$B$47',format2)
+        worksheet.merge_range('A50:M50', 'Estudiantes que aprobaron', merge_format)
+        i += 3
+        j = 0
+        worksheet.write(i,j,'Promedio',format)
+        for c in data['ordcompt']:
+            if data['promgeneralindaprob'][c] > 0:
+                worksheet.write(i,j+1,data['promgeneralindaprob'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=SI.ERROR(PROMEDIO.SI($M14:$M40,">=2.95",M14:M40),0)',format2)
+
+    else:
+        worksheet.merge_range(i,0,i,12, 'Población Total', merge_format)
+        itot = i
+        i += 1
+        j = 0
+        worksheet.write(i,j,'Promedio',format)
+        for c in data['ordcompt']:
+            if data['promgeneralind'][c] > 0:
+                worksheet.write(i,j+1,data['promgeneralind'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+
+        worksheet.write_formula(i,j+1, '=SI.ERROR(PROMEDIO(M14:M'+str(itot)+'),0)',format2)
+        i += 1
+        j = 0
+        worksheet.write(i,j,'Desv. Estándar',format)
+        for c in data['ordcompt']:
+            if data['desviacion'][c] > 0:
+                worksheet.write(i,j+1,data['desviacion'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=SI.ERROR(PROMEDIO(M14:M'+str(itot)+'),0)',format2)
+        i += 1
+        j = 0
+        worksheet.write(i,j,'DE/Promedio',format)
+        for c in data['ordcompt']:
+            if data['devmed'][c] > 0:
+                worksheet.write(i,j+1,data['devmed'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=SI.ERROR(M'+str(itot+2)+'/M'+str(itot+3)+',0)',format2)
+        i += 1
+        j = 0
+        worksheet.write(i,j,'Mínimo',format)
+        for c in data['ordcompt']:
+            if data['minimo'][c] > 0:
+                worksheet.write(i,j+1,data['minimo'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=MIN(M14:M'+str(itot)+')',format2)
+        i += 1
+        j = 0
+        worksheet.write(i,j,'Maximo',format)
+        for c in data['ordcompt']:
+            if data['maximo'][c] > 0:
+                worksheet.write(i,j+1,data['maximo'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=MAX(M14:M'+str(itot)+')',format2)
+        i += 2
+        j = 0
+        worksheet.write(i-1,j,'No Estudiantes',format)
+        worksheet.merge_range(i-1,1,i-1,12,data['estud'], merge_format3)
+        worksheet.write(i,j,'%\Aprueban',format)
+        for c in data['ordcompt']:
+            if data['promgeneralindaprob'][c] > 0:
+                worksheet.write(i,j+1,data['promgeneralindaprob'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=CONTAR.SI(M14:M'+str(itot)+',">=2.95")/$B$'+str(itot+7)+'',format2)
+        i+= 2
+        worksheet.merge_range(i,0,i,12, 'Estudiantes que aprobaron', merge_format)
+        i += 1
+        j = 0
+        worksheet.write(i,j,'Promedio',format)
+        for c in data['ordcompt']:
+            if data['promgeneralindaprob'][c] > 0:
+                worksheet.write(i,j+1,data['promgeneralindaprob'][c],formatn2) 
+            else:
+                worksheet.write(i,j+1,0.00,formatn2) 
+            j+=1
+        worksheet.write_formula(i,j+1, '=SI.ERROR(PROMEDIO.SI($M14:$M'+str(itot)+',">=2.95",M14:M'+str(itot)+'),0)',format2)
+
+    workbook.close()
+    return redirect(url_for('reporte', periodo=periodo, codigo=codigo, grupo=grupo))
+
 def login_required(f):
    @wraps(f)
    def wrap(*args, **kwargs):
@@ -1326,6 +1582,7 @@ def reporte(periodo, codigo, grupo):
     promgeneralindaprob= dict( [(c,0) for c in competencias])
     notascompt =dict( [(c,[]) for c in competencias])
     desviacion= dict( [(c,0) for c in competencias])
+    desvmed= dict( [(c,0) for c in competencias])
     minimo= dict( [(c,0) for c in competencias])
     maximo= dict( [(c,0) for c in competencias])
     aprueban= dict( [(c,0) for c in competencias])
@@ -1364,6 +1621,8 @@ def reporte(periodo, codigo, grupo):
 
     for nota in notascompt:
         desviacion[nota] = round(statistics.stdev(notascompt[nota],promgeneralind[compt]),2)
+        if desviacion[nota] > 0 :
+            desvmed[nota] = round(desviacion[nota]/promgeneralind[nota],2)
         minimo[nota] = min(notascompt[nota])
         maximo[nota] = max(notascompt[nota])
         for notas in notascompt[nota]:
@@ -1415,21 +1674,28 @@ def reporte(periodo, codigo, grupo):
         pastper+=1
     load = 0
     reporteg = 1
-    dirar = str(periodos[pastper][0])+str(codigo)+str(grupo)
-    if path.isfile(str(periodo)+str(codigo)+str(grupo)+".json"):
-        dirar = str(periodo)+str(codigo)+str(grupo)
+    dirar = 'reportes/'+str(periodos[pastper][0])+str(codigo)+str(grupo)
+    if path.isfile(dirar+".json"):
+        dirar = 'reportes/'+str(periodos[pastper][0])+str(codigo)+str(grupo)
     else:
-        dirar = str(periodos[pastper][0])+str(codigo)+str(grupo)
-
-    with open(str(dirar)+".json") as reportef:
-        reporteg = json.load(reportef) 
-        load = 1
-
+        dirar = 'reportes/'+str(periodo)+str(codigo)+str(grupo)
+    if path.isfile(str(dirar)+".json"):
+        with open(str(dirar)+".json") as reportef:
+            reporteg = json.load(reportef) 
+            load = 1
+    formm =dict( [(c,0) for c in competencias])
+    for com in formula:
+        formm[com[0]] = com[1]
     entries = dict()
     if load == 0:
-        entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1] ,'minnota': minnota[1], 'promgeneralind':promgeneralind, 'promgeneralindaprob':promgeneralindaprob, 'estud':len(estudiantes), 'ordcompt': competencias, 'high':high, 'lowest':lowest, 'instrumentos':instss,'desviacion':desviacion,'minimo':minimo, 'maximo':maximo,'aprueban':aprueban,'inspor':inssts,'inscompt':insxcompt, 'promins':promins, 'load':load}
+        entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1] ,'minnota': minnota[1], 'promgeneralind':promgeneralind, 'promgeneralindaprob':promgeneralindaprob, 'estud':len(estudiantes), 'ordcompt': competencias, 'high':high, 'lowest':lowest, 'instrumentos':instss,'desviacion':desviacion,'minimo':minimo, 'maximo':maximo,'aprueban':aprueban,'inspor':inssts,'inscompt':insxcompt, 'promins':promins, 'load':load,'formm':formm}
     else:
-        entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1] ,'minnota': minnota[1], 'promgeneralind':promgeneralind, 'promgeneralindaprob':promgeneralindaprob, 'estud':len(estudiantes), 'ordcompt': competencias, 'high':high, 'lowest':lowest, 'instrumentos':instss,'desviacion':desviacion,'minimo':minimo, 'maximo':maximo,'aprueban':aprueban,'inspor':inssts,'inscompt':insxcompt, 'promins':promins, 'load':load,'store':reporteg}
+        entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1] ,'minnota': minnota[1], 'promgeneralind':promgeneralind, 'promgeneralindaprob':promgeneralindaprob, 'estud':len(estudiantes), 'ordcompt': competencias, 'high':high, 'lowest':lowest, 'instrumentos':instss,'desviacion':desviacion,'minimo':minimo, 'maximo':maximo,'aprueban':aprueban,'inspor':inssts,'inscompt':insxcompt, 'promins':promins, 'load':load,'formm':formm,'store':reporteg}
+    entries['sestud'] = estudiantes
+    entries['comres'] = resultadosTotales
+    entries['notdef'] = notasDefinitivas
+    entries['devmed'] = desvmed
+    excel = NotasExcel(periodo,codigo,grupo,entries)
 
     return render_template('report.html', entries=entries)
 
@@ -1470,14 +1736,7 @@ def guardarReporte(periodo, codigo, grupo):
     #Recarga la pagina del reporte
     return redirect(url_for('reporte', periodo=periodo, codigo=codigo, grupo=grupo))
 
-@app.route('/<periodo>/<codigo>/<grupo>/excel', methods=['POST'])
-@login_required
-def NotasExcel(periodo, codigo, grupo,data):
-    nombre ='algo.xlsx'
-    workbook = xlsxwriter.Workbook(nombre)
-    worksheet = workbook.add_worksheet()
-    print(data)
-    return redirect(url_for('reporte', periodo=periodo, codigo=codigo, grupo=grupo))
+
 
 if __name__ == '__main__':
     if len(sys.argv)>2 and sys.argv[1]=='initdb':
