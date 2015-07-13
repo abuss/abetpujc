@@ -31,7 +31,7 @@
             <hr>
             <h3> Por mediciones directas de desempeños</h3>
             <hr>
-            El consolidado de las notas de los estudiantes se encuentra en el archivo adjunto: <a  href="excel/{{entries.detalles[3]}}{{entries.detalles[1]}}{{entries.detalles[2]}}.xlsx" download="{{entries.detalles[3]}}{{entries.detalles[1]}}{{entries.detalles[2]}}.xlsx">Notas {{ entries.detalles[3] }}</a> .<br>
+            El consolidado de las notas de los estudiantes se encuentra en el archivo adjunto: <a href="{{ url_for('downloadexcel', filename=entries.nomexcel) }}" download="{{entries.detalles[3]}}{{entries.detalles[1]}}{{entries.detalles[2]}}.xlsx">Notas {{ entries.detalles[3] }}</a> .<br>
             Comentarios:<br>
             {% if entries.load == 0 %}
             <textarea class="textIn" name="1comments1" >

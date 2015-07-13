@@ -6,7 +6,7 @@ from contextlib import closing
 import math,statistics
 
 from flask import Flask, request, g, redirect, url_for, \
-    render_template, flash, session
+    render_template, flash, session, send_from_directory
 import flask
 import requests
 from functools import wraps, reduce 
@@ -24,7 +24,8 @@ app.config.update(dict(
     DEBUG=True,
     SECRET_KEY='development key',
     USERNAME='admin',
-    PASSWORD='default'
+    PASSWORD='default',
+    EXCEL = 'excel'
 ))
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 #class flask.ext.login.LoginManager(app=app, add_context_processor=True)
@@ -357,7 +358,7 @@ def NotasExcel(periodo, codigo, grupo,data):
         worksheet.write_formula(i,j+1, '=SI.ERROR(PROMEDIO.SI($M14:$M'+str(itot)+',">=2.95",M14:M'+str(itot)+'),0)',format2)
 
     workbook.close()
-    return redirect(url_for('reporte', periodo=periodo, codigo=codigo, grupo=grupo))
+    return 0
 
 def login_required(f):
    @wraps(f)
@@ -1695,6 +1696,7 @@ def reporte(periodo, codigo, grupo):
     entries['comres'] = resultadosTotales
     entries['notdef'] = notasDefinitivas
     entries['devmed'] = desvmed
+    entries['nomexcel'] = str(periodo)+str(codigo)+str(grupo)+'.xlsx'
     excel = NotasExcel(periodo,codigo,grupo,entries)
 
     return render_template('report.html', entries=entries)
@@ -1736,6 +1738,10 @@ def guardarReporte(periodo, codigo, grupo):
     #Recarga la pagina del reporte
     return redirect(url_for('reporte', periodo=periodo, codigo=codigo, grupo=grupo))
 
+@app.route('/excel/<path:filename>', methods=['GET', 'POST'])
+def downloadexcel(filename):
+    uploads = path.join(app.root_path, app.config['EXCEL'])   
+    return send_from_directory(uploads,filename)
 
 
 if __name__ == '__main__':
