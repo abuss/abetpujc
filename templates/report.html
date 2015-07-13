@@ -8,7 +8,7 @@
     <div class=page>
         <table>
             <tr>
-                <td><img src="../../../static/logo.png"></td>
+                <td><img src="{{ url_for('static', filename='logo.png') }}"></td>
                 <td width="20">&nbsp;</td>
                 <td><h4>Facultad de Ingeniería<br></h4></td>
             </tr>
@@ -467,6 +467,9 @@ Los instrumentos de medición directa fueron . Los porcentajes de los instrument
         <br>
         <input type=submit value='Guardar'>
         </form>  
+        <form name="DescargarPdf" action="{{ url_for('downloadpdf', filename=entries.nompdf) }}" >
+             <input type=submit value='Descargar pdf'>
+        </form>   
          <form name="botonvolver" action="{{ url_for('asignatura', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}" >
              <input type=submit value='Volver a {{entries.detalles[0]}}'>
         </form>        

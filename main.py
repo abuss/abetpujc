@@ -6,7 +6,7 @@ from contextlib import closing
 import math,statistics
 
 from flask import Flask, request, g, redirect, url_for, \
-    render_template, flash, session, send_from_directory
+    render_template, flash, session, send_from_directory, make_response
 import flask
 import requests
 from functools import wraps, reduce 
@@ -15,6 +15,7 @@ import sys
 from flask import json
 from os import path
 import xlsxwriter
+import pdfkit
 
 
 # Inicializacion de variables
@@ -25,7 +26,8 @@ app.config.update(dict(
     SECRET_KEY='development key',
     USERNAME='admin',
     PASSWORD='default',
-    EXCEL = 'excel'
+    EXCEL = 'excel',
+    PDF = 'pdf'
 ))
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 #class flask.ext.login.LoginManager(app=app, add_context_processor=True)
@@ -359,6 +361,12 @@ def NotasExcel(periodo, codigo, grupo,data):
 
     workbook.close()
     return 0
+
+def reportepdf(periodo, codigo, grupo, datos):
+    nombre ='pdf/'+str(periodo)+str(codigo)+str(grupo)+'.pdf'
+    rendered_template = render_template('report.html', entries=datos)
+    pdf = pdfkit.from_string(rendered_template, nombre, css='./static/style.css', options = {'encoding':'utf-8'})
+    return 0 
 
 def login_required(f):
    @wraps(f)
@@ -1697,7 +1705,13 @@ def reporte(periodo, codigo, grupo):
     entries['notdef'] = notasDefinitivas
     entries['devmed'] = desvmed
     entries['nomexcel'] = str(periodo)+str(codigo)+str(grupo)+'.xlsx'
+    entries['nompdf'] = str(periodo)+str(codigo)+str(grupo)+'.pdf'
+
     excel = NotasExcel(periodo,codigo,grupo,entries)
+    reportepdf(periodo,codigo,grupo,entries)
+    print(path.join(app.root_path, app.config['PDF']))
+    send_from_directory(path.join(app.root_path, app.config['PDF']),entries['nompdf'])
+    #,url_for('reporte', periodo=entries['detalles'][3], codigo=entries['detalles'][1], grupo=entries['detalles'][2])
 
     return render_template('report.html', entries=entries)
 
@@ -1705,7 +1719,7 @@ def reporte(periodo, codigo, grupo):
 @login_required
 def guardarReporte(periodo, codigo, grupo):
     db = get_db()
-    filename = str(periodo)+str(codigo)+str(grupo)+".json"
+    filename = 'reportes/'+str(periodo)+str(codigo)+str(grupo)+".json"
     data = {"1comments1": request.form["1comments1"],"1comments2":request.form["1comments2"],"1comments3":request.form["1comments3"],
             "2comments1":request.form["2comments1"],"3comments1":request.form["3comments1"],"3comments2":request.form["3comments2"],
             "3comments3":request.form["3comments3"], "3comments4":request.form["3comments4"], "3comments5":request.form["3comments5"],
@@ -1743,6 +1757,10 @@ def downloadexcel(filename):
     uploads = path.join(app.root_path, app.config['EXCEL'])   
     return send_from_directory(uploads,filename)
 
+@app.route('/pdf/<path:filename>', methods=['GET', 'POST'])
+def downloadpdf(filename):
+    uploads = path.join(app.root_path, app.config['PDF'])   
+    return send_from_directory(uploads,filename)
 
 if __name__ == '__main__':
     if len(sys.argv)>2 and sys.argv[1]=='initdb':
