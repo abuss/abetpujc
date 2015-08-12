@@ -148,7 +148,11 @@
         <input type=submit value='Definir Evaluaciones'>
     </form>
     <form action="{{ url_for('reporte', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2]) }}" method=post>
-        <input type=submit value='Generar Reporte'>
+        {%if entries.habrep == 1 %}
+            <input type=submit value='Generar Reporte'>
+        {% else %}
+            <input type=submit value='Generar Reporte' disabled>
+        {% endif %}
     </form>  
     <form action="{{ url_for('show_courses', periodo=entries.periodo) }}">
         <input type=submit value='Volver al listado de cursos'>

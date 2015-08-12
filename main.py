@@ -661,7 +661,6 @@ def asignatura(periodo, codigo, grupo):
     # for i in estudiantes:
     #     print (i)
     # print (len(inst))
-
     ################################################################################################
     comptorg = list(resultadosTotales[estudiantes[0][1]].keys())
     comptorg.sort()
@@ -683,6 +682,10 @@ def asignatura(periodo, codigo, grupo):
                'numestudiantes': len(estudiantes), 'notasIndicadores': notasIndicadores, 'conteo': conteo,
                'formula': formula, 'notasInstrumentos': notasInstrumentos, 'notasDefinitivas': notasDefinitivas,
                'resultadosTotales': resultadosTotales, 'periodo': periodo, 'idinst': supinst, 'idcompt':comptorg}
+    if not notasDef:
+        entries['habrep'] = 0
+    else:
+        entries['habrep'] = 1
     return render_template('course.html', entries=entries)
 
 
@@ -1706,7 +1709,6 @@ def reporte(periodo, codigo, grupo):
     entries['devmed'] = desvmed
     entries['nomexcel'] = str(periodo)+str(codigo)+str(grupo)+'.xlsx'
     entries['nompdf'] = str(periodo)+str(codigo)+str(grupo)+'.pdf'
-
     excel = NotasExcel(periodo,codigo,grupo,entries)
     reportepdf(periodo,codigo,grupo,entries)
     #print(path.join(app.root_path, app.config['PDF']))
@@ -1765,4 +1767,4 @@ def downloadpdf(filename):
 if __name__ == '__main__':
     if len(sys.argv)>2 and sys.argv[1]=='initdb':
         init_db()
-    app.run(host='10.5.31.2')
+    app.run(host='0.0.0.0')
