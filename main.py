@@ -21,7 +21,7 @@ import pdfkit
 # Inicializacion de variables
 app = Flask(__name__)
 app.config.update(dict(
-    DATABASE='/tmp/abet.db',
+    DATABASE='/home/abetpujc/abetpujc/abet.db',
     DEBUG=True,
     SECRET_KEY='development key',
     USERNAME='admin',
@@ -1709,7 +1709,7 @@ def reporte(periodo, codigo, grupo):
 
     excel = NotasExcel(periodo,codigo,grupo,entries)
     reportepdf(periodo,codigo,grupo,entries)
-    print(path.join(app.root_path, app.config['PDF']))
+    #print(path.join(app.root_path, app.config['PDF']))
     send_from_directory(path.join(app.root_path, app.config['PDF']),entries['nompdf'])
     #,url_for('reporte', periodo=entries['detalles'][3], codigo=entries['detalles'][1], grupo=entries['detalles'][2])
 
@@ -1765,4 +1765,4 @@ def downloadpdf(filename):
 if __name__ == '__main__':
     if len(sys.argv)>2 and sys.argv[1]=='initdb':
         init_db()
-    app.run()
+    app.run(host='10.5.31.2')
