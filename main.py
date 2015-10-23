@@ -819,7 +819,7 @@ def guardarPesosInstrumentos(periodo, codigo, grupo):
         datos3 = [x[0] for x in datos1]
         for Inst in dbInst:
             if Inst not in datos3:
-                print("Borrar")
+                #print("Borrar")
                 db.execute('DELETE from INSTRUMENTO where evaluacion = ?  and asignatura = ?',[Inst,detalles[4]])
         db.commit()
         flash("Datos guardados")
