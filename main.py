@@ -18,7 +18,7 @@ import xlsxwriter
 import pdfkit
 
 
-# Inicializacion de variables
+# Inicializacion de variables /home/abetpujc/abetpujc/abet.db
 app = Flask(__name__)
 app.config.update(dict(
     DATABASE='/home/abetpujc/abetpujc/abet.db',
@@ -813,8 +813,15 @@ def guardarPesosInstrumentos(periodo, codigo, grupo):
                         db.execute('UPDATE or IGNORE porcentaje_abet set porcentaje = ? where asignatura =? and evaluacion = ? and Id_COMPETENCIA = ?',
                        [datos2[i - 1][j],detalles[4], numeroEval[0][0], resultados[j][0]])
                         db.commit()
-
-
+        #Elimina los que ya no estan
+        curMat = db.execute('select EVALUACION from instrumento where asignatura=?',[detalles[4]])
+        dbInst = [x[0] for x in curMat.fetchall()]
+        datos3 = [x[0] for x in datos1]
+        for Inst in dbInst:
+            if Inst not in datos3:
+                print("Borrar")
+                db.execute('DELETE from INSTRUMENTO where evaluacion = ?  and asignatura = ?',[Inst,detalles[4]])
+        db.commit()
         flash("Datos guardados")
 
     # Recarga la pagina de instrumentos
