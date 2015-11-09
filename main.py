@@ -19,9 +19,11 @@ import pdfkit
 
 
 # Inicializacion de variables /home/abetpujc/abetpujc/abet.db
+#/home/amezqui/work/abetpujc
+
 app = Flask(__name__)
 app.config.update(dict(
-    DATABASE='/home/abetpujc/abetpujc/abet.db',
+    DATABASE='/home/amezqui/work/abetpujc/abet.db',
     DEBUG=True,
     SECRET_KEY='development key',
     USERNAME='admin',
@@ -364,8 +366,8 @@ def NotasExcel(periodo, codigo, grupo,data):
 
 def reportepdf(periodo, codigo, grupo, datos):
     nombre ='pdf/'+str(periodo)+str(codigo)+str(grupo)+'.pdf'
-    rendered_template = render_template('report.html', entries=datos)
-    pdf = pdfkit.from_string(rendered_template, nombre, css='./static/style.css', options = {'encoding':'utf-8'})
+    rendered_template = render_template('reportPDF.html', entries=datos)
+    pdf = pdfkit.from_string(rendered_template, nombre, css='static/style.css', options = {'encoding':'utf-8'})
     return 0 
 
 def login_required(f):
@@ -411,9 +413,10 @@ def show_periods():
         per = 0
 
     #print(periodos)
-
+    usuario = session['id_prof'][1] if 'id_prof' in session else session['user']
+    power = session['lvl']
     # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web
-    entries = {'periodos': periodos, 'hayperiodos': per}
+    entries = {'periodos': periodos, 'hayperiodos': per,'usuario' : usuario, 'permisos' : power}
  
     
     
@@ -430,21 +433,28 @@ def show_courses(periodo):
         "select nombre_carrera, id_carrera from acreditacion_abet where periodo=? order by nombre_carrera asc",
         [periodo])
     carreras = cur1.fetchall()
-
     # Recupera (de la base de datos) los cursos
     if session['lvl'] == 4 :
         cur2 = db.execute(
         "select nombre, codigo, grupo, periodo, id_carrera from asignatura where periodo=? and id_profesor=? order by nombre asc",
-        [periodo,session['id_prof'][0][0]])
+        [periodo,session['id_prof'][0]])
     else:
         cur2 = db.execute(
         "select nombre, codigo, grupo, periodo, id_carrera from asignatura where periodo=? order by nombre asc",
         [periodo])
     cursos = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3], carrera=row[4]) for row in cur2.fetchall()]
+    cursosAux =[x['carrera'] for x in cursos]
 
+    for x in carreras:
+        if x[1] not in cursosAux:
+            carreras.remove(x)
+
+    #print (carreras)
     vacio = 0
+    usuario = session['id_prof'][1] if 'id_prof' in session else session['user']
+    power = session['lvl']
     # Agrupa los datos recuperados en una sola lista y la retorna a la pagina web  
-    entries = {'carreras': carreras, 'cursos': cursos, 'vacio' : vacio }
+    entries = {'carreras': carreras, 'cursos': cursos, 'vacio' : vacio, 'usuario' : usuario, 'permisos' : power }
 
     return render_template('main.html', entries=entries)
 
@@ -455,6 +465,7 @@ def show_courses(periodo):
 def asignatura(periodo, codigo, grupo):
     # Accede a la base de datos
     db = get_db()
+    
 
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
@@ -474,9 +485,9 @@ def asignatura(periodo, codigo, grupo):
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
      #periodo="", grupo="",codigo="",urlget=""
-    #argmnts = [p_periodo,grupo,codigo,geturl]
-    #estudiantes = get_students("ws",argmnts)
-    estudiantes = get_students("bd",detalles)
+    argmnts = [p_periodo,grupo,codigo,urlget]
+    estudiantes = get_students("ws",argmnts)
+#    estudiantes = get_students("bd",detalles)
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -675,17 +686,19 @@ def asignatura(periodo, codigo, grupo):
     #print(supinst[0])
     #print(notasIndicadores[supinst[0]].keys())
     #print(resultadosTotales)
-                          
+    usuario = session['id_prof'][1] if 'id_prof' in session else session['user']
+    power = session['lvl']
     ################################################################################################
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
                'numestudiantes': len(estudiantes), 'notasIndicadores': notasIndicadores, 'conteo': conteo,
                'formula': formula, 'notasInstrumentos': notasInstrumentos, 'notasDefinitivas': notasDefinitivas,
-               'resultadosTotales': resultadosTotales, 'periodo': periodo, 'idinst': supinst, 'idcompt':comptorg}
+               'resultadosTotales': resultadosTotales, 'periodo': periodo, 'idinst': supinst, 'idcompt':comptorg, 'usuario' : usuario, 'permisos' : power }
     if not notasDef:
         entries['habrep'] = 0
     else:
         entries['habrep'] = 1
+
     return render_template('course.html', entries=entries)
 
 
@@ -736,9 +749,11 @@ def instrumentos(periodo, codigo, grupo):
     # Recupera (de la base de datos) el numero de evaluaciones
     cur4 = db.execute("select count(*) from instrumento where asignatura=?", [detalles[4]])
     numevals = cur4.fetchall()
+    usuario = session['id_prof'][1] if 'id_prof' in session else session['user']
+    power = session['lvl']
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'resprog': formula, 'suma': suma, 'numevals': numevals[0][0],
-               'evaluaciones': evaluaciones, 'conteo': conteo}
+               'evaluaciones': evaluaciones, 'conteo': conteo, 'usuario' : usuario, "permisos" : power }
     return render_template('defcourse.html', entries=entries)
 
 
@@ -819,7 +834,7 @@ def guardarPesosInstrumentos(periodo, codigo, grupo):
         datos3 = [x[0] for x in datos1]
         for Inst in dbInst:
             if Inst not in datos3:
-                print("Borrar")
+                #print("Borrar")
                 db.execute('DELETE from INSTRUMENTO where evaluacion = ?  and asignatura = ?',[Inst,detalles[4]])
         db.commit()
         flash("Datos guardados")
@@ -894,9 +909,10 @@ def indicadores(periodo, codigo, grupo):
     cur4 = db.execute(
         "select id, descripcion, resultado_de_programa from indicador_de_desempeno where carrera=?",
         [detalles[5]])
-
+    usuario = session['id_prof'][1] if 'id_prof' in session else session['user']
+    power = session['lvl']
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
-    entries = {'detalles': detalles, 'resprog': inst, 'indicdesemp': cur4.fetchall()}
+    entries = {'detalles': detalles, 'resprog': inst, 'indicdesemp': cur4.fetchall(), 'usuario' : usuario, 'permisos' : power }
     return render_template('assessments.html', entries=entries)
 
 
@@ -995,12 +1011,12 @@ def notas(periodo, codigo, grupo):
     # cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
     estudiantes = []
     p_periodo = "0940"
-    #proof = {'pCurso': codigo, 'pGrupo' : grupo, 'pPeriodo' : p_periodo }
-    geturl = "http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
+    # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
+    urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
      #periodo="", grupo="",codigo="",urlget=""
-    #argmnts = [p_periodo,grupo,codigo,geturl]
-    #estudiantes = get_students("ws",argmnts)
-    estudiantes = get_students("bd",detalles)
+    argmnts = [p_periodo,grupo,codigo,urlget]
+    estudiantes = get_students("ws",argmnts)
+    #estudiantes = get_students("bd",detalles)
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -1116,9 +1132,11 @@ def notas(periodo, codigo, grupo):
         #continue
         #print("x= ",x," z= ",z ," y= ",y," w= ",w)
     #print(notas)
+    usuario = session['id_prof'][1] if 'id_prof' in session else session['user']
+    power = session['lvl']
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
-               'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas, 'idinst' : supinst}
+               'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas, 'idinst' : supinst, 'usuario' : usuario, "permisos" : power }
     return render_template('grades.html', entries=entries)
 
 
@@ -1140,11 +1158,11 @@ def guardarNotas(periodo, codigo, grupo):
     #estudiantes = cur2.fetchall()
     p_periodo = "0940"
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
-    geturl = "http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
+    urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
      #periodo="", grupo="",codigo="",urlget=""
-    #argmnts = [p_periodo,grupo,codigo,geturl]
-    #estudiantes = get_students("ws",argmnts)
-    estudiantes = get_students("bd",detalles)
+    argmnts = [p_periodo,grupo,codigo,urlget]
+    estudiantes = get_students("ws",argmnts)
+    #estudiantes = get_students("bd",detalles)
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -1446,9 +1464,13 @@ def login():
                 lvlacc = cur1.fetchall()
                 session['lvl'] = lvlacc[0][0]
                 if lvlacc[0][0] == 4 :                    
-                    cur2 = db.execute("select p.id from usuario u inner join profesor p on u.nombre = p.nombre")
-                    idprof = cur2.fetchall()
+                    cur2 = db.execute("select p.id, p.nombre from usuario u inner join profesor p on u.nombre = p.nombre")
+                    idprof = cur2.fetchall()[0]
                     session['id_prof'] = idprof
+                if lvlacc[0][0] == 1:
+                    session['user'] = "Administrador"
+                if lvlacc[0][0] == 2:
+                    session['user'] = "Moderador"    
                 return redirect(url_for('show_periods'))            
             else: 
                 error = "Usuario o contrasena incorrectos, intente de nuevo"
@@ -1464,6 +1486,8 @@ def logout():
     session.pop('lvl', None)
     if 'id_prof' in session:
         session.pop('id_prof', None)
+    if 'user' in session :
+        session.pop('user', None)
     return redirect(url_for('login'))
 
 @app.route('/<periodo>/<codigo>/<grupo>/reporte', methods=['GET', 'POST'])
@@ -1491,10 +1515,15 @@ def reporte(periodo, codigo, grupo):
             perder += 1
         else:
             aprobados.append(x[0])
-    maxnota = max(notasDef)
+ #  maxnota = max(notasDef)
     minnota = min(notasDef)
-
-    estudiantes = get_students("bd",detalles)
+    p_periodo = "0940"
+    # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
+    urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
+     #periodo="", grupo="",codigo="",urlget=""
+    argmnts = [p_periodo,grupo,codigo,urlget]
+    estudiantes = get_students("ws",argmnts)
+    #estudiantes = get_students("bd",detalles)
      # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion,d.porcentaje \

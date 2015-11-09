@@ -1,4 +1,4 @@
-<!doctype html lang="es">
+<!doctype html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -6,20 +6,17 @@
     <title>ABET - Facultad de Ingeniería</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-    <div class="page">
+    <div>
         <table>
             <tr>
-                <td><img src="{{ url_for('static', filename='logo.png') }}"></td>
+                <td><img src="http://escher.puj.edu.co:5000/static/logo.png"></td>
                 <td width="20">&nbsp;</td>
                 <td><h4>Facultad de Ingeniería<br></h4></td>
             </tr>
         </table>
         <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET</h1>
         <hr>
-        <br>
-        <br>
         {% block body %}
             <form name="forma" id="forma" action="{{ url_for('guardarReporte', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}" method="post">
             <h2 class="thickh2">Formato Evaluación Cursos ABET {{ entries.detalles[3] }}</h2>
@@ -34,26 +31,11 @@
             <hr>
             <h3> Por mediciones directas de desempeños</h3>
             <hr>
-            El consolidado de las notas de los estudiantes se encuentra en el archivo adjunto: <a href="{{ url_for('downloadexcel', filename=entries.nomexcel) }}" download="{{entries.detalles[3]}}{{entries.detalles[1]}}{{entries.detalles[2]}}.xlsx">Notas {{ entries.detalles[3] }}</a> .<br>
+            El consolidado de las notas de los estudiantes se encuentra en el archivo adjunto: Notas {{ entries.detalles[3] }}.<br>
             Comentarios:<br>
-            {% if entries.load == 0 %}
-            <textarea class="textIn" name="1comments1" >
-El curso {{ entries.detalles[0] }}
-
-
-({{ entries.perder }}) estudiantes no aprobaron la asignatura.
-
-
-La nota más alta del curso fue {{ entries.maxnota }} y la más baja fue {{ entries.minnota }}.
-
-
-Los promedios del grupo por cada resultado de programa son los siguientes:
-            </textarea>
-            {% else %}
-             <textarea class="textIn" name="1comments1" >
-{{ entries.store['1comments1'] }}
-            </textarea>
-            {% endif %}
+             <p name="1comments1" >
+                {{ entries.store['1comments1'] }}
+            </p>
             <table class='note-table'>
               <tr>
                 <td class='FHborder-table'>Grupo</td>
@@ -93,16 +75,7 @@ Los promedios del grupo por cada resultado de programa son los siguientes:
                
               </tr>
             </table>
-            {% if entries.load == 0 %}
-            <textarea class="textIn" name="1comments2" >
-Puede notarse que las notas más bajas se encuentran en los resultados de programa {{ entries.lowest[0][0] }}: {{ entries.lowest[0][1] }}  e/y {{ entries.lowest[1][0] }}: {{ entries.lowest[1][1] }}. 
-
-El mejor resultado de programa es  {{ entries.high[0] }} : {{ entries.high[1] }}
-A continuación se presenta el resumen de los resultados obtenidos:
-            {% else %}
-                 <textarea class="textIn" name="1comments2" >{{ entries.store['1comments2'] }}</textarea>
-            {% endif %}
-            </textarea>
+                 <p name="1comments2" >{{ entries.store['1comments2'] }}</p>       
         <table class='note-table'>
             <caption class='caption-style'>Población Total</caption>
             <tr>
@@ -204,17 +177,9 @@ A continuación se presenta el resumen de los resultados obtenidos:
 
         <h3>Descripción del método utilizado para recoger la información referida</h3>
         <hr>
-        {% if entries.load == 0 %}
-        <textarea class = 'textIn' name="1comments3">
-Los instrumentos de medición directa fueron . Los porcentajes de los instrumentos y las habilidades evaluadas fueron:
-        </textarea>
-        {% else %}
-        <textarea class="textIn" name="1comments3" >
-{{ entries.store['1comments3'] }}
-        </textarea>
-        {% endif %}
-
-        <br>
+        <p name="1comments3" >
+            {{ entries.store['1comments3'] }}
+        </p>
         <table class='note-table'>
             <tr>
                 <th class='Fborder-table'> Instrumento</th>
@@ -258,224 +223,139 @@ Los instrumentos de medición directa fueron . Los porcentajes de los instrument
         Comentarios:<br>
         A continuación se presenta una breve descripción de los instrumentos de medición directa:<br>
         <ul>
-            {% if entries.load == 0 %}
-                {% for j in entries.instrumentos %}
-                        <li>{{ j }}:</li><input class='textIn2' name= '{{ j }}'></input>
-                {% endfor %}
-            {% else %}
-                {% for j in entries.instrumentos %}
+            {% for j in entries.instrumentos %}
 
-                        <li>{{ j }}:</li><input class='textIn2' name= '{{ j }}' value='{{ entries.store[j] }}'></input>
+                    <li>{{ j }}:</li><p name= '{{ j }}'> {{ entries.store[j] }} </p>
 
-                {% endfor %}
-            {% endif %}
+            {% endfor %}
         </ul>
         <h2 class="thickh2">II. Logro de los objetivos de aprendizaje del curso</h2>
         <hr>
-        {% if entries.load == 0 %}
-        <textarea class='textIn' name="2comments1" ></textarea>
-        {% else %}
-        <textarea class="textIn" name="2comments1" >
-{{ entries.store['2comments1'] }}
-        </textarea>
-        {% endif %}
+
+        <p name="2comments1" >
+            {{ entries.store['2comments1'] }}
+        </p>
+
         <h2 class="thickh2">III. Desarrollo de los procesos del curso</h2>
         <hr>
         <h3>Cubrimiento del programa y del cuerpo de conocimiento</h3>
         Comentarios:<br>
         
-        {% if entries.load == 0 %}
-        <textarea class='textIn' name="3comments1"></textarea>
-        {% else %}
-        <textarea class="textIn" name="3comments1">
-{{ entries.store['3comments1'] }}
-        </textarea>
-        {% endif %}
+        <p name="3comments1">
+            {{ entries.store['3comments1'] }}
+        </p>
+
 
         <hr>
         <h3>Integración curricular (fórmula del curso)</h3>
         <hr>
         Comentarios:<br>
         
-        {% if entries.load == 0 %}
-        <textarea class='textIn' name="3comments2"></textarea>
-        {% else %}
-        <textarea class="textIn" name="3comments2" >
-{{ entries.store['3comments2'] }}
-        </textarea>
-        {% endif %}
+        <p name="3comments2" >
+            {{ entries.store['3comments2'] }}
+        </p>
+
 
         <h3>Tiempo de estudio de los estudiantes</h3>
         <hr>
         Comentarios:<br>
-        
-        {% if entries.load == 0 %}
-        <textarea class='textIn' name="3comments3"></textarea>
-        {% else %}
-        <textarea class="textIn" name="3comments3" >
-{{ entries.store['3comments3'] }}
-        </textarea>
-        {% endif %}
+
+        <p name="3comments3" >
+            {{ entries.store['3comments3'] }}
+        </p>
+
 
         <h3>Texto, otras fuentes de información y software</h3>
         <hr>
         Comentarios:<br>
-        
-        {% if entries.load == 0 %}
-        <textarea class='textIn' name="3comments4"></textarea>
-        {% else %}
-        <textarea class="textIn" name="3comments4" >
-{{ entries.store['3comments4'] }}
-        </textarea>
-        {% endif %}
+        <p name="3comments4" >
+            {{ entries.store['3comments4'] }}
+        </p>
 
         <h3>Instalaciones y Recursos</h3>
         <hr>
         Comentarios:<br>
         
-        {% if entries.load == 0 %}
-        <textarea class='textIn' name="3comments5"></textarea>
-        {% else %}
-        <textarea class="textIn" name="3comments5" >
-{{ entries.store['3comments5'] }}
-        </textarea>
-        {% endif %}
+        <p name="3comments5" >
+            {{ entries.store['3comments5'] }}
+        </p>
+
 
         <h3>Políticas y Reglas del Curso</h3>
         <hr>
         Comentarios:<br>
-        
-        {% if entries.load == 0 %}
-        <textarea class='textIn' name="3comments6"></textarea>
-        {% else %}
-        <textarea class="textIn" name="3comments6" >
-{{ entries.store['3comments6'] }}
-        </textarea>
-        {% endif %}
+        <p name="3comments6" >
+            {{ entries.store['3comments6'] }}
+        </p>
 
         <h2 class="thickh2">IV. Acciones de mejoramiento implementadas en el período académico</h2>
         <hr>
         <h3>En cuanto a la fórmula y balance de evaluación del curso</h3>
         <hr>
         Comentarios:<br>
-        {% if entries.load == 0 %}
-        <textarea class='textIn' name="4comments1" ></textarea>
-        {% else %}
-
-        <textarea class="textIn" name="4comments1" >
-{{ entries.store['4comments1'] }}
-        </textarea>
-
-        {% endif %}
+        <p name="4comments1" >
+            {{ entries.store['4comments1'] }}
+        </p>
 
         <h3>En cuanto al contenido del curso</h3>
         <hr>
         Comentarios:<br>
-        {% if entries.load == 0 %}
-        <textarea class='textIn' name="4comments2"></textarea>
-        {% else %}
-        <textarea class="textIn" name="4comments2" >
-{{ entries.store['4comments2'] }}
-        </textarea>
+        <p name="4comments2" >
+            {{ entries.store['4comments2'] }}
+        </p>
 
-        {% endif %}
 
         <h3>En cuanto a la metodología del curso</h3>
         <hr>
         <h3>En cuanto a recursos e instalaciones</h3>
         <hr>
         Comentarios:<br>
-        {% if entries.load == 0 %}
-        <textarea class='textIn' name="4comments3"></textarea>
-        {% else %}
-<textarea class="textIn" name="4comments3" >
-
+        <p name="4comments3" >
             {{ entries.store['4comments3'] }}
-
-        </textarea>
-
-        {% endif %}
+        </p>
 
         <h2 class="thickh2">V. Recomendaciones sobre desarrollo futuro</h2>
         <hr>
         <h3>Integración curricular (fórmula del curso)</h3>
         <hr>
         Comentarios:<br>
-        {% if entries.load == 0 %}
-            <textarea class='textIn' name="5comments1"></textarea>
-
-        {% else %}
-            <textarea class="textIn" name="5comments1" >
-{{ entries.store['5comments1'] }}
-            </textarea>
-        {% endif %}
+        <p name="5comments1" >
+            {{ entries.store['5comments1'] }}
+        </p>
 
         <h3>Calificación de los resultados de estudiantes</h3>
         <hr>
         Comentarios:<br>
-        {% if entries.load == 0 %}
-            <textarea class='textIn' name="5comments2"></textarea>
-
-        {% else %}
-            <textarea class="textIn" name="5comments2" >
-{{ entries.store['5comments2'] }}
-            </textarea>
-        {% endif %}
+            <p name="5comments2" >
+                {{ entries.store['5comments2'] }}
+            </p>
 
         <h3>Áreas de interés especial</h3>
         <hr>
         Comentarios:<br>
-        {% if entries.load == 0 %}
-            <textarea class='textIn' name="5comments3"></textarea>
-
-        {% else %}
-            <textarea class="textIn" name="5comments3" >
-{{ entries.store['5comments3'] }}
-            </textarea>
-        {% endif %}
+            <p name="5comments3" >
+                {{ entries.store['5comments3'] }}
+            </p>
 
         <h3>Contenido y programación</h3>
         <hr>
         Comentarios:<br>
-        {% if entries.load == 0 %}
-            <textarea class='textIn' name="5comments4"></textarea>
-
-        {% else %}
-            <textarea class="textIn" name="5comments4" >
-{{ entries.store['5comments4'] }}
-            </textarea>
-        {% endif %}
+        <p name="5comments4" >
+            {{ entries.store['5comments4'] }}
+        </p>
 
         <h3>Recursos: texto, otras fuentes de información, software, instalaciones, etc.</h3>
         <hr>
         Comentarios:<br>
-        {% if entries.load == 0 %}
-            <textarea class='textIn' name="5comments5"></textarea>
-
-        {% else %}
-            <textarea class="textIn" name="5comments5" >
-{{ entries.store['5comments5'] }}
-            </textarea>
-        {% endif %}
+        <p name="5comments5" >
+            {{ entries.store['5comments5'] }}
+        </p>
         <h2 class="thickh2">VI. Comentarios Adicionales</h2>
         <hr>   
         Comentarios:<br>
-        {% if entries.load == 0 %}
-        <textarea class='textIn' name="6comments1"></textarea>
-        {% else %}
-            <textarea class="textIn" name="6comments1" >
-{{ entries.store['6comments1'] }}
-            </textarea>
-        {% endif %}
-        <br>
-        <input type=submit value='Guardar'>
-        </form>  
-        <form name="DescargarPdf" action="{{ url_for('downloadpdf', filename=entries.nompdf) }}" >
-             <input type=submit value='Descargar pdf'>
-        </form>   
-         <form name="botonvolver" action="{{ url_for('asignatura', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}" >
-             <input type=submit value='Volver a {{entries.detalles[0]}}'>
-        </form>        
+        <p name="6comments1" >
+            {{ entries.store['6comments1'] }}
+        </p>
         {% endblock %}
     </div>
 </body>

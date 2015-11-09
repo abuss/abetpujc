@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html lang="es">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -146,7 +146,7 @@
             <td><h4>Facultad de Ingeniería<br>{{entries.detalles[6]}}</h4></td>
         </tr>
     </table>
-    <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET<form action="{{ url_for('logout')}}">
+    <h1>PROCESO DE ACREDITACIÓN INTERNACIONAL ABET<form action="{{ url_for('logout')}}"><p>Bienvenido {{ entries.usuario }} </p>
         <input type=submit value='Log Out'>
         </form></h1>
     <hr>
@@ -155,7 +155,7 @@
     <br>
     <h5>Definición de Evaluaciones</h5>
     <br>
-
+    {% if entries.permisos != 2  %}
     <form name="forma" id="forma" action="{{ url_for('guardarPesosInstrumentos', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2]) }}" method=post onkeydown="testForEnter();">
         <table name="tabla" id="tabla" border="0">
             <tr>
@@ -229,6 +229,33 @@
             {% endif %}
         {% endwith %}
     </form>
+
+    {% else %}
+    <table name="tabla" id="tabla" border="0">
+            <tr>
+                <td class="showNotes">Instrumento</td>
+                <td class="showNotes" align="center">%</td>
+                <td class="showNotes" width="50">&nbsp;</td>
+                {% for entry in entries.resprog %}
+                    <td class="showNotes" align="center" title="{{entry[2]}}">{{ entry[0] }}</td>
+                {% endfor %}
+                <td class="showNotes" align="center">Total (%)</td>
+            </tr>
+            {% if entries.numevals>0 %}
+                {% for k in range(1,entries.numevals+1) %}
+                    <tr>
+                        <td class="showNotes">{{ entries.evaluaciones[(k-1)*entries.conteo][0] }}</td>
+                        <td class="showNotes">{{ entries.evaluaciones[(k-1)*entries.conteo][1] }}</td>
+                        <td width="150">&nbsp;</td>
+                        {% for j in range(0,entries.conteo) %}
+                            <td class="showNotes">{{ entries.evaluaciones[((k-1)*entries.conteo)+j][3] }}</td>
+                        {% endfor %}
+                        <td class="showNotes" align="center"><div id="fila{{k}}">0</div></td>
+                    </tr>
+                {% endfor %}
+            {% endif %}            
+    </table>
+    {% endif %}
     <form name="botonseguir" action="{{ url_for('indicadores', periodo=entries.detalles[3], codigo=entries.detalles[1], grupo=entries.detalles[2])}}">
         <input type=submit value='Definir los detalles de los Instrumentos'>
     </form>
