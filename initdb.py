@@ -2,7 +2,7 @@
 import sqlite3
 from contextlib import closing
 
-DATABASE = '/home/amezqui/work/abetpujc/abet.db'
+DATABASE = '/home/abetpujc/abetpujc/abet.db'
 
 
 def connect_db():

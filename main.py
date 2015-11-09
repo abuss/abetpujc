@@ -23,7 +23,7 @@ import pdfkit
 
 app = Flask(__name__)
 app.config.update(dict(
-    DATABASE='/home/amezqui/work/abetpujc/abet.db',
+    DATABASE='/home/abetpujc/abetpujc/abet.db',
     DEBUG=True,
     SECRET_KEY='development key',
     USERNAME='admin',
