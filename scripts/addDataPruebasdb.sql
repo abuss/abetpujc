@@ -54,18 +54,18 @@ insert into resultado_de_programa values (40,'G','Habilidad para analizar los im
 insert into resultado_de_programa values (40,'H','Reconocimiento de la necesidad de, y la habilidad para, continuar con el desarrollo profesional','');
 insert into resultado_de_programa values (40,'I','Habilidad para usar las técnicas, destrezas y herramientas modernas para la práctica de la computación','');
 insert into resultado_de_programa values (40,'J','Habilidad para aplicar los fundamentos y principios de las matemáticas y de la computación en el modelamiento y diseño de sistemas computacionales','');
-insert into resultado_de_programa values (40,'K','Habilidad para aplicar los principios de diseño y desarrollo de software en la construcción de sistemas de diferente complejidad','');
+insert into resultado_de_programa values (40,'K','Habilidad para aplicar los principios de diseño y desarrollo de software en la construcción de sistemas de diferente complejidad','');   
 insert into resultado_de_programa values (10,'A','Habilidad para aplicar conocimientos de matemáticas, ciencias e ingeniería','');
-insert into resultado_de_programa values (10,'B','Habilidad para analizar un problema e identificar los requerimientos necesarios para su definición y solución','');
-insert into resultado_de_programa values (10,'C','Habilidad para diseñar, implementar y evaluar procesos y sistemas computacionales','');
-insert into resultado_de_programa values (10,'D','Habilidad para funcionar en equipos de trabajo','');
-insert into resultado_de_programa values (10,'E','Entendimiento de la responsabilidad profesional y ética','');
-insert into resultado_de_programa values (10,'F','Habilidad para comunicarse efectivamente','');
-insert into resultado_de_programa values (10,'G','Habilidad para analizar los impactos de la computación y la ingeniería en las personas, organizaciones y la sociedad','');
-insert into resultado_de_programa values (10,'H','Reconocimiento de la necesidad de, y la habilidad para, continuar con el desarrollo profesional','');
-insert into resultado_de_programa values (10,'I','Habilidad para usar las técnicas, destrezas y herramientas modernas para la práctica de la computación','');
-insert into resultado_de_programa values (10,'J','Habilidad para aplicar los fundamentos y principios de las matemáticas y de la computación en el modelamiento y diseño de sistemas computacionales','');
-insert into resultado_de_programa values (10,'K','Habilidad para aplicar los principios de diseño y desarrollo de software en la construcción de sistemas de diferente complejidad','');
+insert into resultado_de_programa values (10,'B','Habilidad para diseñar y conducir experimentos así como para analizar e interpretar datos','');
+insert into resultado_de_programa values (10,'C','La habilidad para diseñar un sistema, componente o proceso para satisfacer necesidades deseadas dentro de restricciones realistas','');
+insert into resultado_de_programa values (10,'D','La habilidad para funcionar en equipos multidisciplinarios','');
+insert into resultado_de_programa values (10,'E','La habilidad para identificar, formular y resolver problemas de ingeniería','');
+insert into resultado_de_programa values (10,'F','El entendimiento de la responsabilidad profesional y ética','');
+insert into resultado_de_programa values (10,'G','La habilidad para comunicarse efectivamente','');
+insert into resultado_de_programa values (10,'H','La educación amplia y necesaria para entender los impactos de las soluciones de ingeniería en contextos globales económicos, ambientales y sociales','');
+insert into resultado_de_programa values (10,'I','El reconocimiento de la necesidad de, y la habilidad para, continuar el aprendizaje a lo largo de la vida','');
+insert into resultado_de_programa values (10,'J','El conocimiento de asuntos contemporáneos','');
+insert into resultado_de_programa values (10,'K','La habilidad para usar las técnicas, destrezas y herramientas modernas de ingeniería necesarias para la práctica de la ingeniería','');
 
 /* Definicion de los indicadores de desempeño */
 /*

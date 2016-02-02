@@ -42,16 +42,16 @@ insert into resultado_de_programa values (40,'I','Habilidad para usar las técni
 insert into resultado_de_programa values (40,'J','Habilidad para aplicar los fundamentos y principios de las matemáticas y de la computación en el modelamiento y diseño de sistemas computacionales','');
 insert into resultado_de_programa values (40,'K','Habilidad para aplicar los principios de diseño y desarrollo de software en la construcción de sistemas de diferente complejidad','');
 insert into resultado_de_programa values (10,'A','Habilidad para aplicar conocimientos de matemáticas, ciencias e ingeniería','');
-insert into resultado_de_programa values (10,'B','Habilidad para analizar un problema e identificar los requerimientos necesarios para su definición y solución','');
-insert into resultado_de_programa values (10,'C','Habilidad para diseñar, implementar y evaluar procesos y sistemas computacionales','');
-insert into resultado_de_programa values (10,'D','Habilidad para funcionar en equipos de trabajo','');
-insert into resultado_de_programa values (10,'E','Entendimiento de la responsabilidad profesional y ética','');
-insert into resultado_de_programa values (10,'F','Habilidad para comunicarse efectivamente','');
-insert into resultado_de_programa values (10,'G','Habilidad para analizar los impactos de la computación y la ingeniería en las personas, organizaciones y la sociedad','');
-insert into resultado_de_programa values (10,'H','Reconocimiento de la necesidad de, y la habilidad para, continuar con el desarrollo profesional','');
-insert into resultado_de_programa values (10,'I','Habilidad para usar las técnicas, destrezas y herramientas modernas para la práctica de la computación','');
-insert into resultado_de_programa values (10,'J','Habilidad para aplicar los fundamentos y principios de las matemáticas y de la computación en el modelamiento y diseño de sistemas computacionales','');
-insert into resultado_de_programa values (10,'K','Habilidad para aplicar los principios de diseño y desarrollo de software en la construcción de sistemas de diferente complejidad','');
+insert into resultado_de_programa values (10,'B','La habilidad para diseñar y conducir experimentos así como para analizar e interpretar datos','');
+insert into resultado_de_programa values (10,'C','La habilidad para diseñar un sistema, componente o proceso para satisfacer necesidades deseadas dentro de restricciones realistas','');
+insert into resultado_de_programa values (10,'D','La habilidad para funcionar en equipos multidisciplinarios','');
+insert into resultado_de_programa values (10,'E','La habilidad para identificar, formular y resolver problemas de ingeniería','');
+insert into resultado_de_programa values (10,'F','El entendimiento de la responsabilidad profesional y ética','');
+insert into resultado_de_programa values (10,'G','La habilidad para comunicarse efectivamente','');
+insert into resultado_de_programa values (10,'H','La educación amplia y necesaria para entender los impactos de las soluciones de ingeniería en contextos globales económicos, ambientales y sociales','');
+insert into resultado_de_programa values (10,'I','El reconocimiento de la necesidad de, y la habilidad para, continuar el aprendizaje a lo largo de la vida','');
+insert into resultado_de_programa values (10,'J','El conocimiento de asuntos contemporáneos','');
+insert into resultado_de_programa values (10,'K','La habilidad para usar las técnicas, destrezas y herramientas modernas de ingeniería necesarias para la práctica de la ingeniería','');
 
 /* Definicion de los indicadores de desempeño */
 /*
@@ -183,6 +183,28 @@ insert into indicador_de_desempeno values (40,'K.2.3','Establece invariantes y p
 insert into indicador_de_desempeno values (40,'K.3.1','Evalua, verifica y valida con respecto a requerimientos y restricciones de sistemas','K');
 insert into indicador_de_desempeno values (40,'K.3.2','Afina e integra hardware','K');
 insert into indicador_de_desempeno values (40,'K.3.3','Identifica la evolución de un software','K');
+
+
+
+insert into indicador_de_desempeno values (10,'A.1','Aplicar conceptos y conocimiento de matemáticas y estadística para resolver problemas de ingeniería o relacionados con la disciplina. (Aplicación)','A');
+insert into indicador_de_desempeno values (10,'A.2','Aplicar conceptos y conocimiento de física y química para resolver problemas de ingeniería o relacionados con la disciplina. (Aplicación)','A');
+insert into indicador_de_desempeno values (10,'A.3','Seleccionar y aplicar conceptos claves de ciencias de la ingeniería y conceptos nucleares de la disciplina para resolver problemas de ingeniería o de Ingeniería Industrial. (Aplicación)','A');
+insert into indicador_de_desempeno values (10,'B.4','Interpretar información numérica relacionada con problemas de ingeniería o relacionados con la disciplina. (Aplicación)','B');
+insert into indicador_de_desempeno values (10,'E.1','Identificar problemas de ingeniería y los modelos, recursos y suposiciones necesarios para resolverlos. (Análisis)','E');
+insert into indicador_de_desempeno values (10,'E.2','Diseñar e implementar las estrategias necesarias para resolver problemas deingeniería. (Síntesis)','E');
+insert into indicador_de_desempeno values (10,'E.3','Integrar conocimientos de Ingeniería Industrial, ciencias y matemáticas a la solución de problemas de ingeniería o relacionados con la disciplina. (Síntesis)','E');
+insert into indicador_de_desempeno values (10,'E.4','Evaluar la validez de las soluciones a problemas de ingeniería y hacer recomendaciones en consecuencia. (Evaluación)','E');
+insert into indicador_de_desempeno values (10,'F.2',' Valorar los impactos de la ingeniería y de la profesión sobre la sociedad. (Evaluación)','F');
+insert into indicador_de_desempeno values (10,'F.3','Demostrar la habilidad para tomar decisiones éticas bien informadas al resolver problemas de ingeniería o relacionados con la disciplina. (caracterización por un valor)','F');
+insert into indicador_de_desempeno values (10,'G.1','Producir comunicación escrita efectiva en relación con: organización, estructura, uso del idioma y terminología, enfoque, concisión y adaptación a la audiencia. (Aplicación)','G');
+insert into indicador_de_desempeno values (10,'G.2','Producir comunicación oral efectiva en relación con: organización, estructura, uso del idioma y terminología, enfoque, concisión y adaptación a la audiencia. (Aplicación)','G');
+insert into indicador_de_desempeno values (10,'G.3','Producir comunicación gráfica efectiva en relación con: organización, estructura y uso del idioma. (Aplicación)','G');
+insert into indicador_de_desempeno values (10,'H.1','Estimar los impactos locales y globales, económicos, ambientales y sociales y las ventajas y desventajas de los productos y proyectos de la ingeniería. (Evaluación)','H');
+insert into indicador_de_desempeno values (10,'J.1','Identificar y analizar las problemáticas sociales, económicas, políticas y ambientales de actualidad en relación con la práctica de la ingeniería y de la profesión. (Análisis)','J');
+insert into indicador_de_desempeno values (10,'J.2','Estimar los impactos de la tecnología, la ingeniería y la profesión sobre las problemáticas locales, nacionales y globales. (Evaluación)','J');
+insert into indicador_de_desempeno values (10,'K.1','Demostrar competencia en el uso de herramientas apropiadas de hardware, i.e. computadores, equipos de ingeniería, etc. (Aplicación)','K');
+insert into indicador_de_desempeno values (10,'K.2','Demostrar competencia en el uso de herramientas apropiadas de software; i.e. hojas de cálculo, procesadores de texto, aplicaciones de diseño, CAD, simuladores, etc. (Aplicación)','K');
+
 
 
 /* Formula de Resultados de Programa */
