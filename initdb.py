@@ -3,6 +3,7 @@ import sqlite3
 from contextlib import closing
 
 DATABASE = '/home/abetpujc/abetpujc/abet.db'
+#DATABASE = '/Users/gsarria/Dropbox/Work/ABETForm/github/abetpujc/abet.db'
 
 
 def connect_db():

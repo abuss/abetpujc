@@ -2,8 +2,8 @@
 BEGIN TRANSACTION;
 
 /* Carreras */
-insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2014-2',5);
-insert into acreditacion_abet values (10,'Ingeniería Industrial','2014-2',3);
+insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2015-2',5);
+insert into acreditacion_abet values (10,'Ingeniería Industrial','2015-2',3);
 /* Profesores */
 insert into profesor values (1,'Gerardo M. Sarria M.','TC');
 insert into profesor values (2,'Juan Carlos Martinez','TC');
@@ -18,17 +18,17 @@ insert into profesor values (10,'Jose Eduardo Tofiño','TC');
 insert into profesor values (11,'Jorge Francisco Estela','TC');
 
 /* Asignaturas */
-insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIP002','A','Fundamentos y Estructuras de Programación',40,1,'2014-2');
-insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG006','A','Arquitectura del Computador II',40,8,'2014-2');
-insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG010','A','Aspectos Sociales y Profesionales',40,6,'2014-2');
-insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG007','A','Computabilidad y Lenguajes Formales',40,7,'2014-2');
-insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG008','A','Computación Gráfica',40,9,'2014-2');
-insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIS002','A','Desarrollo Formal de Programas',40,4,'2014-2');
-insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CID001','A','Gestión y Modelado de Datos',40,5,'2014-2');
-insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG002','A','Lógica en Ciencias de la Computación',40,10,'2014-2');
-insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300MAG031','A','Matemáticas Discretas para la Computación',40,3,'2014-2');
-insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIS005','A','Procesos de Ingeniería de Software',40,2,'2014-2');
-insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300IGQ001','A','Termodinámica',10,11,'2014-2');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIP002','A','Fundamentos y Estructuras de Programación',40,1,'2015-2');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG006','A','Arquitectura del Computador II',40,8,'2015-2');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG010','A','Aspectos Sociales y Profesionales',40,6,'2015-2');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG007','A','Computabilidad y Lenguajes Formales',40,7,'2015-2');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG008','A','Computación Gráfica',40,9,'2015-2');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIS002','A','Desarrollo Formal de Programas',40,4,'2015-2');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CID001','A','Gestión y Modelado de Datos',40,5,'2015-2');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG002','A','Lógica en Ciencias de la Computación',40,10,'2015-2');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300MAG031','A','Matemáticas Discretas para la Computación',40,3,'2015-2');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIS005','A','Procesos de Ingeniería de Software',40,2,'2015-2');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300IGQ001','A','Termodinámica',10,11,'2015-2');
 /* Resultados de Programa */
 insert into resultado_de_programa values (40,'A','Habilidad para aplicar conocimientos de matemáticas, ciencias e ingeniería','');
 insert into resultado_de_programa values (40,'B','Habilidad para analizar un problema e identificar los requerimientos necesarios para su definición y solución','');

@@ -1,9 +1,12 @@
+#!/usr/bin/python
+# -*- coding: latin-1 -*-
+
 # Sistema de evaluacion ABET
 # Librerias
 from __future__ import division
 import sqlite3
 from contextlib import closing
-import math,statistics
+import math#,statistics
 
 from flask import Flask, request, g, redirect, url_for, \
     render_template, flash, session, send_from_directory, make_response
@@ -14,8 +17,8 @@ from operator import itemgetter
 import sys
 from flask import json
 from os import path
-import xlsxwriter
-import pdfkit
+#import xlsxwriter
+#import pdfkit
 
 
 # Inicializacion de variables /home/abetpujc/abetpujc/abet.db
@@ -24,6 +27,7 @@ import pdfkit
 app = Flask(__name__)
 app.config.update(dict(
     DATABASE='/home/abetpujc/abetpujc/abet.db',
+    #DATABASE='/Users/gsarria/Dropbox/Work/ABETForm/github/abetpujc/abet.db',
     DEBUG=True,
     SECRET_KEY='development key',
     USERNAME='admin',
@@ -143,7 +147,7 @@ def NotasExcel(periodo, codigo, grupo,data):
     worksheet.merge_range('B2:M2',data['detalles'][0], merge_format2)
     worksheet.merge_range('B3:M3',data['detalles'][3], merge_format2)
     worksheet.merge_range('B4:M4',data['detalles'][7], merge_format2)
-    worksheet.merge_range('A6:M6', 'FÃ³rmula del Curso', merge_format)
+    worksheet.merge_range('A6:M6', 'Fórmula del Curso', merge_format)
     worksheet.add_table('B7:L7',{'header_row': False})
     i = 6
     j = 1
@@ -207,7 +211,7 @@ def NotasExcel(periodo, codigo, grupo,data):
                 j+=1
             worksheet.write(i,j+1,'',formatn)
             i+=1
-        worksheet.merge_range('A41:M41', 'PoblaciÃ³n Total', merge_format)
+        worksheet.merge_range('A41:M41', 'Población Total', merge_format)
         i += 1
         j = 0
         worksheet.write(i,j,'Promedio',format)
@@ -220,7 +224,7 @@ def NotasExcel(periodo, codigo, grupo,data):
         worksheet.write_formula(i,j+1, '=SI.ERROR(PROMEDIO(M14:M40),0)',format2)
         i += 1
         j = 0
-        worksheet.write(i,j,'Desv. EstÃ¡ndar',format)
+        worksheet.write(i,j,'Desv. Estándar',format)
         for c in data['ordcompt']:
             if data['desviacion'][c] > 0:
                 worksheet.write(i,j+1,data['desviacion'][c],formatn2) 
@@ -240,7 +244,7 @@ def NotasExcel(periodo, codigo, grupo,data):
         worksheet.write_formula(i,j+1, '=SI.ERROR(M43/M42,0)',format2)
         i += 1
         j = 0
-        worksheet.write(i,j,'MÃ­nimo',format)
+        worksheet.write(i,j,'Mínimo',format)
         for c in data['ordcompt']:
             if data['minimo'][c] > 0:
                 worksheet.write(i,j+1,data['minimo'][c],formatn2) 
@@ -283,7 +287,7 @@ def NotasExcel(periodo, codigo, grupo,data):
         worksheet.write_formula(i,j+1, '=SI.ERROR(PROMEDIO.SI($M14:$M40,">=2.95",M14:M40),0)',format2)
 
     else:
-        worksheet.merge_range(i,0,i,12, 'PoblaciÃ³n Total', merge_format)
+        worksheet.merge_range(i,0,i,12, 'Población Total', merge_format)
         itot = i
         i += 1
         j = 0
@@ -298,7 +302,7 @@ def NotasExcel(periodo, codigo, grupo,data):
         worksheet.write_formula(i,j+1, '=SI.ERROR(PROMEDIO(M14:M'+str(itot)+'),0)',format2)
         i += 1
         j = 0
-        worksheet.write(i,j,'Desv. EstÃ¡ndar',format)
+        worksheet.write(i,j,'Desv. Estándar',format)
         for c in data['ordcompt']:
             if data['desviacion'][c] > 0:
                 worksheet.write(i,j+1,data['desviacion'][c],formatn2) 
@@ -318,7 +322,7 @@ def NotasExcel(periodo, codigo, grupo,data):
         worksheet.write_formula(i,j+1, '=SI.ERROR(M'+str(itot+2)+'/M'+str(itot+3)+',0)',format2)
         i += 1
         j = 0
-        worksheet.write(i,j,'MÃ­nimo',format)
+        worksheet.write(i,j,'Mínimo',format)
         for c in data['ordcompt']:
             if data['minimo'][c] > 0:
                 worksheet.write(i,j+1,data['minimo'][c],formatn2) 
@@ -481,7 +485,14 @@ def asignatura(periodo, codigo, grupo):
     #estudiantes = cur2.fetchall()
     #for x in estudiantes:
     #   print (x)
-    p_periodo = "0940"
+    # Periodos:
+    # 2014-1: 0930
+    # 2014-2: 0940
+    # 2015-1: 0945
+    # 2015-2: 0950
+    # 2016-1: 0955
+    # 2016-2: 0960
+    p_periodo = "0950"
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
      #periodo="", grupo="",codigo="",urlget=""
