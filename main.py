@@ -26,7 +26,9 @@ from os import path
 
 app = Flask(__name__)
 app.config.update(dict(
-    DATABASE='/home/abetpujc/abetpujc/abet.db',
+    # Base de datos oficial
+    DATABASE = '/home/abetpujc/abetpujc/abet.db',
+    # Para hacer pruebas
     #DATABASE='/Users/gsarria/Dropbox/Work/ABETForm/github/abetpujc/abet.db',
     DEBUG=True,
     SECRET_KEY='development key',
@@ -492,7 +494,17 @@ def asignatura(periodo, codigo, grupo):
     # 2015-2: 0950
     # 2016-1: 0955
     # 2016-2: 0960
-    p_periodo = "0950"
+    print("*********************************")
+    print(detalles[3])
+    print("*********************************")
+    if(detalles[3] == '2014-1'):
+        p_periodo = "0930"
+    elif(detalles[3] == '2014-2'):
+        p_periodo = "0940"
+    elif(detalles[3] == '2015-1'):
+        p_periodo = "0945"
+    elif(detalles[3] == '2015-2'):
+        p_periodo = "0950"
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
      #periodo="", grupo="",codigo="",urlget=""

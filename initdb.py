@@ -2,7 +2,9 @@
 import sqlite3
 from contextlib import closing
 
+# Base de datos oficial
 DATABASE = '/home/abetpujc/abetpujc/abet.db'
+# Para hacer pruebas
 #DATABASE = '/Users/gsarria/Dropbox/Work/ABETForm/github/abetpujc/abet.db'
 
 
