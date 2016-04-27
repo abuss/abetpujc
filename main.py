@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -*- coding: latin-1 -*-
+# -*- coding: latin1 -*-
 
 # Sistema de evaluacion ABET
 # Librerias
@@ -27,9 +27,9 @@ from os import path
 app = Flask(__name__)
 app.config.update(dict(
     # Base de datos oficial
-    DATABASE = '/home/abetpujc/abetpujc/abet.db',
+    #DATABASE = '/home/abetpujc/abetpujc/abet.db',
     # Para hacer pruebas
-    #DATABASE='/Users/gsarria/Dropbox/Work/ABETForm/github/abetpujc/abet.db',
+    DATABASE='/Users/gsarria/Dropbox/Work/ABETForm/github/abetpujc/abet.db',
     DEBUG=True,
     SECRET_KEY='development key',
     USERNAME='admin',
@@ -69,27 +69,31 @@ def get_db():
         g.sqlite_db = connect_db()
     return g.sqlite_db
 
-def get_students(src,args):
+
+def get_students(src, args):
      #   print x
-     #periodo="", grupo="",codigo="",urlget=""
-    if src == "ws":    
+     #periodo="", grupo="", codigo="", urlget=""
+    if src == "ws":
+        #print("******************************")
+        #print(args)
+        #print("******************************")
 
         estudiantes = []
         p_periodo = args[0]
         group = args[1]
-        proof = {'pCurso': args[2], 'pGrupo' : group, 'pPeriodo' : p_periodo }
+        proof = {'pCurso': args[2], 'pGrupo': group, 'pPeriodo': p_periodo}
         # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
         r = requests.get(args[3], params=proof)
         
-        proofjson =r.json()
+        proofjson = r.json()
         for x in proofjson:
             #print (x)
-            estudiante = [x['nombre'].capitalize(),int(x['emplid'])]
+            estudiante = [x['nombre'].capitalize(), int(x['emplid'])]
             estudiantes.append(estudiante)
 
         for e in estudiantes:
             nombre = e[0].rsplit(' ')
-            if len(nombre) >3 :
+            if len(nombre) > 3:
                 temp1 = nombre[0].capitalize()
                 temp2 = nombre[1].capitalize()
                 nombre[0] = nombre[2].capitalize()
@@ -101,7 +105,7 @@ def get_students(src,args):
                 nombre[0] = nombre[1].capitalize()
                 nombre[1] = nombre[2].capitalize()
                 nombre[2] = temp1
-            e[0] = reduce(lambda x,y:x+' '+y, nombre)
+            e[0] = reduce(lambda x, y: x+' '+y, nombre)
         estudiantes.sort()
         return estudiantes
     elif src == "bd":
@@ -115,7 +119,7 @@ def get_students(src,args):
         print("No hay procedimiento para la fuente: ", src)
 
 
-def NotasExcel(periodo, codigo, grupo,data):
+def NotasExcel(periodo, codigo, grupo, data):
     nombre ='excel/'+str(periodo)+str(codigo)+str(grupo)+'.xlsx'
     workbook = xlsxwriter.Workbook(nombre)
     worksheet = workbook.add_worksheet()
@@ -370,11 +374,13 @@ def NotasExcel(periodo, codigo, grupo,data):
     workbook.close()
     return 0
 
+
 def reportepdf(periodo, codigo, grupo, datos):
     nombre ='pdf/'+str(periodo)+str(codigo)+str(grupo)+'.pdf'
     rendered_template = render_template('reportPDF.html', entries=datos)
     pdf = pdfkit.from_string(rendered_template, nombre, css='static/style.css', options = {'encoding':'utf-8'})
     return 0 
+
 
 def login_required(f):
    @wraps(f)
@@ -429,7 +435,8 @@ def show_periods():
 
     return render_template('periods.html', entries=entries)
 
-@app.route('/<periodo>',methods=['GET', 'POST'])
+
+@app.route('/<periodo>', methods=['GET', 'POST'])
 @login_required
 def show_courses(periodo):
     # Accede a la base de datos
@@ -465,7 +472,6 @@ def show_courses(periodo):
     return render_template('main.html', entries=entries)
 
 
-
 @app.route('/<periodo>/<codigo>/<grupo>', methods=['GET', 'POST'])
 @login_required
 def asignatura(periodo, codigo, grupo):
@@ -480,6 +486,9 @@ def asignatura(periodo, codigo, grupo):
         where d.codigo=? and d.grupo=? and d.periodo=? and d.id_carrera = e.id_carrera",
         [codigo, grupo, periodo])
     detalles = cur1.fetchall()[0]
+    #print("******************************")
+    #print(detalles)
+    #print("******************************")
 
 
     # Recupera los estudiantes
@@ -494,9 +503,7 @@ def asignatura(periodo, codigo, grupo):
     # 2015-2: 0950
     # 2016-1: 0955
     # 2016-2: 0960
-    print("*********************************")
-    print(detalles[3])
-    print("*********************************")
+    p_periodo = ""
     if(detalles[3] == '2014-1'):
         p_periodo = "0930"
     elif(detalles[3] == '2014-2'):
@@ -506,11 +513,14 @@ def asignatura(periodo, codigo, grupo):
     elif(detalles[3] == '2015-2'):
         p_periodo = "0950"
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
-    urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
-     #periodo="", grupo="",codigo="",urlget=""
-    argmnts = [p_periodo,grupo,codigo,urlget]
+    urlget = "http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
+    #periodo="", grupo="",codigo="",urlget=""
+    argmnts = [p_periodo, grupo, codigo, urlget]
     estudiantes = get_students("ws",argmnts)
 #    estudiantes = get_students("bd",detalles)
+    #print("******************************")
+    #print(estudiantes)
+    #print("******************************")
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -531,10 +541,13 @@ def asignatura(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) la informacion de las notas de los indicadores ya contenida en la base de datos
     cur5 = db.execute(
-        "select evaluacion, codigo_estudiante,competencia, nota from nota_abet where asignatura=? and nivel=1",
+        "select evaluacion, codigo_estudiante, competencia, nota from nota_abet where asignatura=? and nivel=1",
         [detalles[4]])
     notasInd = cur5.fetchall()
+    #print("******************************")
     #print(notasInd)
+    #print("******************************")
+
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
     cur6 = db.execute(
         "select d.resultado_de_programa, d.peso, e.descripcion from formula as d, resultado_de_programa as e \
@@ -593,38 +606,58 @@ def asignatura(periodo, codigo, grupo):
     for com in resprog:
         if com[1] not in supinst:
             supinst.append(com[1])
-    compt = dict([(ind,{}) for ind in supinst])
+    compt = dict([(ind, {}) for ind in supinst])
     tempcompt = []
     idtemp = resprog[0][1]
     for com in resprog:
         if idtemp == com[1]:
             tempcompt.append(com[2])
         else:
-            compt[idtemp]=tempcompt
+            compt[idtemp] = tempcompt
             idtemp = com[1]
             tempcompt = [com[2]]
-    compt[supinst[len(supinst)-1]] =tempcompt
+    compt[supinst[len(supinst)-1]] = tempcompt
     #print('competencias',compt)
 
     #supinst = list(supinst)
     #print(supinst)
-    notasIndicadores = dict([(ind,{}) for ind in supinst])
+    notasIndicadores = dict([(ind, {}) for ind in supinst])
+
+    #print("******************************")
+    #print(notasIndicadores)
+    #print("******************************")
 
     for nota in notasIndicadores:
-        notasIndicadores[nota] = dict( [(e[1],{}) for e in estudiantes])
+        notasIndicadores[nota] = dict([(e[1],{}) for e in estudiantes])
+
+    #print("******************************")
+    #print(notasIndicadores)
+    #print(len(notasIndicadores[1]))
+    #print("******************************")
 
     for nota in notasIndicadores:
         for estudiante in notasIndicadores[nota]:
-            notasIndicadores[nota][estudiante] = dict( [(comp,{}) for comp in compt[nota]] )
+            notasIndicadores[nota][estudiante] = dict([(comp, {}) for comp in compt[nota]])
             #print(nota,notasIndicadores[nota][estudiante])
+    #print("******************************")
+    #print(notasIndicadores)
+    #print("******************************")
 
-    #notasIndicadores = {}
-    #for i in range(1,len(inst)+1):
-        #notasIndicadores[i]=dict([(e[1],{}) for e in estudiantes])
-    #print("notasInd",notasInd)
+            #notasIndicadores = {}
+    for i in range(1,len(inst)+1):
+        notasIndicadores[i] = dict([(e[1], {}) for e in estudiantes])
+    # print("******************************")
+    # print("notasInd",notasInd)
+    #print("******************************")
+    #print(notasIndicadores)
+    #print("******************************")
     for (x,y,z,w) in notasInd:
-        #print("x= ",x," z= ",z ," y= ",y," w= ",w)
-        notasIndicadores[x][y][z] = round(w,1)
+        # print("******************************")
+        # print("x= ",x," z= ",z ," y= ",y," w= ",w)
+        # print("******************************")
+        # print(notasIndicadores[x])
+        # print("******************************")
+        notasIndicadores[x][y][z] = round(w, 1)
 
     #print("not",notasIndicadores)
     #for x in notasIndicadores:
@@ -1033,11 +1066,19 @@ def notas(periodo, codigo, grupo):
     # Recupera (de la base de datos) los estudiantes
     # cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
     estudiantes = []
-    p_periodo = "0940"
+    p_periodo = ""
+    if (detalles[3] == '2014-1'):
+        p_periodo = "0930"
+    elif (detalles[3] == '2014-2'):
+        p_periodo = "0940"
+    elif (detalles[3] == '2015-1'):
+        p_periodo = "0945"
+    elif (detalles[3] == '2015-2'):
+        p_periodo = "0950"
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
      #periodo="", grupo="",codigo="",urlget=""
-    argmnts = [p_periodo,grupo,codigo,urlget]
+    argmnts = [p_periodo, grupo, codigo, urlget]
     estudiantes = get_students("ws",argmnts)
     #estudiantes = get_students("bd",detalles)
 
@@ -1179,12 +1220,20 @@ def guardarNotas(periodo, codigo, grupo):
     # Recupera (de la base de datos) los estudiantes
     #cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre desc", [detalles[4]])
     #estudiantes = cur2.fetchall()
-    p_periodo = "0940"
+    p_periodo = ""
+    if (detalles[3] == '2014-1'):
+        p_periodo = "0930"
+    elif (detalles[3] == '2014-2'):
+        p_periodo = "0940"
+    elif (detalles[3] == '2015-1'):
+        p_periodo = "0945"
+    elif (detalles[3] == '2015-2'):
+        p_periodo = "0950"
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
      #periodo="", grupo="",codigo="",urlget=""
-    argmnts = [p_periodo,grupo,codigo,urlget]
-    estudiantes = get_students("ws",argmnts)
+    argmnts = [p_periodo, grupo, codigo, urlget]
+    estudiantes = get_students("ws", argmnts)
     #estudiantes = get_students("bd",detalles)
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
@@ -1282,18 +1331,18 @@ def guardarNotas(periodo, codigo, grupo):
     #print ("Evaluacion: ",evaluacion)
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
-    #print(request.form)
+    print(request.form)
     #print("ind:", indicadores)
     for i in range(len(indicadores)):
         temp1 = []
         for j in range(len(estudiantes)):
             temp2 = []
             for k in range(len(indicadores[i])):
-                #print("ind" + str(j+1) + str(estudiantes[i][0]) + str(k))
-                if request.form["ind" + str(i+1) + str(estudiantes[j][0]) + str(k)] == "" :
+                #print("ind" + str(j+1) + estudiantes[i][0] + str(k))
+                if request.form["ind" + str(i+1) + estudiantes[j][0] + str(k)] == "":
                     temp2.append("0")
                 else:    
-                    temp2.append(request.form["ind" + str(i+1) + str(estudiantes[j][0]) + str(k)])
+                    temp2.append(request.form["ind" + str(i+1) + estudiantes[j][0] + str(k)])
                     #print("request form",str(estudiantes[j][0]),request.form["ind" + str(i+1) + str(estudiantes[j][0]) + str(k)])
             temp1.append(temp2)
         datos.append(temp1)
@@ -1307,8 +1356,8 @@ def guardarNotas(periodo, codigo, grupo):
     # Procesa e inserta la nueva informacion de indicadores, resultados de programa e instrumentos en la base de datos
     # for x in porcentaje_indicadores:
     #     print(x[0],x[1])
-    j = 0
 
+    j = 0
     revisados = []
     for el in porcentaje_indicadores:
         i = 0
@@ -1325,7 +1374,6 @@ def guardarNotas(periodo, codigo, grupo):
     #for x in porcentaje_indicadores:
      #   print(x[0],x[1])
     #print(copia_porcentaje_indicadores.sort() == porcentaje_indicadores.sort())
-
 
     definitiva_asignatura = []
     m = n = 0

@@ -2685,7 +2685,6 @@ insert into estudiante values ('210002','Pepita Mendieta',10);
 insert into estudiante values ('220001','Pepito Perez',11);
 insert into estudiante values ('230002','Pepita Mendieta',11);
 
-
 /* Prueba: Definicion de los porcentajes de los instrumentos */
 insert into porcentaje_abet values (1,1,'A.1.1',25,3,'A');
 insert into porcentaje_abet values (1,1,'A.1.3',25,3,'A');
