@@ -818,7 +818,7 @@ def instrumentos(periodo, codigo, grupo):
     power = session['lvl']
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'resprog': formula, 'suma': suma, 'numevals': numevals[0][0],
-               'evaluaciones': evaluaciones, 'conteo': conteo, 'usuario' : usuario, "permisos" : power }
+               'evaluaciones': evaluaciones, 'conteo': conteo, 'usuario': usuario, "permisos": power }
     return render_template('defcourse.html', entries=entries)
 
 
@@ -843,7 +843,7 @@ def guardarPesosInstrumentos(periodo, codigo, grupo):
     if(x != ''):
         numero = int(request.form['numeroDeFilas'])
     else:
-        numero = 1
+        numero = 5
 
     # Recupera y procesa todos los datos (porcentajes) actuales de la pagina
     datos1 = []
@@ -855,14 +855,12 @@ def guardarPesosInstrumentos(periodo, codigo, grupo):
             tmp.append(request.form[resultados[j][0] + str(i)])
         datos2.append(tmp)
 
-    #print(datos1)
-    #print(datos2)
     # Validacion antes de insertar: si el instrumento ya existe no se puede ingresar
     # Si no hay datos repetidos que no pueden ser guardados
     if request.form['hayRepetidos'] == '0':
         # Inserta la nueva informacion en la base de datos
         for i in range(1, int(numero) - 3):
-            if not db.execute("select asignatura from instrumento where asignatura = ? and evaluacion = ? ",[detalles[4], datos1[i - 1][0]]).fetchall() :
+            if not db.execute("select asignatura from instrumento where asignatura = ? and evaluacion = ? ", [detalles[4], datos1[i - 1][0]]).fetchall():
                 db.execute('insert or IGNORE into instrumento (asignatura, evaluacion, porcentaje) values (?,?,?)',
                        [detalles[4], datos1[i - 1][0], datos1[i - 1][1]])
                 db.commit()
