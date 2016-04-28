@@ -779,10 +779,6 @@ def instrumentos(periodo, codigo, grupo):
         [codigo, grupo, periodo])
     detalles = cur1.fetchall()[0]
 
-    print("*****************************")
-    print(detalles)
-    print("*****************************")
-
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
     cur2 = db.execute(
         "select d.resultado_de_programa, d.peso, e.descripcion \
@@ -814,17 +810,9 @@ def instrumentos(periodo, codigo, grupo):
     for row in cur3.fetchall():
         evaluaciones.append(row)
 
-    print("*****************************")
-    print(evaluaciones)
-    print("*****************************")
-
     # Recupera (de la base de datos) el numero de evaluaciones
     cur4 = db.execute("select count(*) from instrumento where asignatura=?", [detalles[4]])
     numevals = cur4.fetchall()
-
-    print("*****************************")
-    print(numevals)
-    print("*****************************")
 
     usuario = session['id_prof'][1] if 'id_prof' in session else session['user']
     power = session['lvl']
@@ -851,7 +839,11 @@ def guardarPesosInstrumentos(periodo, codigo, grupo):
     resultados = cur2.fetchall()
 
     # Recupera de la pagina el numero de instrumentos actual
-    numero = int(request.form['numeroDeFilas'])
+    x = request.form['numeroDeFilas']
+    if(x != ''):
+        numero = int(request.form['numeroDeFilas'])
+    else:
+        numero = 1
 
     # Recupera y procesa todos los datos (porcentajes) actuales de la pagina
     datos1 = []
