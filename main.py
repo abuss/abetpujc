@@ -34,8 +34,8 @@ app.config.update(dict(
     SECRET_KEY='development key',
     USERNAME='admin',
     PASSWORD='default',
-    EXCEL = 'excel',
-    PDF = 'pdf'
+    EXCEL='excel',
+    PDF='pdf'
 ))
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 #class flask.ext.login.LoginManager(app=app, add_context_processor=True)
@@ -87,7 +87,7 @@ def get_students(src, args):
         
         proofjson = r.json()
         for x in proofjson:
-            #print (x)
+            #print(x)
             estudiante = [x['nombre'].capitalize(), int(x['emplid'])]
             estudiantes.append(estudiante)
 
@@ -100,11 +100,15 @@ def get_students(src, args):
                 nombre[1] = nombre[3].capitalize()
                 nombre[2] = temp1
                 nombre[3] = temp2
-            else:
+            elif len(nombre) == 3:
                 temp1 = nombre[0].capitalize()
                 nombre[0] = nombre[1].capitalize()
                 nombre[1] = nombre[2].capitalize()
                 nombre[2] = temp1
+            else:
+                temp1 = nombre[0].capitalize()
+                nombre[0] = nombre[1].capitalize()
+                nombre[1] = temp1
             e[0] = reduce(lambda x, y: x+' '+y, nombre)
         estudiantes.sort()
         return estudiantes
@@ -512,6 +516,8 @@ def asignatura(periodo, codigo, grupo):
         p_periodo = "0945"
     elif(detalles[3] == '2015-2'):
         p_periodo = "0950"
+    elif (detalles[3] == '2016-1'):
+        p_periodo = "0955"
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget = "http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
     #periodo="", grupo="",codigo="",urlget=""
@@ -544,9 +550,6 @@ def asignatura(periodo, codigo, grupo):
         "select evaluacion, codigo_estudiante, competencia, nota from nota_abet where asignatura=? and nivel=1",
         [detalles[4]])
     notasInd = cur5.fetchall()
-    #print("******************************")
-    #print(notasInd)
-    #print("******************************")
 
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
     cur6 = db.execute(
@@ -554,6 +557,7 @@ def asignatura(periodo, codigo, grupo):
         where asignatura=? and e.id = d.resultado_de_programa and e.carrera=?",
         [detalles[4], detalles[5]])
     formula = cur6.fetchall()
+
     numResultados = len(formula)
     resultados = []
     for a,b,c in formula:
@@ -596,7 +600,6 @@ def asignatura(periodo, codigo, grupo):
             if i >= len(resprog) - 1:
                 break
             i = i + 1
-
         inst.append(temp1)
     for i in range(len(inst)):
         inst[i].insert(0,len(inst[i]))
@@ -608,15 +611,17 @@ def asignatura(periodo, codigo, grupo):
             supinst.append(com[1])
     compt = dict([(ind, {}) for ind in supinst])
     tempcompt = []
-    idtemp = resprog[0][1]
-    for com in resprog:
-        if idtemp == com[1]:
-            tempcompt.append(com[2])
-        else:
-            compt[idtemp] = tempcompt
-            idtemp = com[1]
-            tempcompt = [com[2]]
-    compt[supinst[len(supinst)-1]] = tempcompt
+    if(resprog != []):
+        idtemp = resprog[0][1]
+        for com in resprog:
+            if idtemp == com[1]:
+                tempcompt.append(com[2])
+            else:
+                compt[idtemp] = tempcompt
+                idtemp = com[1]
+                tempcompt = [com[2]]
+
+        compt[supinst[len(supinst)-1]] = tempcompt
     #print('competencias',compt)
 
     #supinst = list(supinst)
@@ -727,7 +732,7 @@ def asignatura(periodo, codigo, grupo):
 
     # for i in estudiantes:
     #     print (i)
-    # print (len(inst))
+    #print(len(inst))
     ################################################################################################
     comptorg = list(resultadosTotales[estudiantes[0][1]].keys())
     comptorg.sort()
@@ -738,18 +743,20 @@ def asignatura(periodo, codigo, grupo):
         for j in comptorg: 
             print(resultadosTotales[k[1]][j],j,k[1])
             #print(notasDefinitivas[k[1]])"""
-    #print(notasIndicadores[11])
+    #print(notasIndicadores)
     #print(supinst[0])
     #print(notasIndicadores[supinst[0]].keys())
     #print(resultadosTotales)
     usuario = session['id_prof'][1] if 'id_prof' in session else session['user']
     power = session['lvl']
     ################################################################################################
+
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
     entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
                'numestudiantes': len(estudiantes), 'notasIndicadores': notasIndicadores, 'conteo': conteo,
                'formula': formula, 'notasInstrumentos': notasInstrumentos, 'notasDefinitivas': notasDefinitivas,
-               'resultadosTotales': resultadosTotales, 'periodo': periodo, 'idinst': supinst, 'idcompt':comptorg, 'usuario' : usuario, 'permisos' : power }
+               'resultadosTotales': resultadosTotales, 'periodo': periodo, 'idinst': supinst, 'idcompt': comptorg,
+               'usuario': usuario, 'permisos': power}
     if not notasDef:
         entries['habrep'] = 0
     else:
@@ -771,6 +778,10 @@ def instrumentos(periodo, codigo, grupo):
         where d.codigo=? and d.grupo=? and d.periodo=? and d.id_carrera = e.id_carrera",
         [codigo, grupo, periodo])
     detalles = cur1.fetchall()[0]
+
+    print("*****************************")
+    print(detalles)
+    print("*****************************")
 
     # Recupera (de la base de datos) y procesa los datos de resultados de programa
     cur2 = db.execute(
@@ -794,13 +805,18 @@ def instrumentos(periodo, codigo, grupo):
     # y porcentaje de evaluaciones y resultados de programa
     cur3 = db.execute(
         'select d.evaluacion, d.porcentaje, e.competencia, e.porcentaje, d.id_evaluacion \
-        from instrumento as d, (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e\
+        from instrumento as d, \
+        (select * from porcentaje_abet as pa inner join Descripcion_A_K as dsak on pa.Id_COMPETENCIA = dsak.competencia) as e \
         where e.asignatura = d.asignatura and d.id_evaluacion = e.evaluacion and e.nivel = 1 and d.asignatura=?',
         [detalles[4]]
         )
     evaluaciones = []
     for row in cur3.fetchall():
         evaluaciones.append(row)
+
+    print("*****************************")
+    print(evaluaciones)
+    print("*****************************")
 
     # Recupera (de la base de datos) el numero de evaluaciones
     cur4 = db.execute("select count(*) from instrumento where asignatura=?", [detalles[4]])
@@ -1561,6 +1577,7 @@ def logout():
         session.pop('user', None)
     return redirect(url_for('login'))
 
+
 @app.route('/<periodo>/<codigo>/<grupo>/reporte', methods=['GET', 'POST'])
 @login_required
 def reporte(periodo, codigo, grupo):
@@ -1824,6 +1841,7 @@ def reporte(periodo, codigo, grupo):
 
     return render_template('report.html', entries=entries)
 
+
 @app.route('/<periodo>/<codigo>/<grupo>/guardarPeriodo', methods=['POST'])
 @login_required
 def guardarReporte(periodo, codigo, grupo):
@@ -1861,15 +1879,18 @@ def guardarReporte(periodo, codigo, grupo):
     #Recarga la pagina del reporte
     return redirect(url_for('reporte', periodo=periodo, codigo=codigo, grupo=grupo))
 
+
 @app.route('/excel/<path:filename>', methods=['GET', 'POST'])
 def downloadexcel(filename):
     uploads = path.join(app.root_path, app.config['EXCEL'])   
     return send_from_directory(uploads,filename)
 
+
 @app.route('/pdf/<path:filename>', methods=['GET', 'POST'])
 def downloadpdf(filename):
     uploads = path.join(app.root_path, app.config['PDF'])   
     return send_from_directory(uploads,filename)
+
 
 if __name__ == '__main__':
     if len(sys.argv)>2 and sys.argv[1]=='initdb':
