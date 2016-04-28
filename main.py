@@ -821,6 +821,11 @@ def instrumentos(periodo, codigo, grupo):
     # Recupera (de la base de datos) el numero de evaluaciones
     cur4 = db.execute("select count(*) from instrumento where asignatura=?", [detalles[4]])
     numevals = cur4.fetchall()
+
+    print("*****************************")
+    print(numevals)
+    print("*****************************")
+
     usuario = session['id_prof'][1] if 'id_prof' in session else session['user']
     power = session['lvl']
     # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
