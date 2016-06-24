@@ -656,6 +656,7 @@ insert into Descripcion_A_K (competencia, Nivel) values ('K',1);
 --insert into porcentaje_abet values(ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id_Pregunta)
 --insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (1,1,'A',80,1);
 /* Periodo 2015-2 */
+/*
 insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (1,1,'A',80,1);
 insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (1,1,'C',0,2);
 insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (1,1,'F',10,3);
@@ -1059,7 +1060,7 @@ insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE,
 insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (11,71,'H',0,401);
 insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (11,71,'J',0,402);
 insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (11,71,'K',0,403);
-
+*/
 
 
 /*----------*/
