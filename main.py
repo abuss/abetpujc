@@ -703,7 +703,8 @@ def asignatura(periodo, codigo, grupo):
         temp2 = cur10.fetchall()
         suma = 0
         for j,k,l in temp2:
-            suma += l
+            if(l != ''):
+                suma += l
         sumaResultados[i] = suma
     resultadosTotales = dict( [(e[1],{}) for e in estudiantes])
     for e in estudiantes:
@@ -1026,19 +1027,16 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
 
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
-    #print(temp)
     for i in range(len(temp)):
         for j in range(len(temp[i])):
-            numero = int(request.form['numeroDeFilas' + str(temp[i][j][0]) + str(temp[i][j][2])])
-            for k in range(numero - 2):
+            numero2 = int(request.form['numeroDeFilas' + str(temp[i][j][0]) + str(temp[i][j][2])])
+            for k in range(numero2 - 2):
                 datos.append((temp[i][j][0], temp[i][j][2],
-                              request.form["indicador" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)][:5],
+                              request.form["indicador" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)][:3],
                               request.form["pesoind" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)]))
-                
-
-   
-    
     # Inserta la nueva informacion en la base de datos
+    print("DATOS:")
+    print(datos)
     for d in datos:
         if d[2] != '---':
             #insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (1,1,'A',80,1);
