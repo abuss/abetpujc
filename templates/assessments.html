@@ -66,7 +66,13 @@
             {% for entry in inst %}
               $("#botonadd{{inst[0][1]}}{{entry[2]}} ").click(function(){
                 var numfilas = document.getElementById('tabla{{entry[1]}}{{entry[2]}}').getElementsByTagName('tr').length;
-                var htmlToAppend = "<tr><td><select style='width: 600px' name='indicador{{inst[0][1]}}{{entry[2]}}"+String(numfilas-2)+"'><option>---</option>{% for i in entries.indicdesemp %}{% if i[2] == entry[2] %}<option>{{i[0]}}: {{i[1]}}</option>{% endif %}{% endfor %}</select></td><td width='20'>&nbsp;</td><td><input type=number step='1' min='0' max='100' name='pesoind{{inst[0][1]}}{{entry[2]}}"+String(numfilas-2)+"' id='pesoind{{inst[0][1]}}{{entry[2]}}"+String(numfilas-2)+"'onchange='sumarPorcentajes()' size='3'><input type=hidden name='numeroDeFilas{{inst[0][1]}}{{entry[2]}}' id='numeroFilas{{inst[0][1]}}{{entry[2]}}' value='"+String(numfilas+1)+"'></td></tr>";
+                var htmlToAppend = "<tr><td><select style='width: 600px' name='indicador{{inst[0][1]}}{{entry[2]}}"+
+                                    String(numfilas-2)+
+                                    "'><option>---</option>{% for i in entries.indicdesemp %}{% if i[2] == entry[2] %}<option>{{i[0]}}: {{i[1]}}</option>{% endif %}{% endfor %}</select></td><td width='20'>&nbsp;</td><td><input type=number step='1' min='0' max='100' name='pesoind{{inst[0][1]}}{{entry[2]}}"+
+                                    String(numfilas-2)+
+                                    "' id='pesoind{{inst[0][1]}}{{entry[2]}}"+String(numfilas-2)+"'onchange='sumarPorcentajes()' size='3'><input type=hidden name='numeroDeFilas{{inst[0][1]}}{{entry[2]}}' id='numeroFilas{{inst[0][1]}}{{entry[2]}}' value='"+
+                                    String(numfilas+1)+
+                                    "'></td></tr>";
                   $("#tabla{{entry[1]}}{{entry[2]}} > tbody > tr").eq(numfilas-1).before(htmlToAppend);
                 numfilas = numfilas + 1;
                 $("#forma").find("#numeroFilas{{inst[0][1]}}{{entry[2]}}")[0].value = numfilas;

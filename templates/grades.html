@@ -99,12 +99,12 @@
                                                 {% for l in entries.notas[entries.idinst[i-1]].keys() %}
                                                     {% for m in entries.notas[entries.idinst[i-1]][l].keys() %}
                                                         {% if k[1] == l and m == entries.indicadores[i-1][1][j] %}
-                                                            <td align="center"><input type="number" size="3" step="1" min="0" max="100" id="ind{{i}}{{k[1]}}{{j}}" name="ind{{i}}{{k[0]}}{{j}}" onchange="calcularNota()" value="{{entries.notas[entries.idinst[i-1]][l][m]}}"></td>
+                                                            <td align="center"><input type="number" step="0.1" size="3" step="1" min="0.0" max="5.0" id="ind{{i}}{{k[1]}}{{j}}" name="ind{{i}}{{k[0]}}{{j}}" onchange="calcularNota()" value="{{entries.notas[entries.idinst[i-1]][l][m]}}"></td>
                                                         {% endif %}
                                                     {% endfor %}
                                                 {% endfor %}
                                             {% else %}
-                                                <td align="center"><input type="number" size="3" step="1" min="0" max="100" id="ind{{i}}{{k[1]}}{{j}}" name="ind{{i}}{{k[0]}}{{j}}" onchange="calcularNota()"></td>
+                                                <td align="center"><input type="number" step="0.1" size="3" step="1" min="0.0" max="5.0" id="ind{{i}}{{k[1]}}{{j}}" name="ind{{i}}{{k[0]}}{{j}}" onchange="calcularNota()"></td>
                                             {% endif %}
                                         {% endfor %}
                                     <td width="10">&nbsp;</td>
@@ -114,7 +114,6 @@
                         {% endif %}
                     </table>
                     <br>
-                    <label><font size="1">* Recuerde que los indicadores se califican con un número entre 0 y 100 (i.e. porcentaje de cumplimiento).</font></label>
                 </div>
             {% endfor %}
         </div>

@@ -479,7 +479,7 @@ def asignatura(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
-        "select d.nombre, d.codigo, d.grupo, d.periodo, d.id, d.id_carrera, e.nombre_carrera \
+        "select d.nombre, d.codigo, d.grupo, d.periodo, d.id, d.id_carrera, e.nombre_carrera, e.codigo_periodo \
         from asignatura as d, acreditacion_abet as e \
         where d.codigo=? and d.grupo=? and d.periodo=? and d.id_carrera = e.id_carrera",
         [codigo, grupo, periodo])
@@ -495,17 +495,20 @@ def asignatura(periodo, codigo, grupo):
     # 2015-2: 0950
     # 2016-1: 0955
     # 2016-2: 0960
-    p_periodo = ""
-    if(detalles[3] == '2014-1'):
-        p_periodo = "0930"
-    elif(detalles[3] == '2014-2'):
-        p_periodo = "0940"
-    elif(detalles[3] == '2015-1'):
-        p_periodo = "0945"
-    elif(detalles[3] == '2015-2'):
-        p_periodo = "0950"
-    elif (detalles[3] == '2016-1'):
-        p_periodo = "0955"
+    p_periodo = detalles[7]
+    print("********************************")
+    print(p_periodo)
+    print("********************************")
+    #if(detalles[3] == '2014-1'):
+    #    p_periodo = "0930"
+    #elif(detalles[3] == '2014-2'):
+    #    p_periodo = "0940"
+    #elif(detalles[3] == '2015-1'):
+    #    p_periodo = "0945"
+    #elif(detalles[3] == '2015-2'):
+    #    p_periodo = "0950"
+    #elif (detalles[3] == '2016-1'):
+    #    p_periodo = "0955"
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget = "http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
     #periodo="", grupo="",codigo="",urlget=""
@@ -977,8 +980,6 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
                               request.form["pesoind" + str(temp[i][j][0]) + str(temp[i][j][2]) + str(k)]))
 
     # Inserta la nueva informacion en la base de datos
-    print("DATOS:")
-    print(datos)
     for d in datos:
         if d[2] != '---':
             #insert into porcentaje_abet (ASIGNATURA, EVALUACION, Id_COMPETENCIA, PORCENTAJE, Id) values (1,1,'A',80,1);
@@ -1103,9 +1104,6 @@ def notas(periodo, codigo, grupo):
             temp6.append(temp4)
             temp8.append(temp7)
             for l in range(len(temp3)):
-                print("********************")
-                print(temp3[l][1])
-                print(temp2[3])
                 if(temp2[3] != ''):
                     temp9.append(temp3[l][1]*temp2[3]/10000)
                 else:
@@ -1162,25 +1160,18 @@ def guardarNotas(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
-        "select nombre, codigo, grupo, periodo, id from asignatura where codigo=? and grupo=? and periodo=?",
+        "select d.nombre, d.codigo, d.grupo, d.periodo, d.id, e.codigo_periodo from asignatura as d, acreditacion_abet as e \
+        where d.codigo=? and d.grupo=? and d.periodo=? and d.id_carrera = e.id_carrera",
         [codigo,grupo,periodo])
     detalles = cur1.fetchall()[0]
 
     # Recupera (de la base de datos) los estudiantes
     #cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre desc", [detalles[4]])
     #estudiantes = cur2.fetchall()
-    p_periodo = ""
-    if (detalles[3] == '2014-1'):
-        p_periodo = "0930"
-    elif (detalles[3] == '2014-2'):
-        p_periodo = "0940"
-    elif (detalles[3] == '2015-1'):
-        p_periodo = "0945"
-    elif (detalles[3] == '2015-2'):
-        p_periodo = "0950"
+    p_periodo = detalles[5]
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
-     #periodo="", grupo="",codigo="",urlget=""
+    #periodo="", grupo="",codigo="",urlget=""
     argmnts = [p_periodo, grupo, codigo, urlget]
     estudiantes = get_students("ws", argmnts)
     #estudiantes = get_students("bd",detalles)
@@ -1271,7 +1262,6 @@ def guardarNotas(periodo, codigo, grupo):
 
     # Recupera de la pagina los datos de las entradas y los procesa
     datos = []
-    print(request.form)
     #print("ind:", indicadores)
     for i in range(len(indicadores)):
         temp1 = []
@@ -1344,10 +1334,15 @@ def guardarNotas(periodo, codigo, grupo):
                 o = 0
                 if m < len(porcentaje_indicadores):
                     temp2 = porcentaje_indicadores[m][3]#Es la competencia
+                    peso = 0
                     while temp1 == porcentaje_indicadores[m][0]:
                         if temp2 == porcentaje_indicadores[m][3]:
                             if datos[d][e][o] != "0":
                                 resultado += int(datos[d][e][o])*porcentaje_indicadores[m][2]/100
+                                #print(int(datos[d][e][o]))
+                                #print(porcentaje_indicadores[m][1])
+                                #resultado += int(datos[d][e][o]) * porcentaje_indicadores[m][2]
+                                peso = peso + porcentaje_indicadores[m][2]
                             m += 1
                             o += 1
                         else:
@@ -1371,6 +1366,11 @@ def guardarNotas(periodo, codigo, grupo):
                                 "update or IGNORE nota_abet set NOTA = ? where asignatura = ? and codigo_estudiante = ? and nivel = 1 and competencia = ? and evaluacion = ?",
                                 [round(resultado,1),detalles[4],estudiantes[e][1], temp2,evaluacion[d]])
                             break
+
+                    #resultado = resultado / peso
+                    #print("++++++++++++++++++++++++")
+                    #print(resultado)
+
 
                     if not db.execute("select CODIGO_ESTUDIANTE from nota_abet where CODIGO_ESTUDIANTE = ? and NIVEL = 1 and competencia = ? and asignatura = ? and evaluacion = ?",[estudiantes[e][1],temp2,detalles[4],evaluacion[d]]).fetchall() :
                         db.execute(
@@ -1408,6 +1408,10 @@ def guardarNotas(periodo, codigo, grupo):
         while est == definitiva_asignatura[j][2]:
             w = j
             for k in porcentajes_instrumentos:
+                print(k)
+                print("******************************")
+                print(definitiva_asignatura[w][0])
+                print("******************************")
                 if k[4] == definitiva_asignatura[w][1]:
                     nota_def += definitiva_asignatura[w][0] * k[1] / 100
                 if len(definitiva_asignatura)/(len(estudiantes)+w) > 1:

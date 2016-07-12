@@ -4,14 +4,16 @@ BEGIN TRANSACTION;
 /*----------*/
 /* Carreras */
 /*----------*/
-insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2015-2',5);
-insert into acreditacion_abet values (10,'Ingeniería Industrial','2015-2',3);
-insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2015-1',5);
-insert into acreditacion_abet values (10,'Ingeniería Industrial','2015-1',3);
-insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2014-2',5);
-insert into acreditacion_abet values (10,'Ingeniería Industrial','2014-2',3);
-insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2014-1',5);
-insert into acreditacion_abet values (10,'Ingeniería Industrial','2014-1',3);
+insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2016-1','0955',5);
+insert into acreditacion_abet values (10,'Ingeniería Industrial','2016-1','0955',3);
+insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2015-2','0950',5);
+insert into acreditacion_abet values (10,'Ingeniería Industrial','2015-2','0950',3);
+insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2015-1','0945',5);
+insert into acreditacion_abet values (10,'Ingeniería Industrial','2015-1','0945',3);
+insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2014-2','0940',5);
+insert into acreditacion_abet values (10,'Ingeniería Industrial','2014-2','0940',3);
+insert into acreditacion_abet values (40,'Ingeniería de Sistemas y Computación','2014-1','0930',5);
+insert into acreditacion_abet values (10,'Ingeniería Industrial','2014-1','0930',3);
 
 /*------------*/
 /* Profesores */
@@ -41,7 +43,7 @@ insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) valu
 insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG002','A','Lógica en Ciencias de la Computación',40,10,'2015-2');
 insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300MAG031','A','Matemáticas Discretas para la Computación',40,3,'2015-2');
 insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIS005','A','Procesos de Ingeniería de Software',40,2,'2015-2');
-insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300IGQ001','A','Termodinámica',10,11,'2015-2');
+insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300IGQ001','B','Termodinámica',10,11,'2015-2');
 insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIP002','A','Fundamentos y Estructuras de Programación',40,1,'2015-1');
 insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG006','A','Arquitectura del Computador II',40,8,'2015-1');
 insert into asignatura (codigo,grupo,nombre,id_carrera,id_profesor,periodo) values ('300CIG010','A','Aspectos Sociales y Profesionales',40,6,'2015-1');
