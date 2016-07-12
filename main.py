@@ -503,6 +503,17 @@ def asignatura(periodo, codigo, grupo):
     estudiantes = get_students("ws",argmnts)
     #estudiantes = get_students("bd",detalles)
 
+    # Elimina estudiantes repetidos que vienen del web service
+    i = 0
+    while i < len(estudiantes):
+        if(i<len(estudiantes)-1):
+            if(estudiantes[i][1] == estudiantes[i+1][1]):
+                del estudiantes[i]
+            else:
+                i = i + 1
+        else:
+            break
+
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
         "select d.evaluacion, d.id_evaluacion, e.competencia, e.porcentaje, f.descripcion \
@@ -666,7 +677,7 @@ def asignatura(periodo, codigo, grupo):
     # Procesa los datos de las notas definitivas guardadas previamente
     notasDefinitivas = dict([(e[1],0) for e in estudiantes])
     for (x,y) in notasDef:
-        notasDefinitivas[x] = round(y,2)
+        notasDefinitivas[x] = float(round(y,2))
 
     comptorg = list(resultadosTotales[estudiantes[0][1]].keys())
     comptorg.sort()
@@ -984,6 +995,7 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
         if r not in datos:
             db.execute('DELETE from porcentaje_abet where evaluacion = ? and Id_COMPETENCIA = ? and asignatura = ?',[r[0],r[2],detalles[4]])
     db.commit()
+    flash("Datos guardados")
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('indicadores', periodo=periodo, codigo=codigo, grupo=grupo))
@@ -1384,6 +1396,7 @@ def guardarNotas(periodo, codigo, grupo):
         else:
             db.execute("update or IGNORE nota_definitiva set NOTA = ? where asignatura = ? and codigo_estudiante = ?", [round(nota_def,1),detalles[4], estudiantes[i][1]])
         db.commit()
+        flash("Datos guardados")
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('notas', periodo=periodo, codigo=codigo, grupo=grupo))
