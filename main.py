@@ -496,19 +496,6 @@ def asignatura(periodo, codigo, grupo):
     # 2016-1: 0955
     # 2016-2: 0960
     p_periodo = detalles[7]
-    print("********************************")
-    print(p_periodo)
-    print("********************************")
-    #if(detalles[3] == '2014-1'):
-    #    p_periodo = "0930"
-    #elif(detalles[3] == '2014-2'):
-    #    p_periodo = "0940"
-    #elif(detalles[3] == '2015-1'):
-    #    p_periodo = "0945"
-    #elif(detalles[3] == '2015-2'):
-    #    p_periodo = "0950"
-    #elif (detalles[3] == '2016-1'):
-    #    p_periodo = "0955"
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget = "http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
     #periodo="", grupo="",codigo="",urlget=""
@@ -1010,7 +997,7 @@ def notas(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
-        "select d.nombre, d.codigo, d.grupo, d.periodo, d.id, d.id_carrera, e.nombre_carrera \
+        "select d.nombre, d.codigo, d.grupo, d.periodo, d.id, d.id_carrera, e.nombre_carrera, e.codigo_periodo \
         from asignatura as d, acreditacion_abet as e \
         where d.codigo=? and d.grupo=? and d.periodo=? and d.id_carrera = e.id_carrera",
         [codigo, grupo, periodo])
@@ -1019,15 +1006,7 @@ def notas(periodo, codigo, grupo):
     # Recupera (de la base de datos) los estudiantes
     # cur2 = db.execute("select nombre, codigo from estudiante where asignatura=? order by nombre asc", [detalles[4]])
     estudiantes = []
-    p_periodo = ""
-    if (detalles[3] == '2014-1'):
-        p_periodo = "0930"
-    elif (detalles[3] == '2014-2'):
-        p_periodo = "0940"
-    elif (detalles[3] == '2015-1'):
-        p_periodo = "0945"
-    elif (detalles[3] == '2015-2'):
-        p_periodo = "0950"
+    p_periodo = detalles[7]
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
     #periodo="", grupo="",codigo="",urlget=""
@@ -1481,7 +1460,7 @@ def reporte(periodo, codigo, grupo):
 
     # Recupera (de la base de datos) los detalles del curso
     cur1 = db.execute(
-        "select a.nombre, a.codigo, a.grupo, a.periodo, a.id, a.id_carrera, e.nombre_carrera, p.nombre \
+        "select a.nombre, a.codigo, a.grupo, a.periodo, a.id, a.id_carrera, e.nombre_carrera, p.nombre, e.codigo_periodo \
         from asignatura as a, profesor as p, acreditacion_abet as e \
         where a.codigo=? and a.grupo=? and a.periodo=? and a.id_profesor = p.id and a.id_carrera = e.id_carrera",
         [codigo,grupo,periodo])
@@ -1503,7 +1482,7 @@ def reporte(periodo, codigo, grupo):
             aprobados.append(x[0])
  #  maxnota = max(notasDef)
     minnota = min(notasDef)
-    p_periodo = "0940"
+    p_periodo = detalles[8]
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget ="http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
      #periodo="", grupo="",codigo="",urlget=""
