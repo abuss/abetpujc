@@ -1247,13 +1247,16 @@ def guardarNotas(periodo, codigo, grupo):
         for j in range(len(estudiantes)):
             temp2 = []
             for k in range(len(indicadores[i])):
-                #print("ind" + str(j+1) + estudiantes[i][0] + str(k))
                 if request.form["ind" + str(i+1) + estudiantes[j][0] + str(k)] == "":
                     temp2.append("0")
                 else:    
                     temp2.append(request.form["ind" + str(i+1) + estudiantes[j][0] + str(k)])
             temp1.append(temp2)
         datos.append(temp1)
+
+    #print("**********************************")
+    #print(datos)
+    #print("**********************************")
 
     # Elimina de la base de datos los registros viejos
     #db.execute('delete from nota_abet where asignatura=?',[detalles[4]])
@@ -1296,16 +1299,19 @@ def guardarNotas(periodo, codigo, grupo):
                 # Procesa e inserta los valores de los indicadores
                 for i in range(len(datos[d][e])):
                     if not db.execute("select CODIGO_ESTUDIANTE from nota_abet where CODIGO_ESTUDIANTE = ? and NIVEL = 3 and COMPETENCIA = ? and asignatura = ? and evaluacion = ?",[estudiantes[e][1],indicadores[d][i],detalles[4],evaluacion[d]]).fetchall() :
+                        print("**********************************")
+                        print([detalles[4], evaluacion[d], indicadores[d][i], 3, estudiantes[e][1], float(datos[d][e][i])])
+                        print("**********************************")
                         db.execute(
                             "insert into nota_abet values (?,?,?,?,?,?)",
-                            [detalles[4], evaluacion[d], indicadores[d][i], 3, estudiantes[e][1], int(datos[d][e][i])])
+                            [detalles[4], evaluacion[d], indicadores[d][i], 3, estudiantes[e][1], float(datos[d][e][i])])
                     else:
                         db.execute(
                             #ASIGNATURA EVALUACION COMPETENCIA NIVEL CODIGO_ESTUDIANTE NOTA
                             "update nota_abet set NOTA = ? where asignatura = ? and codigo_estudiante = ? and NIVEL = 3 and competencia = ? and evaluacion = ? ",
                             [int(datos[d][e][i]),detalles[4],estudiantes[e][1],indicadores[d][i],evaluacion[d]])
 
-                    definitiva_instrumento += (int(datos[d][e][i])*pesos[d][i])
+                    definitiva_instrumento += (float(datos[d][e][i])*pesos[d][i])
 
                 # Procesa e inserta los valores de los resultados de programa
                 m = n
@@ -1317,7 +1323,7 @@ def guardarNotas(periodo, codigo, grupo):
                     while temp1 == porcentaje_indicadores[m][0]:
                         if temp2 == porcentaje_indicadores[m][3]:
                             if datos[d][e][o] != "0":
-                                resultado += int(datos[d][e][o])*porcentaje_indicadores[m][2]/100
+                                resultado += float(datos[d][e][o])*porcentaje_indicadores[m][2]/100
                                 #print(int(datos[d][e][o]))
                                 #print(porcentaje_indicadores[m][1])
                                 #resultado += int(datos[d][e][o]) * porcentaje_indicadores[m][2]
