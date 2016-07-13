@@ -510,15 +510,15 @@ def asignatura(periodo, codigo, grupo):
     # estudiantes = get_students("bd",detalles)
 
     # Elimina estudiantes repetidos que vienen del web service
-    # i = 0
-    # while i < len(estudiantes):
-    #     if(i<len(estudiantes)-1):
-    #         if(estudiantes[i][1] == estudiantes[i+1][1]):
-    #             del estudiantes[i]
-    #         else:
-    #             i = i + 1
-    #     else:
-    #         break
+    i = 0
+    while i < len(estudiantes):
+        if(i<len(estudiantes)-1):
+            if(estudiantes[i][1] == estudiantes[i+1][1]):
+                del estudiantes[i]
+            else:
+                i = i + 1
+        else:
+            break
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -1045,15 +1045,15 @@ def notas(periodo, codigo, grupo):
     # estudiantes = get_students("bd",detalles)
 
     # Elimina estudiantes repetidos que vienen del web service
-    # i = 0
-    # while i < len(estudiantes):
-    #     if (i < len(estudiantes) - 1):
-    #         if (estudiantes[i][1] == estudiantes[i + 1][1]):
-    #             del estudiantes[i]
-    #         else:
-    #             i = i + 1
-    #     else:
-    #         break
+    i = 0
+    while i < len(estudiantes):
+        if (i < len(estudiantes) - 1):
+            if (estudiantes[i][1] == estudiantes[i + 1][1]):
+                del estudiantes[i]
+            else:
+                i = i + 1
+        else:
+            break
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -1196,15 +1196,15 @@ def guardarNotas(periodo, codigo, grupo):
     # estudiantes = get_students("bd",detalles)
 
     # Elimina estudiantes repetidos que vienen del web service
-    # i = 0
-    # while i < len(estudiantes):
-    #     if (i < len(estudiantes) - 1):
-    #         if (estudiantes[i][1] == estudiantes[i + 1][1]):
-    #             del estudiantes[i]
-    #         else:
-    #             i = i + 1
-    #     else:
-    #         break
+    i = 0
+    while i < len(estudiantes):
+        if (i < len(estudiantes) - 1):
+            if (estudiantes[i][1] == estudiantes[i + 1][1]):
+                del estudiantes[i]
+            else:
+                i = i + 1
+        else:
+            break
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -1523,11 +1523,20 @@ def reporte(periodo, codigo, grupo):
         [codigo, grupo, periodo, periodo])
     detalles = cur1.fetchall()[0]
 
+    print("****************************************")
+    print(detalles)
+    print("****************************************")
+
     # Recupera (de la base de datos) la informacion de las notas de los instrumentos ya contenida en la base de datos
     cur2 = db.execute(
         "select codigo_estudiante, nota from nota_definitiva where asignatura=?",
         [detalles[4]])
     notasDef = cur2.fetchall()
+
+    print("****************************************")
+    print(notasDef)
+    print("****************************************")
+
     perder = 0
     perdieron = []
     aprobados = []
@@ -1537,8 +1546,16 @@ def reporte(periodo, codigo, grupo):
             perder += 1
         else:
             aprobados.append(x[0])
-    maxnota = max(notasDef)
-    minnota = min(notasDef)
+
+    # Halla las notas maxima y minima
+    maxnota = 0
+    minnota = 5
+    for i in notasDef:
+        if i[1] > maxnota:
+            maxnota = i[1]
+        if i[1] < minnota:
+            minnota = i[1]
+
     p_periodo = detalles[8]
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget = "http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
@@ -1548,16 +1565,15 @@ def reporte(periodo, codigo, grupo):
     # estudiantes = get_students("bd",detalles)
 
     # Elimina estudiantes repetidos que vienen del web service
-    # i = 0
-    # while i < len(estudiantes):
-    #     if (i < len(estudiantes) - 1):
-    #         if (estudiantes[i][1] == estudiantes[i + 1][1]):
-    #             del estudiantes[i]
-    #         else:
-    #             i = i + 1
-    #     else:
-    #         break
-
+    i = 0
+    while i < len(estudiantes):
+        if (i < len(estudiantes) - 1):
+            if (estudiantes[i][1] == estudiantes[i + 1][1]):
+                del estudiantes[i]
+            else:
+                i = i + 1
+        else:
+            break
 
     # Recupera (de la base de datos) los datos de los instrumentos de evaluacion
     cur3 = db.execute(
@@ -1785,7 +1801,7 @@ def reporte(periodo, codigo, grupo):
     #    entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1],'minnota': minnota[1], 'promgeneralind':promgeneralind, 'promgeneralindaprob':promgeneralindaprob, 'estud':len(estudiantes), 'ordcompt': competencias, 'high':high, 'lowest':lowest, 'instrumentos':instss,'desviacion':desviacion,'minimo':minimo, 'maximo':maximo,'aprueban':aprueban,'inspor':inssts,'inscompt':insxcompt, 'promins':promins, 'load':load,'formm':formm}
     # else:
     #    entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1],'minnota': minnota[1], 'promgeneralind':promgeneralind, 'promgeneralindaprob':promgeneralindaprob, 'estud':len(estudiantes), 'ordcompt': competencias, 'high':high, 'lowest':lowest, 'instrumentos':instss,'desviacion':desviacion,'minimo':minimo, 'maximo':maximo,'aprueban':aprueban,'inspor':inssts,'inscompt':insxcompt, 'promins':promins, 'load':load,'formm':formm,'store':reporteg}
-    entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota[1], 'minnota': minnota[1],
+    entries = {'detalles': detalles, 'perder': perder, 'maxnota': maxnota, 'minnota': minnota,
                'promgeneralind': promgeneralind, 'promgeneralindaprob': promgeneralindaprob, 'estud': len(estudiantes),
                'ordcompt': competencias, 'high': high, 'lowest': lowest, 'instrumentos': instss,
                'desviacion': desviacion, 'minimo': minimo, 'maximo': maximo, 'aprueban': aprueban, 'inspor': inssts,
