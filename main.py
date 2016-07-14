@@ -1523,20 +1523,13 @@ def reporte(periodo, codigo, grupo):
         [codigo, grupo, periodo, periodo])
     detalles = cur1.fetchall()[0]
 
-    print("****************************************")
-    print(detalles)
-    print("****************************************")
-
     # Recupera (de la base de datos) la informacion de las notas de los instrumentos ya contenida en la base de datos
     cur2 = db.execute(
         "select codigo_estudiante, nota from nota_definitiva where asignatura=?",
         [detalles[4]])
     notasDef = cur2.fetchall()
 
-    print("****************************************")
-    print(notasDef)
-    print("****************************************")
-
+    # Halla el numero de estudiantes que ganan y pierden la asignatura
     perder = 0
     perdieron = []
     aprobados = []
@@ -1556,6 +1549,7 @@ def reporte(periodo, codigo, grupo):
         if i[1] < minnota:
             minnota = i[1]
 
+    # Recupera datos del web service
     p_periodo = detalles[8]
     # http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/definicionNotas?pCurso=300CSP011&pGrupo=A&pPeriodo=0930
     urlget = "http://pruebas.javerianacali.edu.co:8080/WS/consultas/academicas/cursoEstudiante"
@@ -1604,6 +1598,7 @@ def reporte(periodo, codigo, grupo):
         "select d.resultado_de_programa, d.peso, e.descripcion from formula as d, resultado_de_programa as e \
         where asignatura=? and e.id = d.resultado_de_programa and e.carrera=?",
         [detalles[4], detalles[5]])
+    formula = cur6.fetchall()
 
     # Recupera(de la base de datos) la competencia con su descripcion
     cur8 = db.execute(
@@ -1615,7 +1610,6 @@ def reporte(periodo, codigo, grupo):
         [detalles[4], detalles[5]])
     descAK = dict(cur8.fetchall())
 
-    formula = cur6.fetchall()
     # formula2 = dict(formula)
     numResultados = len(formula)
     resultados = []
@@ -1668,15 +1662,15 @@ def reporte(periodo, codigo, grupo):
             resultadosTotales[c][b] = round(resultadosTotales[c][b] + (d * e / sumaResultados[b]), 2)
         if c in aprobados:
             if (d == "" or e == ""):
-                resultadosTotales[c][b] = round(resultadosTotales[c][b], 2)
+                resultadosTotalesaprob[c][b] = round(resultadosTotalesaprob[c][b], 2)
             else:
-                resultadosTotales[c][b] = round(resultadosTotales[c][b] + (d * e / sumaResultados[b]), 2)
+                resultadosTotalesaprob[c][b] = round(resultadosTotalesaprob[c][b] + (d * e / sumaResultados[b]), 2)
 
     for est in resultadosTotales:
         for compt in resultadosTotales[est]:
-            resultadosTotales[est][compt] = round(5 * resultadosTotales[est][compt] / 100, 1)
+            resultadosTotales[est][compt] = round(resultadosTotales[est][compt], 2)
             if est in aprobados:
-                resultadosTotalesaprob[est][compt] = round(5 * resultadosTotalesaprob[est][compt] / 100, 1)
+                resultadosTotalesaprob[est][compt] = round(resultadosTotalesaprob[est][compt], 2)
 
     # Procesa los datos de las notas definitivas guardadas previamente
     notasDefinitivas = dict([(e[1], 0) for e in estudiantes])
@@ -1693,6 +1687,7 @@ def reporte(periodo, codigo, grupo):
     minimo = dict([(c, 0) for c in competencias])
     maximo = dict([(c, 0) for c in competencias])
     aprueban = dict([(c, 0) for c in competencias])
+
     for estud in resultadosTotales:
         for compt in promgeneralind:
             if compt in resultadosTotales[estud]:
