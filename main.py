@@ -430,6 +430,7 @@ def show_periods():
     per = 1
     if len(periodos) == 0:
         per = 0
+
     usuario = session['id_prof'][1] if 'id_prof' in session else session['user']
     power = session['lvl']
 
@@ -855,7 +856,7 @@ def guardarPesosInstrumentos(periodo, codigo, grupo):
                 # print("Borrar")
                 db.execute('DELETE from INSTRUMENTO where evaluacion = ?  and asignatura = ?', [Inst, detalles[4]])
         db.commit()
-        flash("Datos guardados")
+        #flash("Datos guardados")
 
     # Recarga la pagina de instrumentos
     return redirect(url_for('instrumentos', periodo=periodo, codigo=codigo, grupo=grupo))
@@ -1013,7 +1014,7 @@ def guardarPesosIndicadores(periodo, codigo, grupo):
             db.execute('DELETE from porcentaje_abet where evaluacion = ? and Id_COMPETENCIA = ? and asignatura = ?',
                        [r[0], r[2], detalles[4]])
     db.commit()
-    flash("Datos guardados")
+    #flash("Datos guardados")
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('indicadores', periodo=periodo, codigo=codigo, grupo=grupo))
@@ -1460,7 +1461,7 @@ def guardarNotas(periodo, codigo, grupo):
             db.execute("update or IGNORE nota_definitiva set NOTA = ? where asignatura = ? and codigo_estudiante = ?",
                        [round(nota_def, 2), detalles[4], estudiantes[i][1]])
         db.commit()
-        flash("Datos guardados")
+        #flash("Datos guardados")
 
     # Recarga la pagina de los indicadores
     return redirect(url_for('notas', periodo=periodo, codigo=codigo, grupo=grupo))
@@ -1475,6 +1476,9 @@ def login():
             cur1 = db.execute("select login, clave from usuario")
             detalles = cur1.fetchall()
             usr = (request.form['username'], request.form['pswd'])
+            print("*************************************")
+            print(usr[0])
+            print("*************************************")
             if usr in detalles:
                 session['logged_in'] = True
                 cur1 = db.execute("select nivel_acceso from usuario where login = ?", [usr[0]])
@@ -1482,8 +1486,12 @@ def login():
                 session['lvl'] = lvlacc[0][0]
                 if lvlacc[0][0] == 4:
                     cur2 = db.execute(
-                        "select p.id, p.nombre from usuario u inner join profesor p on u.nombre = p.nombre")
+                        "select p.id, p.nombre from usuario u inner join profesor p on u.nombre = p.nombre \
+                        where u.login=?", [usr[0]])
                     idprof = cur2.fetchall()[0]
+                    print("*************************************")
+                    print(idprof)
+                    print("*************************************")
                     session['id_prof'] = idprof
                 if lvlacc[0][0] == 1:
                     session['user'] = "Administrador"
@@ -1767,7 +1775,6 @@ def reporte(periodo, codigo, grupo):
             sumaTotal += a
     for ins in promins:
         if promins[ins]:
-            print(promins[ins])
             if len(promins[ins]) < len(instss):
                 [promins[ins].append(0) for i in range(len(instss) - len(promins[ins]))]
             #promins[ins] = round(statistics.mean(promins[ins]), 2)
@@ -1777,10 +1784,6 @@ def reporte(periodo, codigo, grupo):
             promins[ins] = 100 * sumaTemp / sumaTotal
         else:
             promins[ins] = 0
-
-    print("*********************************")
-    print(promins)
-    print("*********************************")
 
     cur12 = db.execute(
         "select distinct periodo from acreditacion_abet order by periodo asc"
