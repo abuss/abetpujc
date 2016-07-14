@@ -1760,13 +1760,27 @@ def reporte(periodo, codigo, grupo):
             if (promins[ins][a] == ''):
                 promins[ins][a] = 0
 
+    # Halla el porcentaje evaluado en cada resultado de programa
+    sumaTotal = 0
+    for ins in promins:
+        for a in promins[ins]:
+            sumaTotal += a
     for ins in promins:
         if promins[ins]:
+            print(promins[ins])
             if len(promins[ins]) < len(instss):
                 [promins[ins].append(0) for i in range(len(instss) - len(promins[ins]))]
-            promins[ins] = round(statistics.mean(promins[ins]), 2)
+            #promins[ins] = round(statistics.mean(promins[ins]), 2)
+            sumaTemp = 0
+            for a in promins[ins]:
+                sumaTemp += a
+            promins[ins] = 100 * sumaTemp / sumaTotal
         else:
             promins[ins] = 0
+
+    print("*********************************")
+    print(promins)
+    print("*********************************")
 
     cur12 = db.execute(
         "select distinct periodo from acreditacion_abet order by periodo asc"
