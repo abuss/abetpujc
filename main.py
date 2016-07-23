@@ -1164,10 +1164,42 @@ def notas(periodo, codigo, grupo):
     usuario = session['id_prof'][1] if 'id_prof' in session else session['user']
     power = session['lvl']
 
-    # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
-    entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
-               'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas, 'idinst': supinst,
-               'usuario': usuario, "permisos": power}
+    # Decide si ya hay datos previemante guardados o no
+    if (notasInd == []):
+        # Construye la lista de notas en caso de no haber notas previamente guardadas
+        newnotas = dict([(n, {}) for n in notas])
+        for i in notas:
+            newnotas[i] = dict([(n, {}) for n in notas[i]])
+            rptemp = []
+            for k in range(len(inst[0])):
+                rptemp.append(inst[0][k][2])
+            for j in newnotas[i]:
+                newnotas[i][j] = dict([(n, {}) for n in rptemp])
+
+        # Construye la lista de indicadores en caso de no haber nada previamente guardado
+        newindicadores = []
+        for i in range(len(inst)):
+            newindicadores.append([])
+            newindicadores[i].append(len(inst[0]))
+            rptemp = []
+            for k in range(len(inst[0])):
+                rptemp.append(inst[0][k][2])
+            newindicadores[i].append(rptemp)
+            newindicadores[i].append(rptemp)
+            rptemp = []
+            for k in range(len(inst[0])):
+                rptemp.append(inst[0][k][3]/100)
+            newindicadores[i].append(rptemp)
+
+        # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
+        entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
+                   'numestudiantes': len(estudiantes), 'indicadores': newindicadores, 'notas': newnotas, 'idinst': supinst,
+                   'usuario': usuario, "permisos": power}
+    else:
+        # Agrupa los datos recuperados y procesados en una sola lista y la retorna a la pagina web
+        entries = {'detalles': detalles, 'estudiantes': estudiantes, 'resprog': inst, 'numinstrumentos': len(inst),
+                   'numestudiantes': len(estudiantes), 'indicadores': indicadores, 'notas': notas, 'idinst': supinst,
+                   'usuario': usuario, "permisos": power}
     return render_template('grades.html', entries=entries)
 
 
