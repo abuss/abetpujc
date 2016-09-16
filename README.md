@@ -18,8 +18,5 @@ Luego crear el ambiente virtual con `pyvenv` y activarlo:
 
 Para instalar las dependencias requeridas por el proyecto:
 
-    pip3 install flask
-    pip3 install requests
-	pip3 install xlsxwriter
-	pip3 install pdfkit
-	sudo apt-get install wkhtmltopdf
+    pip3 install -r requirements.txt
+    sudo apt-get install wkhtmltopdf
