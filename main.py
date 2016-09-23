@@ -29,7 +29,9 @@ app.config.update(dict(
     # Base de datos oficial
     # DATABASE = '/home/abetpujc/abetpujc/abet.db',
     # Para hacer pruebas
-    DATABASE='/Users/gsarria/Dropbox/Work/ABETForm/github/abetpujc/abet.db',
+    #DATABASE='/Users/gsarria/Dropbox/Work/ABETForm/github/abetpujc/abet.db',
+    
+    DATABASE='C:/Users/Usuario/Desktop/Abet/abetpujc-master/abet.db',
     DEBUG=True,
     SECRET_KEY='development key',
     USERNAME='admin',
@@ -461,12 +463,15 @@ def show_courses(periodo):
         cur2 = db.execute(
             "select nombre, codigo, grupo, periodo, id_carrera from asignatura where periodo=? order by nombre asc",
             [periodo])
+
     cursos = [dict(title=row[0], cod=row[1], grupo=row[2], periodo=row[3], carrera=row[4]) for row in cur2.fetchall()]
     cursosAux = [x['carrera'] for x in cursos]
 
-    for x in carreras:
-        if x[1] not in cursosAux:
-            carreras.remove(x)
+    if (len(carreras) > 0):
+        for x in carreras:
+            if x[1] not in cursosAux:
+                carreras.remove(x)
+
 
     vacio = 0
     usuario = session['id_prof'][1] if 'id_prof' in session else session['user']
@@ -1926,4 +1931,9 @@ def downloadpdf(filename):
 if __name__ == '__main__':
     if len(sys.argv) > 2 and sys.argv[1] == 'initdb':
         init_db()
-    app.run(host='0.0.0.0')
+    if True:
+        host = '127.0.0.1'
+    else:
+        host = '0.0.0.0'
+
+    app.run(host)
