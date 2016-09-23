@@ -23,20 +23,24 @@
         <br>        
         <br>
         {% block body %}
-            Listado de cursos del período {{ entries.cursos[0].periodo }}:
-            <ul>
-            {% for carreras in entries.carreras %}
-                <label>{{carreras[0]}}:</label>
-                <br><br>
-                {% for entry in entries.cursos %}
-                    {% if entry.carrera == carreras[1] %}
-                        <li><a href="{{ url_for('asignatura', periodo=entry.periodo, codigo=entry.cod, grupo=entry.grupo) }}">{{ entry.title }}</a>
-                        <br><br>
-                    {% endif %}
-                    {% else%}
-                        <em>No hay cursos.</em>
+            {% if entries.cursos | length  == 0 %}
+                <h4>No existen cursos para este periodo.</h4>
+            {% else %}
+                Listado de cursos del período {{ entries.cursos[0].periodo }}:
+                <ul>
+                {% for carreras in entries.carreras %}
+                    <label>{{carreras[0]}}:</label>
+                    <br><br>
+                    {% for entry in entries.cursos %}
+                        {% if entry.carrera == carreras[1] %}
+                            <li><a href="{{ url_for('asignatura', periodo=entry.periodo, codigo=entry.cod, grupo=entry.grupo) }}">{{ entry.title }}</a>
+                            <br><br>
+                        {% endif %}
+                        {% else%}
+                            <em>No hay cursos.</em>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
+            {% endif %}
             </ul>
              <form action="{{ url_for('show_periods')}}">
         <input type=submit value='Volver al listado de periodos'>
